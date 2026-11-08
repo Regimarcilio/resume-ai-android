@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
@@ -104,7 +104,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.google.truth:truth:1.1.5")
     testImplementation("org.robolectric:robolectric:4.11")
