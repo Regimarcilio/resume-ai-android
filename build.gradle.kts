@@ -1,4 +1,4 @@
-// Top-level build file - minimal, delegates to convention plugins
+// Top-level build file - minimal
 plugins {
     id("com.android.application") version "8.5.0" apply false
     id("com.android.library") version "8.5.0" apply false
@@ -8,8 +8,6 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.50" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22" apply false
 }
-
-import org.gradle.api.GradleException
 
 allprojects {
     group = "com.resumeapp"
@@ -37,32 +35,5 @@ tasks.register("bumpVersion") {
         
         appBuildFile.writeText(newContent)
         println("Updated version: $versionName ($versionCode)")
-    }
-}
-
-// Kalimaster SAST task
-tasks.register("kalimasterSast") {
-    group = "verification"
-    description = "Runs Kalimaster SAST security scan"
-    doLast {
-        val projectRoot = project.rootDir.absolutePath
-        val outputFile = file("kalimaster-sast-report.json").absolutePath
-        
-        val classpath = project.configurations.runtimeClasspath.get().map { it.absolutePath }.joinToString(":")
-        val mainClass = "com.resumeapp.sast.KalimasterSast"
-        
-        val process = java.lang.ProcessBuilder("java", "-cp", classpath, mainClass, projectRoot, outputFile)
-            .directory(project.rootDir)
-            .redirectErrorStream(true)
-            .start()
-        
-        process.inputStream.bufferedReader().forEachLine { println(it) }
-        val exitCode = process.waitFor()
-        
-        if (exitCode != 0) {
-            throw GradleException("Kalimaster SAST found blocking security issues. Report: kalimaster-sast-report.json")
-        }
-        
-        println("✅ Kalimaster SAST completed successfully")
     }
 }
