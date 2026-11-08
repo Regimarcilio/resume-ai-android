@@ -21,6 +21,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { url = uri("https://jitpack.io") } // Para SQLCipher se necessário
     }
+    // Define version catalog ONCE at root level for all projects
     versionCatalogs {
         create("libs") {
             from(files("gradle/libs.versions.toml"))
