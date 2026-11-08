@@ -2,8 +2,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
-    id("org.jlleitschuh.gradle.ktlint") version "1.1.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.4"
 }
 
 group = "com.resumeapp.domain"

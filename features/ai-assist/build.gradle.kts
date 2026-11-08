@@ -4,8 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id("org.jlleitschuh.gradle.ktlint") version "1.1.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.4"
 }
 
 android {

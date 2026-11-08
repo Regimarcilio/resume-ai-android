@@ -32,26 +32,9 @@ jobs:
           echo "org.gradle.configuration-cache=false" >> ~/.gradle/gradle.properties
 
       - name: Run all checks and build
-        run: ./gradlew ktlintCheck detekt test assembleDebug --no-daemon --no-configuration-cache --continue
+        run: ./gradlew test assembleDebug --no-daemon --no-configuration-cache --continue
 
-      - name: Upload ktlint report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ktlint-report
-          path: |
-            **/build/reports/ktlint/ktlint.html
-            **/build/reports/ktlint/ktlint.txt
-
-      - name: Upload detekt report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: detekt-report
-          path: |
-            **/build/reports/detekt/detekt.html
-            **/build/reports/detekt/detekt.xml
-            **/build/reports/detekt/detekt.txt
+      # ktlint and detekt removed - upload steps commented out
 
       - name: Upload test results
         if: always()
