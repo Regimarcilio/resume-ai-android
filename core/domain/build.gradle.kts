@@ -30,5 +30,4 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.google.truth:truth:1.1.5")
 
-// Ktlint configuration
 }

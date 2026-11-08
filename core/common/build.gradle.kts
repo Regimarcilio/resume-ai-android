@@ -95,6 +95,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
-
-// Ktlint configuration
 }
