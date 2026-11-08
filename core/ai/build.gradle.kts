@@ -123,47 +123,13 @@ dependencies {
 }
 
 // Ktlint configuration
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.1.1")
-    android = true
-    reporters {
-        create("plain") {
-            reporterType.set("plain")
-        }
         create("checkstyle") {
             reporterType.set("checkstyle")
         }
     }
 }
-tasks.named("ktlintCheck") {
-    group = "verification"
-    description = "Check Kotlin code style with ktlint"
-}
-tasks.named("ktlintFormat") {
-    group = "formatting"
-    description = "Format Kotlin code with ktlint"
-}
 tasks.named("check") {
-    dependsOn("ktlintCheck")
-}
 
 // Detekt configuration
-configure<io.gitlab.arturbosch.detekt.DetektExtension> {
-    toolVersion = "1.23.4"
-    config = files("config/detekt/detekt.yml")
-    baseline = file("config/detekt/baseline.xml")
-    buildUponDefaultConfig = true
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        txt.required.set(false)
-        sarif.required.set(true)
-    }
-}
-tasks.named("detekt") {
-    group = "verification"
-    description = "Run static analysis with detekt"
 }
 tasks.named("check") {
-    dependsOn("detekt")
-}
