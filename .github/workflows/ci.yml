@@ -14,7 +14,7 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,17 +25,8 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
-      - name: Run ktlint
-        run: ./gradlew ktlintCheck --no-daemon --no-configuration-cache
-
-      - name: Run detekt
-        run: ./gradlew detekt --no-daemon --no-configuration-cache
-
-      - name: Run unit tests
-        run: ./gradlew test --no-daemon --continue --no-configuration-cache
-
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache
+      - name: Run all checks and build
+        run: ./gradlew ktlintCheck detekt test assembleDebug --no-daemon --no-configuration-cache --continue
 
       - name: Upload ktlint report
         if: always()
