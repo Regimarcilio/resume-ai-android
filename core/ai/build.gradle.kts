@@ -121,15 +121,3 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
 }
-
-// Ktlint configuration
-        create("checkstyle") {
-            reporterType.set("checkstyle")
-        }
-    }
-}
-tasks.named("check") {
-
-// Detekt configuration
-}
-tasks.named("check") {

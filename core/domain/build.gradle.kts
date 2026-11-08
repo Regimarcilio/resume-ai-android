@@ -2,7 +2,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
-}
 
 group = "com.resumeapp.domain"
 version = "1.0.0"
@@ -11,12 +10,10 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
-}
 
 repositories {
     google()
     mavenCentral()
-}
 
 dependencies {
     // Kotlin stdlib
@@ -32,16 +29,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.google.truth:truth:1.1.5")
-}
 
 // Ktlint configuration
-        create("checkstyle") {
-            reporterType.set("checkstyle")
-        }
-    }
 }
-tasks.named("check") {
-
-// Detekt configuration
-}
-tasks.named("check") {
