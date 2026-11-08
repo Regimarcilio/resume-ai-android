@@ -1,0 +1,22 @@
+# Local properties - DO NOT COMMIT
+# Copy to local.properties and fill in your values
+
+# Android SDK location (auto-detected by Android Studio)
+# sdk.dir=/home/user/Android/Sdk
+
+# AI Gateway Configuration
+# AI_GATEWAY_BASE_URL=http://10.0.2.2:8080
+# AI_GATEWAY_API_KEY=dev-key-change-in-prod
+
+# Play Billing (optional for local dev)
+# PLAY_BILLING_LICENSE_KEY=your-license-key-from-play-console
+
+# Signing (release only)
+# storeFile=../keystore/release.keystore
+# storePassword=***
+# keyAlias=resume-app
+# keyPassword=***
+
+# Crashlytics / Firebase (optional)
+# FIREBASE_API_KEY=***
+# FIREBASE_APP_ID=***

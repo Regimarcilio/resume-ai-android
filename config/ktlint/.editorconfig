@@ -1,0 +1,31 @@
+# ktlint Configuration
+# Standard Android Kotlin style guide
+
+disabled_rules:
+  - no-wildcard-imports  # Allow wildcard imports for Compose
+
+android: true
+
+# Custom rules for our project
+ktlint_ignore_dirs:
+  - build
+  - generated
+
+# Line length
+max_line_length: 120
+
+# Indentation
+indent_size: 4
+continuation_indent_size: 4
+
+# Import ordering
+import_ordering:
+  - android
+  - androidx
+  - com.google
+  - com.resumeapp
+  - kotlinx
+  - org.jetbrains
+  - org.apache
+  - java
+  - kotlin

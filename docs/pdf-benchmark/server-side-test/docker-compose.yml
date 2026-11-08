@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  pdf-service:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVICE_PORT=8082
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./templates:/app/templates
+      - ./fonts:/app/fonts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
