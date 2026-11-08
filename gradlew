@@ -31,7 +31,7 @@ else
   JAVA="java"
 fi
 
-# Use array for JVM opts to avoid quoting issues
-DEFAULT_JVM_OPTS=("-Xmx64m" "-Xms64m")
+# POSIX sh compatible JVM opts (no arrays)
+DEFAULT_JVM_OPTS="-Xmx64m -Xms64m"
 
-exec "$JAVA" "${DEFAULT_JVM_OPTS[@]}" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+exec "$JAVA" $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
