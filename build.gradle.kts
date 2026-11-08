@@ -7,7 +7,7 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.20-1.0.14" apply false
     id("com.google.dagger.hilt.android") version "2.50" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22" apply false
-    id("org.jetbrains.kotlin.parcelize") version "1.9.22" apply false
+    id("org.jetbrains.kotlin.parcelize") apply false
     id("org.jetbrains.kotlin.plugin.compose") version "1.5.10" apply false
 }
 
