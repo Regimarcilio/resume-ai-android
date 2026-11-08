@@ -25,6 +25,11 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
+      - name: Setup Gradle (no cache)
+        run: |
+          echo "org.gradle.caching=false" >> ~/.gradle/gradle.properties
+          echo "org.gradle.configuration-cache=false" >> ~/.gradle/gradle.properties
+
       - name: Run all checks and build
         run: ./gradlew ktlintCheck detekt test assembleDebug --no-daemon --no-configuration-cache --continue
 
