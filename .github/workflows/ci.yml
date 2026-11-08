@@ -11,10 +11,10 @@ env:
   GRADLE_VERSION: '8.5'
 
 jobs:
-  lint-and-static-analysis:
-    name: Lint & Static Analysis
+  build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,14 +26,17 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Generate version catalog accessors
-        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
-
       - name: Run ktlint
         run: ./gradlew ktlintCheck --no-daemon --no-configuration-cache
 
       - name: Run detekt
         run: ./gradlew detekt --no-daemon --no-configuration-cache
+
+      - name: Run unit tests
+        run: ./gradlew test --no-daemon --continue --no-configuration-cache
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache
 
       - name: Upload ktlint report
         if: always()
@@ -54,27 +57,6 @@ jobs:
             **/build/reports/detekt/detekt.xml
             **/build/reports/detekt/detekt.txt
 
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Generate version catalog accessors
-        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
-
-      - name: Run unit tests
-        run: ./gradlew test --no-daemon --continue --no-configuration-cache
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -93,28 +75,6 @@ jobs:
             **/build/reports/jacoco/**/*.html
             **/build/reports/jacoco/**/*.xml
 
-  build-apk:
-    name: Build Debug APK
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [lint-and-static-analysis, unit-tests]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Generate version catalog accessors
-        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
-
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -125,7 +85,7 @@ jobs:
     name: Notify on Failure
     runs-on: ubuntu-latest
     if: failure()
-    needs: [lint-and-static-analysis, unit-tests, build-apk]
+    needs: [build-and-test]
     steps:
       - name: Send Slack notification
         if: env.SLACK_WEBHOOK != ''
