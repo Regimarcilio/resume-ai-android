@@ -5,7 +5,6 @@
 # This script allows you to run gradle with no installation.
 # It has been adapted from gradle's own gradle wrapper.
 
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 APP_NAME="Gradle"
 APP_BASE_NAME=${0##*/}
 
@@ -32,4 +31,7 @@ else
   JAVA="java"
 fi
 
-exec "$JAVA" $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+# Use array for JVM opts to avoid quoting issues
+DEFAULT_JVM_OPTS=("-Xmx64m" "-Xms64m")
+
+exec "$JAVA" "${DEFAULT_JVM_OPTS[@]}" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
