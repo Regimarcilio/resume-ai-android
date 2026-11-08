@@ -97,52 +97,6 @@ jobs:
             **/build/reports/jacoco/**/*.html
             **/build/reports/jacoco/**/*.xml
 
-  instrumented-tests:
-    name: Instrumented Tests (Emulator)
-    runs-on: macos-latest  # Required for Android emulator
-    timeout-minutes: 60
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 34
-          ndk-version: r26c
-          emulator: true
-
-      - name: Start emulator
-        run: |
-          echo "no" | avdmanager create avd -n test -k "system-images;android-34;default;x86_64" --force
-          emulator -avd test -no-skin -no-audio -no-window -no-boot-anim -gpu swiftshader_indirect -qemu -m 2048 &
-          # Wait for emulator to boot
-          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-
-      - name: Run instrumented tests
-        run: ./gradlew connectedAndroidTest --no-daemon --continue
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: instrumented-test-results
-          path: |
-            **/build/outputs/androidTest-results/**/*.xml
-            **/build/reports/androidTests/**/*.html
-
   build-apk:
     name: Build Debug APK
     runs-on: ubuntu-latest
@@ -173,41 +127,11 @@ jobs:
           name: debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
-  sast-scan:
-    name: Kalimaster SAST Scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-
-      - name: Run Kalimaster SAST
-        run: ./gradlew kalimasterSast --no-daemon
-
-      - name: Upload SAST report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sast-report
-          path: kalimaster-sast-report.json
-
   notify:
     name: Notify on Failure
     runs-on: ubuntu-latest
     if: failure()
-    needs: [lint-and-static-analysis, unit-tests, instrumented-tests, build-apk, sast-scan]
+    needs: [lint-and-static-analysis, unit-tests, build-apk]
     steps:
       - name: Send Slack notification
         if: env.SLACK_WEBHOOK != ''

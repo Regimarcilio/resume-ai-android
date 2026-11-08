@@ -5,11 +5,9 @@ plugins {
     id("org.jetbrains.kotlin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id("com.resumeapp.convention.android-application")
-    id("com.resumeapp.convention.compose")
-    id("com.resumeapp.convention.ktlint")
-    id("com.resumeapp.convention.detekt")
-    id("com.resumeapp.convention.testing")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 android {
@@ -131,4 +129,50 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// Ktlint configuration
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set(libs.versions.ktlint.get())
+    android = true
+    reporters {
+        create("plain") {
+            reporterType.set("plain")
+        }
+        create("checkstyle") {
+            reporterType.set("checkstyle")
+        }
+    }
+}
+tasks.named("ktlintCheck") {
+    group = "verification"
+    description = "Check Kotlin code style with ktlint"
+}
+tasks.named("ktlintFormat") {
+    group = "formatting"
+    description = "Format Kotlin code with ktlint"
+}
+tasks.named("check") {
+    dependsOn("ktlintCheck")
+}
+
+// Detekt configuration
+configure<io.gitlab.arturbosch.detekt.DetektExtension> {
+    toolVersion = libs.versions.detekt.get()
+    config = files("config/detekt/detekt.yml")
+    baseline = file("config/detekt/baseline.xml")
+    buildUponDefaultConfig = true
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        txt.required.set(false)
+        sarif.required.set(true)
+    }
+}
+tasks.named("detekt") {
+    group = "verification"
+    description = "Run static analysis with detekt"
+}
+tasks.named("check") {
+    dependsOn("detekt")
 }

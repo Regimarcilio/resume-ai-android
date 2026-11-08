@@ -4,14 +4,6 @@ pluginManagement {
         google()
         mavenCentral()
     }
-    // Use convention plugins from build-logic
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.namespace == "com.resumeapp.convention") {
-                useModule("com.resumeapp.convention:build-logic:1.0.0")
-            }
-        }
-    }
 }
 
 dependencyResolutionManagement {
@@ -19,9 +11,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // Para SQLCipher se necessário
+        maven { url = uri("https://jitpack.io") }
     }
-    // Define version catalog ONCE at root level for all projects
     versionCatalogs {
         create("libs") {
             from(files("gradle/libs.versions.toml"))
@@ -47,9 +38,6 @@ include("features:onboarding")
 
 // App module
 include("app")
-
-// Build logic (convention plugins)
-include("build-logic:convention")
 
 // Security tools
 include("kalimaster-sast")
