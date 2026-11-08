@@ -38,6 +38,3 @@ include("features:onboarding")
 
 // App module
 include("app")
-
-// Security tools
-include("kalimaster-sast")
