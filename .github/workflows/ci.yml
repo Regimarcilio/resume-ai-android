@@ -26,6 +26,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Generate version catalog accessors
+        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
+
       - name: Run ktlint
         run: ./gradlew ktlintCheck --no-daemon --no-configuration-cache
 
@@ -66,6 +69,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Generate version catalog accessors
+        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
+
       - name: Run unit tests
         run: ./gradlew test --no-daemon --continue --no-configuration-cache
 
@@ -102,6 +108,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: gradle
+
+      - name: Generate version catalog accessors
+        run: ./gradlew :app:generateVersionCatalog --no-daemon --no-configuration-cache
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon --no-configuration-cache
