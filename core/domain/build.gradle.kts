@@ -22,23 +22,23 @@ repositories {
 
 dependencies {
     // Kotlin stdlib
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.datetime)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
     // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.truth)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("com.google.truth:truth:1.1.5")
 }
 
 // Ktlint configuration
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set(libs.versions.ktlint.get())
+    version.set("1.1.1")
     reporters {
         create("plain") {
             reporterType.set("plain")
@@ -62,7 +62,7 @@ tasks.named("check") {
 
 // Detekt configuration
 configure<io.gitlab.arturbosch.detekt.DetektExtension> {
-    toolVersion = libs.versions.detekt.get()
+    toolVersion = "1.23.4"
     config = files("config/detekt/detekt.yml")
     baseline = file("config/detekt/baseline.xml")
     buildUponDefaultConfig = true
