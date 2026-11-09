@@ -12,14 +12,14 @@ import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.android.InstallIn
-import dagger.hilt.android.components.SingletonComponent
-import dagger.hilt.android.scopes.Singleton
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.hilt.Scopes.Singleton
 import javax.inject.Inject
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AiModule {
+abstract class AiModule {
 
     @Provides
     @Singleton
