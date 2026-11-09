@@ -24,6 +24,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
+    // Gson for JSON serialization in TraceEntry.toJson()
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
