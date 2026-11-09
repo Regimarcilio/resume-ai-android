@@ -5,14 +5,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.resumeapp.data.db.converters.Converters
-import com.resumeapp.domain.model.*
 
 @Database(
     entities = [
-        Resume::class,
-        ResumeSection::class,
-        Template::class,
-        ATSScore::class,
+        ResumeEntity::class,
+        ResumeSectionEntity::class,
+        TemplateEntity::class,
+        ATSScoreEntity::class,
         AICacheEntity::class,
         TraceEntity::class,
         SubscriptionStatusEntity::class,

@@ -2,23 +2,21 @@ package com.resumeapp.data.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.resumeapp.domain.model.Resume
-import com.resumeapp.domain.model.ResumeSection
 
 @Dao
 interface ResumeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(resume: Resume): Long
+    suspend fun insert(resume: ResumeEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(resumes: List<Resume>)
+    suspend fun insertAll(resumes: List<ResumeEntity>)
 
     @Update
-    suspend fun update(resume: Resume): Int
+    suspend fun update(resume: ResumeEntity): Int
 
     @Delete
-    suspend fun delete(resume: Resume)
+    suspend fun delete(resume: ResumeEntity)
 
     @Query("DELETE FROM resumes WHERE id = :id")
     suspend fun deleteById(id: String): Int
@@ -27,41 +25,38 @@ interface ResumeDao {
     suspend fun deleteAll(): Int
 
     @Query("SELECT * FROM resumes WHERE id = :id")
-    suspend fun getById(id: String): Resume?
+    suspend fun getById(id: String): ResumeEntity?
 
     @Query("SELECT * FROM resumes WHERE userId = :userId ORDER BY updatedAt DESC")
-    suspend fun getAllByUserId(userId: String): List<Resume>
+    suspend fun getAllByUserId(userId: String): List<ResumeEntity>
 
     @Query("SELECT * FROM resumes WHERE userId = :userId ORDER BY updatedAt DESC")
-    fun observeAllByUserId(userId: String): LiveData<List<Resume>>
+    fun observeAllByUserId(userId: String): LiveData<List<ResumeEntity>>
 
     @Query("SELECT * FROM resumes WHERE userId = :userId ORDER BY updatedAt DESC LIMIT 1")
-    suspend fun getLatestByUserId(userId: String): Resume?
+    suspend fun getLatestByUserId(userId: String): ResumeEntity?
 
     @Query("SELECT COUNT(*) FROM resumes WHERE userId = :userId")
     suspend fun countByUserId(userId: String): Int
 
     @Query("SELECT * FROM resumes WHERE templateId = :templateId")
-    suspend fun getByTemplateId(templateId: String): List<Resume>
-
-    // Sections are stored as separate entities with resumeId FK
-    // Use ResumeSectionDao for section operations
+    suspend fun getByTemplateId(templateId: String): List<ResumeEntity>
 }
 
 @Dao
 interface ResumeSectionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(section: ResumeSection): Long
+    suspend fun insert(section: ResumeSectionEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(sections: List<ResumeSection>)
+    suspend fun insertAll(sections: List<ResumeSectionEntity>)
 
     @Update
-    suspend fun update(section: ResumeSection): Int
+    suspend fun update(section: ResumeSectionEntity): Int
 
     @Delete
-    suspend fun delete(section: ResumeSection)
+    suspend fun delete(section: ResumeSectionEntity)
 
     @Query("DELETE FROM resume_sections WHERE id = :id")
     suspend fun deleteById(id: String): Int
@@ -70,13 +65,13 @@ interface ResumeSectionDao {
     suspend fun deleteByResumeId(resumeId: String): Int
 
     @Query("SELECT * FROM resume_sections WHERE resumeId = :resumeId ORDER BY `order` ASC")
-    suspend fun getByResumeId(resumeId: String): List<ResumeSection>
+    suspend fun getByResumeId(resumeId: String): List<ResumeSectionEntity>
 
     @Query("SELECT * FROM resume_sections WHERE resumeId = :resumeId ORDER BY `order` ASC")
-    fun observeByResumeId(resumeId: String): androidx.lifecycle.LiveData<List<ResumeSection>>
+    fun observeByResumeId(resumeId: String): LiveData<List<ResumeSectionEntity>>
 
     @Query("SELECT * FROM resume_sections WHERE id = :id")
-    suspend fun getById(id: String): ResumeSection?
+    suspend fun getById(id: String): ResumeSectionEntity?
 
     @Query("UPDATE resume_sections SET `order` = :newOrder WHERE id = :id")
     suspend fun updateOrder(id: String, newOrder: Int): Int
