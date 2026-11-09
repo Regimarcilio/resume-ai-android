@@ -121,7 +121,7 @@ class AnalyzeATSUseCase constructor(
         if (personalInfo.phone.isBlank()) completeness -= 10
         if (personalInfo.summary.isBlank()) completeness -= 10
 
-        val sectionCompleteness = resume.sections.filter { it.itemsJson != "[]" }.size * 100 / max(1, resume.sections.size)
+        val sectionCompleteness = resume.sections.filter { it.itemsJson != "[]" }.size * 100 / maxOf(1, resume.sections.size)
         completeness = (completeness + sectionCompleteness) / 2
 
         return LocalScores(
@@ -135,7 +135,7 @@ class AnalyzeATSUseCase constructor(
         val missingKeywords: List<String>
     )
 
-    private fun analyzeWithAI(resume: Resume, jobDescription: String): AIAnalysis {
+    private suspend fun analyzeWithAI(resume: Resume, jobDescription: String): AIAnalysis {
         // Build prompt for AI
         val resumeText = buildResumeText(resume)
         val prompt = if (jobDescription.isNotBlank()) {
