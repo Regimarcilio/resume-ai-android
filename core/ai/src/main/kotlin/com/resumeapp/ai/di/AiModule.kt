@@ -1,7 +1,6 @@
 package com.resumeapp.ai.di
 
 import com.resumeapp.ai.cache.AICache
-import com.resumeapp.ai.cache.RoomAICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
 import com.resumeapp.ai.guardrail.GuardrailPipeline
@@ -15,11 +14,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.android.scopes.Singleton
-import javax.inject.Inject
 
 /**
  * AI Module - Hilt module for AI dependencies
- * Provides all AI-related dependencies: gateways, cache, guardrails, tracing
+ * Provides all AI-related dependencies: gateways, guardrails, tracing
+ * AICache is provided by core:data module (RoomAICache)
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -39,10 +38,6 @@ abstract class AiModule {
         inputSanitizer: InputSanitizer,
         outputValidator: OutputValidator
     ): GuardrailPipeline = GuardrailPipeline(inputSanitizer, outputValidator)
-
-    @Provides
-    @Singleton
-    fun provideAICache(roomAICache: RoomAICache): AICache = roomAICache
 
     @Provides
     @Singleton
