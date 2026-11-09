@@ -45,3 +45,13 @@ data class PdfCacheEntity(
     val pdfData: ByteArray,
     val createdAt: Long
 )
+
+@Entity(tableName = "subscription_status")
+data class SubscriptionStatusEntity(
+    @PrimaryKey
+    val tier: String, // Serialized SubscriptionTier enum
+    val expiryDate: Long?,
+    val isActive: Boolean,
+    val purchaseToken: String?,
+    val featuresJson: String // Serialized Set<FeatureFlag>
+)

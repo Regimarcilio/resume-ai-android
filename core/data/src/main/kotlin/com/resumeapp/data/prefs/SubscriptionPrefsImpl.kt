@@ -1,6 +1,6 @@
 package com.resumeapp.data.prefs
 
-import com.resumeapp.billing.model.SubscriptionStatus
+import com.resumeapp.domain.model.SubscriptionStatus
 import com.resumeapp.domain.model.SubscriptionTier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,22 +20,18 @@ class SubscriptionPrefsImpl @Inject constructor(
 
     private val _status = MutableStateFlow<SubscriptionStatus?>(null)
     override val statusFlow: Flow<SubscriptionStatus> = _status
-        .map { it ?: SubscriptionStatus(isActive = false) }
+        .map { it ?: SubscriptionStatus() }
         .distinctUntilChanged()
 
     override val currentStatus: SubscriptionStatus
-        get() = _status.value ?: SubscriptionStatus(isActive = false)
+        get() = _status.value ?: SubscriptionStatus()
 
     override suspend fun saveSubscriptionStatus(status: SubscriptionStatus) {
         _status.value = status
         // Persist to DataStore via UserPrefs
         userPrefs.updateSubscription(
-            tier = when {
-                status.sku == "lifetime" -> SubscriptionTier.LIFETIME
-                status.sku == "pro_monthly" -> SubscriptionTier.PRO
-                else -> SubscriptionTier.FREE
-            },
-            expiryDate = status.expiryTime,
+            tier = status.tier,
+            expiryDate = status.expiryDate,
             purchaseToken = status.purchaseToken
         )
     }
@@ -56,14 +52,10 @@ class SubscriptionPrefsImpl @Inject constructor(
         val prefsStatus = userPrefs.subscriptionStatusFlow.firstOrNull()
         if (prefsStatus != null) {
             _status.value = SubscriptionStatus(
+                tier = prefsStatus.tier,
+                expiryDate = prefsStatus.expiryDate,
                 isActive = prefsStatus.isActive,
-                sku = when (prefsStatus.tier) {
-                    SubscriptionTier.LIFETIME -> "lifetime"
-                    SubscriptionTier.PRO -> "pro_monthly"
-                    else -> null
-                },
-                purchaseToken = prefsStatus.purchaseToken,
-                expiryTime = prefsStatus.expiryDate
+                purchaseToken = prefsStatus.purchaseToken
             )
         }
     }

@@ -15,7 +15,7 @@ import com.resumeapp.domain.model.*
         ATSScore::class,
         AICacheEntity::class,
         TraceEntity::class,
-        SubscriptionStatus::class,
+        SubscriptionStatusEntity::class,
         PdfCacheEntity::class
     ],
     version = 2,

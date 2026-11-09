@@ -82,19 +82,19 @@ interface TraceDao {
 interface SubscriptionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(status: SubscriptionStatus): Long
+    suspend fun insert(status: SubscriptionStatusEntity): Long
 
     @Update
-    suspend fun update(status: SubscriptionStatus): Int
+    suspend fun update(status: SubscriptionStatusEntity): Int
 
     @Delete
-    suspend fun delete(status: SubscriptionStatus)
+    suspend fun delete(status: SubscriptionStatusEntity)
 
     @Query("SELECT * FROM subscription_status ORDER BY tier DESC LIMIT 1")
-    suspend fun getCurrent(): SubscriptionStatus?
+    suspend fun getCurrent(): SubscriptionStatusEntity?
 
     @Query("SELECT * FROM subscription_status ORDER BY tier DESC LIMIT 1")
-    fun observeCurrent(): LiveData<SubscriptionStatus?>
+    fun observeCurrent(): LiveData<SubscriptionStatusEntity?>
 
     @Query("DELETE FROM subscription_status")
     suspend fun clear(): Int
