@@ -8,8 +8,8 @@ import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class AICacheRepositoryImpl @Inject constructor(

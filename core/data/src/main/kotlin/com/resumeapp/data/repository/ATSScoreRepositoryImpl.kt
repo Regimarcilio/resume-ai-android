@@ -6,8 +6,8 @@ import com.resumeapp.domain.model.ATSScore
 import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.repository.ATSScoreRepository
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class ATSScoreRepositoryImpl @Inject constructor(

@@ -1,17 +1,11 @@
 package com.resumeapp.ai.trace
 
 import android.content.Context
-import androidx.datastore.preferences.DataStore
-import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.resumeapp.domain.model.TraceEntry
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.reflect.Type
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -41,8 +35,7 @@ interface TraceLogger {
 }
 
 class TraceLoggerImpl @Inject constructor(
-    private val context: Context,
-    private val traceDataStore: DataStore<androidx.datastore.preferences.Preferences>
+    private val context: Context
 ) : TraceLogger {
 
     private val traceDir = File(context.filesDir, "traces")
@@ -87,7 +80,7 @@ class TraceLoggerImpl @Inject constructor(
     }
 
     override fun getTraceFlow(): Flow<TraceEntry> {
-        // Not implemented for DataStore - would need to read files
+        // Not implemented - would need to read files
         return kotlinx.coroutines.flow.emptyFlow()
     }
 

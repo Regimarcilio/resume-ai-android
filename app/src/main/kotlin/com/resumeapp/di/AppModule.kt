@@ -32,7 +32,6 @@ import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
 import com.resumeapp.ai.di.AiModule
-import com.resumeapp.ai.di.AiModule
 import com.resumeapp.data.sync.SyncModule
 import com.resumeapp.pdf.di.PdfModule
 import dagger.hilt.android.EntryPoint
@@ -44,7 +43,13 @@ import dagger.hilt.android.scopes.Singleton
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import jakarta.inject.Inject
+import com.resumeapp.ai.gateway.AIGatewayClient
+import com.resumeapp.ai.gateway.AIGatewayClientImpl
+import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.guardrail.GuardrailPipeline
+import com.resumeapp.ai.trace.TraceLogger
+import com.resumeapp.ai.trace.TraceUploader
 
 /**
  * Main Application Module - Provides application-level dependencies
@@ -148,6 +153,22 @@ object NetworkModule {
         .client(okHttpClient)
         .addConverterFactory(retrofit2.converter.moshi.MoshiConverterFactory.create(moshi))
         .build()
+
+    @Provides
+    @Singleton
+    fun provideAIGatewayClient(
+        okHttpClient: okhttp3.OkHttpClient,
+        guardrailPipeline: GuardrailPipeline,
+        aiCache: AICache,
+        traceLogger: TraceLogger,
+        traceUploader: TraceUploader
+    ): AIGatewayClient = AIGatewayClientImpl(
+        okHttpClient = okHttpClient,
+        guardrailPipeline = guardrailPipeline,
+        aiCache = aiCache,
+        traceLogger = traceLogger,
+        traceUploader = traceUploader
+    )
 }
 
 /**

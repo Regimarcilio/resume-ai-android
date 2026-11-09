@@ -62,6 +62,7 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
@@ -69,6 +70,9 @@ dependencies {
     // DataStore for traces
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.datastore:datastore-core:1.0.0")
+
+    // Gson for TraceLogger
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")
@@ -98,8 +102,6 @@ dependencies {
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
 
     // Kotlin
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")

@@ -7,8 +7,8 @@ import com.resumeapp.data.db.AICacheDao
 import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 /**
  * Room-backed AI Cache implementation - Semantic and exact caching
