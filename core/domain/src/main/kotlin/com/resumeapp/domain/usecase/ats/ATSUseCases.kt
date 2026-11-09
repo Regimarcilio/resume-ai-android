@@ -38,7 +38,7 @@ class AnalyzeATSUseCase constructor(
         val forceRefresh: Boolean = false
     )
 
-    override suspend fun invoke(params: Params): Result<ATSScore> {
+    override suspend operator fun invoke(params: Params): Result<ATSScore> {
         return try {
             // Check if we have a cached score and not forcing refresh
             if (!params.forceRefresh) {
@@ -343,7 +343,7 @@ class GetATSScoreUseCase constructor(
     private val atsScoreRepository: ATSScoreRepository
 ) : AsyncUseCase<IdParams, ATSScore> {
 
-    override suspend fun invoke(params: IdParams): Result<ATSScore> {
+    override suspend operator fun invoke(params: IdParams): Result<ATSScore> {
         return try {
             val score = atsScoreRepository.getByResumeId(params.id)
                 ?: return Failure("ATS score not found for resume: ${params.id}")
@@ -369,7 +369,7 @@ class ApplyATSSuggestionUseCase constructor(
         val userInput: String? = null // For suggestions requiring user input (e.g., keyword value)
     )
 
-    override suspend fun invoke(params: Params): Result<Resume> {
+    override suspend operator fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
                 ?: return Failure("Resume not found: ${params.resumeId}")
@@ -443,7 +443,7 @@ class RefreshATSUseCase constructor(
     private val analyzeATSUseCase: AnalyzeATSUseCase
 ) : AsyncUseCase<IdParams, ATSScore> {
 
-    override suspend fun invoke(params: IdParams): Result<ATSScore> {
+    override suspend operator fun invoke(params: IdParams): Result<ATSScore> {
         return analyzeATSUseCase(AnalyzeATSUseCase.Params(
             resumeId = params.id,
             forceRefresh = true

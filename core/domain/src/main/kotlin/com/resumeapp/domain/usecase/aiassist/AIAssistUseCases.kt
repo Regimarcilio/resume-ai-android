@@ -45,7 +45,7 @@ class ImproveBulletsUseCase constructor(
         val experienceLevel: String? = null // Junior, Mid, Senior, Lead
     )
 
-    override suspend fun invoke(params: Params): Result<List<String>> {
+    override suspend operator fun invoke(params: Params): Result<List<String>> {
         return try {
             val prompt = buildImproveBulletsPrompt(params)
 
@@ -139,7 +139,7 @@ class ExtractKeywordsUseCase constructor(
         val maxKeywords: Int = 20
     )
 
-    override suspend fun invoke(params: Params): Result<List<String>> {
+    override suspend operator fun invoke(params: Params): Result<List<String>> {
         return try {
             val prompt = """
                 Extraia as ${params.maxKeywords} palavras-chave mais relevantes desta descrição de vaga para otimização ATS:
@@ -234,7 +234,7 @@ class RephraseSectionUseCase constructor(
         SHORT, MEDIUM, LONG
     }
 
-    override suspend fun invoke(params: Params): Result<String> {
+    override suspend operator fun invoke(params: Params): Result<String> {
         return try {
             val toneInstructions = when (params.tone) {
                 Tone.PROFESSIONAL -> "Tom profissional e corporativo"
@@ -312,7 +312,7 @@ class SuggestTemplatesUseCase constructor(
         val maxSuggestions: Int = 3
     )
 
-    override suspend fun invoke(params: Params): Result<List<Template>> {
+    override suspend operator fun invoke(params: Params): Result<List<Template>> {
         return try {
             val allTemplates = templateRepository.getAllActive()
 
