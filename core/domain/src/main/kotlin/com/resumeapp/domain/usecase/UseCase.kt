@@ -23,7 +23,7 @@ interface UseCase<in Params, out ResultType> {
  * Async UseCase for operations that need coroutine scope
  */
 interface AsyncUseCase<in Params, out ResultType> {
-    suspend operator fun invoke(params: Params): Result<ResultType>
+    suspend fun invoke(params: Params): Result<ResultType>
 }
 
 /**

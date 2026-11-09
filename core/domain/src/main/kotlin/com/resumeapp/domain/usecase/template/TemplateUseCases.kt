@@ -27,7 +27,7 @@ class GetTemplatesUseCase constructor(
         val freeOnly: Boolean = false
     )
 
-    override fun invoke(params: Params): Result<List<Template>> {
+    override suspend fun invoke(params: Params): Result<List<Template>> {
         return try {
             val templates = when {
                 params.category != null -> templateRepository.getByCategory(params.category!!)
@@ -50,7 +50,7 @@ class GetTemplateByIdUseCase constructor(
     private val templateRepository: TemplateRepository
 ) : AsyncUseCase<IdParams, Template> {
 
-    override fun invoke(params: IdParams): Result<Template> {
+    override suspend fun invoke(params: IdParams): Result<Template> {
         return try {
             templateRepository.getById(params.id)
                 ?.let { Success(it) }
@@ -82,7 +82,7 @@ class PreviewTemplateUseCase constructor(
         val samplePdfBytes: ByteArray? = null
     )
 
-    override fun invoke(params: Params): Result<PreviewResult> {
+    override suspend fun invoke(params: Params): Result<PreviewResult> {
         return try {
             val template = templateRepository.getById(params.templateId)
                 ?: return Failure("Template not found: ${params.templateId}")
@@ -121,7 +121,7 @@ class SelectTemplateUseCase constructor(
         val templateId: String
     )
 
-    override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
+    override suspend fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val template = templateRepository.getById(params.templateId)
                 ?: return Failure("Template not found: ${params.templateId}")
@@ -157,7 +157,7 @@ class GetTemplatesByCategoryUseCase constructor(
         val includePremium: Boolean = true
     )
 
-    override fun invoke(params: Params): Result<List<Template>> {
+    override suspend fun invoke(params: Params): Result<List<Template>> {
         return try {
             val templates = templateRepository.getByCategory(params.category)
             val filtered = if (params.includePremium) {

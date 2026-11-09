@@ -27,7 +27,7 @@ class CreateResumeUseCase constructor(
         val userId: String
     )
 
-    override fun invoke(params: Params): Result<Resume> {
+    override suspend fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = Resume(
                 userId = params.userId,
@@ -72,7 +72,7 @@ class GetResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<IdParams, Resume> {
 
-    override fun invoke(params: IdParams): Result<Resume> {
+    override suspend fun invoke(params: IdParams): Result<Resume> {
         return try {
             resumeRepository.getById(params.id)
                 ?.let { Success(it) }
@@ -91,7 +91,7 @@ class GetAllResumesUseCase constructor(
     private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<SearchParams, List<Resume>> {
 
-    override fun invoke(params: SearchParams): Result<List<Resume>> {
+    override suspend fun invoke(params: SearchParams): Result<List<Resume>> {
         return try {
             val userId = params.filters["userId"] ?: return Failure("userId required")
             val resumes = resumeRepository.getAllByUserId(userId)
@@ -117,7 +117,7 @@ class UpdateResumeUseCase constructor(
         val personalInfo: PersonalInfo? = null
     )
 
-    override fun invoke(params: Params): Result<Resume> {
+    override suspend fun invoke(params: Params): Result<Resume> {
         return try {
             val existing = resumeRepository.getById(params.resumeId)
                 ?: return Failure("Resume not found: ${params.resumeId}")
@@ -145,7 +145,7 @@ class DeleteResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<IdParams, Unit> {
 
-    override fun invoke(params: IdParams): Result<Unit> {
+    override suspend fun invoke(params: IdParams): Result<Unit> {
         return try {
             resumeRepository.deleteById(params.id)
             Success(Unit)
@@ -169,7 +169,7 @@ class DuplicateResumeUseCase constructor(
         val newTitle: String? = null
     )
 
-    override fun invoke(params: Params): Result<Resume> {
+    override suspend fun invoke(params: Params): Result<Resume> {
         return try {
             val original = resumeRepository.getById(params.resumeId)
                 ?: return Failure("Resume not found: ${params.resumeId}")
@@ -206,7 +206,7 @@ class ReorderSectionsUseCase constructor(
         val sectionOrders: Map<String, Int> // sectionId -> newOrder
     )
 
-    override fun invoke(params: Params): Result<Resume> {
+    override suspend fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
                 ?: return Failure("Resume not found: ${params.resumeId}")
@@ -247,7 +247,7 @@ class UpdateSectionUseCase constructor(
         val isVisible: Boolean? = null
     )
 
-    override fun invoke(params: Params): Result<Resume> {
+    override suspend fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
                 ?: return Failure("Resume not found: ${params.resumeId}")
