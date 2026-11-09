@@ -1,10 +1,12 @@
 package com.resumeapp.data.sync
 
-import com.resumeapp.data.repository.ResumeRepositoryImpl
-import com.resumeapp.pdf.repository.PdfRepositoryImpl
-import com.resumeapp.ai.client.AiGatewayClientImpl
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.repository.PdfRepository
+import com.resumeapp.domain.repository.ResumeRepository
+import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.gateway.AIGatewayClient
+import com.resumeapp.ai.gateway.AIRequest
+import com.resumeapp.ai.gateway.AIResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +16,11 @@ import javax.inject.Singleton
 @Singleton
 class OfflineFirstRepository @Inject constructor(
     private val syncManager: SyncManager,
-    private val resumeRepository: ResumeRepositoryImpl,
-    private val pdfRepository: PdfRepositoryImpl,
-    private val aiGatewayClient: AiGatewayClientImpl,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val resumeRepository: ResumeRepository,
+    private val pdfRepository: PdfRepository,
+    private val aiCache: AICache,
+    private val aiGatewayClient: AIGatewayClient,
+    private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) {
 
     // Resume operations (always work offline - local DB)
@@ -31,8 +34,7 @@ class OfflineFirstRepository @Inject constructor(
     suspend fun generatePdf(resume: Resume, template: String, watermark: Boolean) = pdfRepository.generatePdf(resume, template, watermark)
 
     // AI Assist - works offline with cached results, queues for server
-    suspend fun aiChatCompletion(request: com.resumeapp.ai.client.AiModels.AiChatRequest) = 
-        aiGatewayClient.chatCompletion(request)
+    suspend fun aiChatCompletion(request: AIRequest): AIResponse = aiGatewayClient.chatCompletion(request)
 
     // ATS Scoring - fully offline (on-device)
     suspend fun calculateATSScore(resumeId: String, jobDescription: String) = 

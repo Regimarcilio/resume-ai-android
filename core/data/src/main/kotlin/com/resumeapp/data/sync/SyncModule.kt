@@ -2,9 +2,12 @@ package com.resumeapp.data.sync
 
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.repository.ResumeRepositoryImpl
-import com.resumeapp.pdf.repository.PdfRepositoryImpl
-import com.resumeapp.ai.client.AiGatewayClientImpl
+import com.resumeapp.data.repository.PdfRepositoryImpl
+import com.resumeapp.data.cache.RoomAICache
 import com.resumeapp.domain.repository.PdfRepository
+import com.resumeapp.domain.repository.ResumeRepository
+import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.gateway.AIGatewayClient
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,23 +24,29 @@ object SyncModule {
     @Singleton
     fun provideSyncManager(
         database: AppDatabase,
-        resumeRepository: ResumeRepositoryImpl,
-        pdfRepository: PdfRepositoryImpl,
-        aiGatewayClient: AiGatewayClientImpl,
-        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+        resumeRepository: ResumeRepository,
+        pdfRepository: PdfRepository,
+        aiCache: AICache,
+        aiGatewayClient: AIGatewayClient,
+        ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
     ): SyncManager {
-        return SyncManager(database, resumeRepository, pdfRepository, aiGatewayClient, ioDispatcher)
+        return SyncManager(database, resumeRepository, pdfRepository, aiCache, aiGatewayClient, ioDispatcher)
     }
 
     @Provides
     @Singleton
     fun provideOfflineFirstRepository(
         syncManager: SyncManager,
-        resumeRepository: ResumeRepositoryImpl,
-        pdfRepository: PdfRepositoryImpl,
-        aiGatewayClient: AiGatewayClientImpl,
-        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+        resumeRepository: ResumeRepository,
+        pdfRepository: PdfRepository,
+        aiCache: AICache,
+        aiGatewayClient: AIGatewayClient,
+        ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
     ): OfflineFirstRepository {
-        return OfflineFirstRepository(syncManager, resumeRepository, pdfRepository, aiGatewayClient, ioDispatcher)
+        return OfflineFirstRepository(syncManager, resumeRepository, pdfRepository, aiCache, aiGatewayClient, ioDispatcher)
     }
+
+    @Provides
+    @Singleton
+    fun provideAICache(roomAICache: RoomAICache): AICache = roomAICache
 }

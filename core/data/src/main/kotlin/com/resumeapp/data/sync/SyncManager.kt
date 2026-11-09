@@ -1,9 +1,10 @@
 package com.resumeapp.data.sync
 
 import com.resumeapp.data.db.AppDatabase
-import com.resumeapp.data.repository.ResumeRepositoryImpl
-import com.resumeapp.pdf.repository.PdfRepositoryImpl
-import com.resumeapp.ai.client.AiGatewayClientImpl
+import com.resumeapp.domain.repository.ResumeRepository
+import com.resumeapp.domain.repository.PdfRepository
+import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.gateway.AIGatewayClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,9 +14,10 @@ import javax.inject.Singleton
 @Singleton
 class SyncManager @Inject constructor(
     private val database: AppDatabase,
-    private val resumeRepository: ResumeRepositoryImpl,
-    private val pdfRepository: PdfRepositoryImpl,
-    private val aiGatewayClient: AiGatewayClientImpl,
+    private val resumeRepository: ResumeRepository,
+    private val pdfRepository: PdfRepository,
+    private val aiCache: AICache,
+    private val aiGatewayClient: AIGatewayClient,
     private val ioDispatcher: CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO
 ) {
 
