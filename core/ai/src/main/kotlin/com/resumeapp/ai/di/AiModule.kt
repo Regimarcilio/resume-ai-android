@@ -3,6 +3,7 @@ package com.resumeapp.ai.di
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.guardrail.GuardrailPipeline
+import com.resumeapp.ai.guardrail.GuardrailPipelineImpl
 import com.resumeapp.ai.guardrail.InputSanitizer
 import com.resumeapp.ai.guardrail.OutputValidator
 import com.resumeapp.ai.trace.TraceLogger
