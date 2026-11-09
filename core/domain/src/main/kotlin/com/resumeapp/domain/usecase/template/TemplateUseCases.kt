@@ -37,7 +37,7 @@ class GetTemplatesUseCase @Inject constructor(
             }
             Result.Success(templates)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -54,9 +54,9 @@ class GetTemplateByIdUseCase @Inject constructor(
         return try {
             templateRepository.getById(params.id)
                 ?.let { Result.Success(it) }
-                ?: Result.Failure(Exception("Template not found: ${params.id}"))
+                ?: Result.failure("Template not found: ${params.id}")
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -85,7 +85,7 @@ class PreviewTemplateUseCase @Inject constructor(
     override fun invoke(params: Params): Result<PreviewResult> {
         return try {
             val template = templateRepository.getById(params.templateId)
-                ?: return Result.Failure(Exception("Template not found: ${params.templateId}"))
+                ?: return Result.failure("Template not found: ${params.templateId}")
 
             // In real implementation, would generate PDF preview
             val result = PreviewResult(
@@ -96,7 +96,7 @@ class PreviewTemplateUseCase @Inject constructor(
             
             Result.Success(result)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -124,10 +124,10 @@ class SelectTemplateUseCase @Inject constructor(
     override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val template = templateRepository.getById(params.templateId)
-                ?: return Result.Failure(Exception("Template not found: ${params.templateId}"))
+                ?: return Result.failure("Template not found: ${params.templateId}")
 
             val resume = resumeRepository.getById(params.resumeId)
-                ?: return Result.Failure(Exception("Resume not found: ${params.resumeId}"))
+                ?: return Result.failure("Resume not found: ${params.resumeId}")
 
             val updated = resume.copy(
                 templateId = params.templateId,
@@ -146,7 +146,7 @@ class SelectTemplateUseCase @Inject constructor(
             val saved = resumeRepository.update(updatedResume)
             Result.Success(saved)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -175,7 +175,7 @@ class GetTemplatesByCategoryUseCase @Inject constructor(
             }
             Result.Success(filtered)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure("Failed to load templates: ${e.message}")
         }
     }
 }

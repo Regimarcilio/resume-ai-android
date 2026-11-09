@@ -51,7 +51,7 @@ interface FlowUseCase<in Params, out ResultType> {
  * Common parameter objects
  */
 @Serializable
-data class NoParams()
+data class NoParams(val placeholder: Unit = Unit)
 
 @Serializable
 data class IdParams(val id: String)

@@ -38,7 +38,7 @@ class CreateResumeUseCase @Inject constructor(
             val saved = resumeRepository.save(resume)
             Result.Success(saved)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -75,9 +75,9 @@ class GetResumeUseCase @Inject constructor(
         return try {
             resumeRepository.getById(params.id)
                 ?.let { Result.Success(it) }
-                ?: Result.Failure(Exception("Resume not found: ${params.id}"))
+                ?: Result.failure("Resume not found: ${params.id}")
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -96,7 +96,7 @@ class GetAllResumesUseCase @Inject constructor(
             val resumes = resumeRepository.getAllByUserId(userId)
             Result.Success(resumes)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -119,7 +119,7 @@ class UpdateResumeUseCase @Inject constructor(
     override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val existing = resumeRepository.getById(params.resumeId)
-                ?: return Result.Failure(Exception("Resume not found: ${params.resumeId}"))
+                ?: return Result.failure("Resume not found: ${params.resumeId}")
 
             val updated = existing.copy(
                 templateId = params.templateId ?: existing.templateId,
@@ -131,7 +131,7 @@ class UpdateResumeUseCase @Inject constructor(
             resumeRepository.update(updated)
             Result.Success(updated)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -149,7 +149,7 @@ class DeleteResumeUseCase @Inject constructor(
             resumeRepository.deleteById(params.id)
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -171,7 +171,7 @@ class DuplicateResumeUseCase @Inject constructor(
     override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val original = resumeRepository.getById(params.resumeId)
-                ?: return Result.Failure(Exception("Resume not found: ${params.resumeId}"))
+                ?: return Result.failure("Resume not found: ${params.resumeId}")
 
             val duplicate = original.copy(
                 id = java.util.UUID.randomUUID().toString(),
@@ -186,7 +186,7 @@ class DuplicateResumeUseCase @Inject constructor(
             val saved = resumeRepository.save(duplicate)
             Result.Success(saved)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -208,7 +208,7 @@ class ReorderSectionsUseCase @Inject constructor(
     override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
-                ?: return Result.Failure(Exception("Resume not found: ${params.resumeId}"))
+                ?: return Result.failure("Resume not found: ${params.resumeId}")
 
             val updatedSections = resume.sections.map { section ->
                 params.sectionOrders[section.id]?.let { newOrder ->
@@ -225,7 +225,7 @@ class ReorderSectionsUseCase @Inject constructor(
             resumeRepository.update(updated)
             Result.Success(updated)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -249,7 +249,7 @@ class UpdateSectionUseCase @Inject constructor(
     override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
-                ?: return Result.Failure(Exception("Resume not found: ${params.resumeId}"))
+                ?: return Result.failure("Resume not found: ${params.resumeId}")
 
             val updatedSections = resume.sections.map { section ->
                 if (section.id == params.sectionId) {
@@ -269,7 +269,7 @@ class UpdateSectionUseCase @Inject constructor(
             resumeRepository.update(updated)
             Result.Success(updated)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }

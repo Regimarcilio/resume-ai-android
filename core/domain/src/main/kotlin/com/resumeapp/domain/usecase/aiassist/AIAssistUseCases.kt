@@ -68,7 +68,7 @@ class ImproveBulletsUseCase @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -176,7 +176,7 @@ class ExtractKeywordsUseCase @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -250,8 +250,18 @@ class RephraseSectionUseCase @Inject constructor(
                 ${params.currentContent}
                 
                 INSTRUÇÕES:
-                - ${when (params.tone) { Tone.PROFESSIONAL -> "Tom profissional e corporativo" Tone.CONCISE -> "Ultra conciso, direto ao ponto" Tone.IMPACTFUL -> "Focado em resultados e impacto" Tone.TECHNICAL -> "Tom técnico, com terminologia específica" Tone.LEADERSHIP -> "Foco em liderança, estratégia e resultados de equipe" }}
-                - ${when (params.targetLength) { Length.SHORT -> "Máximo 2 frases" Length.MEDIUM -> "3-5 frases" Length.LONG -> "Parágrafo completo, detalhado" }}
+                - ${when (params.tone) {
+                    Tone.PROFESSIONAL -> "Tom profissional e corporativo"
+                    Tone.CONCISE -> "Ultra conciso, direto ao ponto"
+                    Tone.IMPACTFUL -> "Focado em resultados e impacto"
+                    Tone.TECHNICAL -> "Tom técnico, com terminologia específica"
+                    Tone.LEADERSHIP -> "Foco em liderança, estratégia e resultados de equipe"
+                }}
+                - ${when (params.targetLength) {
+                    Length.SHORT -> "Máximo 2 frases"
+                    Length.MEDIUM -> "3-5 frases"
+                    Length.LONG -> "Parágrafo completo, detalhado"
+                }}
                 - Use verbos de ação forte
                 - Inclua métricas se aplicável
                 - Otimizado para ATS
@@ -273,7 +283,7 @@ class RephraseSectionUseCase @Inject constructor(
                 is Result.Failure -> Result.Failure(result.error)
             }
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -321,7 +331,7 @@ class SuggestTemplatesUseCase @Inject constructor(
             
             Result.Success(scored)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }

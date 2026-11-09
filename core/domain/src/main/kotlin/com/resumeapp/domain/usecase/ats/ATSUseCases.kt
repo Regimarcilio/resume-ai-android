@@ -76,7 +76,7 @@ class AnalyzeATSUseCase @Inject constructor(
 
             Result.Success(saved)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -321,7 +321,7 @@ class GetATSScoreUseCase @Inject constructor(
                 ?: return Result.Failure(Exception("ATS score not found for resume: ${params.id}"))
             Result.Success(score)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -395,7 +395,7 @@ class ApplyATSSuggestionUseCase @Inject constructor(
             val saved = com.resumeapp.domain.repository.ResumeRepository.update(updated)
             Result.Success(saved)
         } catch (e: Exception) {
-            Result.Failure(e)
+            Result.failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
