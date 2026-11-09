@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.resumeapp.features.ai-assist"
+    namespace = "com.resumeapp.features.ai_assist"
     compileSdk = 34
     defaultConfig {
         minSdk = 24
