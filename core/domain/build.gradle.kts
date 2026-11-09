@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
 }
 
 group = "com.resumeapp.domain"
@@ -14,7 +14,7 @@ java {
 
 dependencies {
     // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
@@ -22,7 +22,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.google.truth:truth:1.1.5")
 }
