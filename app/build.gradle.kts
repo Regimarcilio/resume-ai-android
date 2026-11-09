@@ -89,6 +89,9 @@ dependencies {
     ksp("com.google.dagger:hilt-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    // Jakarta inject for @Singleton annotation
+    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+
     // Kotlin Coroutines & Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

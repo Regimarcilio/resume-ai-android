@@ -68,6 +68,7 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:2.48")
     ksp("com.google.dagger:hilt-compiler:2.48")
+    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
 
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")

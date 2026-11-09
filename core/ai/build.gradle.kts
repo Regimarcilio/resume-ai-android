@@ -94,6 +94,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.48")
     ksp("com.google.dagger:hilt-compiler:2.48")
 
+    // Jakarta inject for @Singleton annotation
+    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

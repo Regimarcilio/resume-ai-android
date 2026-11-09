@@ -9,8 +9,7 @@ import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import kotlinx.coroutines.Dispatchers
-import javax.inject.Inject
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
