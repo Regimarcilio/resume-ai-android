@@ -129,24 +129,4 @@ sealed interface Result<out T> {
         is Success -> value
         is Failure -> throw error
     }
-    
-    fun onSuccess(action: (T) -> Unit): Result<T> = when(this) {
-        is Success -> action(value)
-        is Failure -> Unit
-    }.also { return this }
-    
-    fun onFailure(action: (Throwable) -> Unit): Result<T> = when(this) {
-        is Failure -> action(error)
-        is Success -> Unit
-    }.also { return this }
-}
-
-extension <T> Result<T>.map<U>(transform: (T) -> U): Result<U> = when(this) {
-    is Success -> Result.Success(transform(value))
-    is Failure -> this
-}
-
-extension <T> Result<T>.flatMap<U>(transform: (T) -> Result<U>): Result<U> = when(this) {
-    is Success -> transform(value)
-    is Failure -> this
 }
