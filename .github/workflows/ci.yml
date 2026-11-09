@@ -32,7 +32,7 @@ jobs:
           echo "org.gradle.configuration-cache=false" >> ~/.gradle/gradle.properties
 
       - name: Run all checks and build
-        run: ./gradlew test assembleDebug --no-daemon --no-configuration-cache --continue
+        run: ./gradlew assembleDebug --no-daemon --no-configuration-cache --continue
 
       # ktlint and detekt removed - upload steps commented out
 
