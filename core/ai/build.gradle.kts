@@ -1,7 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
-    id("org.jetbrains.kotlin.kapt")
 }
 
 kotlin {
@@ -45,10 +44,6 @@ dependencies {
 
     // Jakarta inject for @Singleton annotation
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
-
-    // Dagger
-    implementation("com.google.dagger:dagger:2.48")
-    kapt("com.google.dagger:dagger-compiler:2.48")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
