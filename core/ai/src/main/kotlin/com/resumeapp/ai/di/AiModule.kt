@@ -12,13 +12,17 @@ import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import dagger.hilt.android.scopes.Singleton
+import javax.inject.Inject
 
 /**
- * AI Module - Regular Dagger module (not Hilt) for dependency injection
- * Included by app's Hilt component via @InstallIn or by adding to app's Hilt module
+ * AI Module - Hilt module for AI dependencies
+ * Provides all AI-related dependencies: gateways, cache, guardrails, tracing
  */
 @Module
+@InstallIn(SingletonComponent::class)
 abstract class AiModule {
 
     @Provides

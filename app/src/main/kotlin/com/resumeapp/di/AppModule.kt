@@ -115,13 +115,6 @@ object AppModule {
 }
 
 /**
- * AI Module - AI dependencies (gateways, cache, guardrails, tracing)
- */
-@Module(includes = [AiModule::class])
-@InstallIn(SingletonComponent::class)
-object AiModuleWrapper
-
-/**
  * Network Module - HTTP client, Retrofit, AI Gateway client
  */
 @Module
