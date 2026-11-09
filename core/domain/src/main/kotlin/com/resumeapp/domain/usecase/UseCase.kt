@@ -2,6 +2,8 @@ package com.resumeapp.domain.usecase
 
 import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
 /**
  * Base UseCase interface - Single responsibility, testable, composable
@@ -42,16 +44,12 @@ interface NoParamsUseCase<out ResultType> {
  * UseCase with flow output for reactive streams
  */
 interface FlowUseCase<in Params, out ResultType> {
-    operator fun invoke(params: Params): kotlinx.coroutines.flow.Flow<Result<ResultType>>
+    operator fun invoke(params: Params): Flow<Result<ResultType>>
 }
 
 /**
  * Common parameter objects
  */
-package com.resumeapp.domain.usecase
-
-import kotlinx.serialization.Serializable
-
 @Serializable
 data class NoParams()
 

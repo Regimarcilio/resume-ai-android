@@ -11,14 +11,14 @@
         android:name=".ResumeApplication"
         android:allowBackup="false"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ResumeApp"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
         tools:targetApi="31">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.ResumeApp"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

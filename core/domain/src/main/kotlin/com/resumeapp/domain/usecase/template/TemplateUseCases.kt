@@ -1,6 +1,8 @@
 package com.resumeapp.domain.usecase.template
 
 import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.Result.Success
+import com.resumeapp.domain.model.Result.Failure
 import com.resumeapp.domain.model.Template
 import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.usecase.AsyncUseCase
@@ -64,8 +66,7 @@ class GetTemplateByIdUseCase @Inject constructor(
  * Generates a preview of a template with sample data
  */
 class PreviewTemplateUseCase @Inject constructor(
-    private val templateRepository: TemplateRepository,
-    // private val pdfGenerator: com.resumeapp.pdf.PdfGenerator // Future integration
+    private val templateRepository: TemplateRepository
 ) : AsyncUseCase<PreviewTemplateUseCase.Params, PreviewTemplateUseCase.PreviewResult> {
 
     @Serializable
