@@ -31,6 +31,8 @@ import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
+import com.resumeapp.ai.di.AiModule
+import com.resumeapp.ai.di.AiModule
 import com.resumeapp.data.sync.SyncModule
 import com.resumeapp.pdf.di.PdfModule
 import dagger.hilt.android.EntryPoint
@@ -111,6 +113,13 @@ object AppModule {
         .setWorkerFactory(HiltWorkerFactory())
         .build()
 }
+
+/**
+ * AI Module - AI dependencies (gateways, cache, guardrails, tracing)
+ */
+@Module(includes = [AiModule::class])
+@InstallIn(SingletonComponent::class)
+object AiModuleWrapper
 
 /**
  * Network Module - HTTP client, Retrofit, AI Gateway client
