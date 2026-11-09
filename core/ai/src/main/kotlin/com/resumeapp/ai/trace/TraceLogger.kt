@@ -3,6 +3,7 @@ package com.resumeapp.ai.trace
 import android.content.Context
 import com.google.gson.Gson
 import com.resumeapp.domain.model.TraceEntry
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import java.io.File
 import java.io.FileOutputStream

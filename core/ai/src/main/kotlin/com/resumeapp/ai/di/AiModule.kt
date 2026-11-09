@@ -1,5 +1,6 @@
 package com.resumeapp.ai.di
 
+import android.content.Context
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.guardrail.GuardrailPipeline
@@ -13,6 +14,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Singleton
 
 /**
@@ -42,9 +44,9 @@ abstract class AiModule {
 
     @Provides
     @Singleton
-    fun provideTraceLogger(): TraceLogger = TraceLoggerImpl()
+    fun provideTraceLogger(@ApplicationContext context: Context): TraceLogger = TraceLoggerImpl(context)
 
     @Provides
     @Singleton
-    fun provideTraceUploader(traceLogger: TraceLogger): TraceUploader = TraceUploader(traceLogger)
+    fun provideTraceUploader(@ApplicationContext context: Context, traceLogger: TraceLogger): TraceUploader = TraceUploader(traceLogger, context)
 }
