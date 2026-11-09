@@ -4,7 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-
 }
 
 android {
@@ -46,6 +45,7 @@ android {
             excludes += "/META-INF/*"
         }
     }
+}
 
 dependencies {
     // Core modules
@@ -101,6 +101,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
-
-}
 }

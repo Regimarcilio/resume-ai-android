@@ -4,7 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-
 }
 
 android {
@@ -46,28 +45,24 @@ android {
             excludes += "/META-INF/*"
         }
     }
+}
 
 dependencies {
     // Core modules
     api(project(":core:common"))
     api(project(":core:domain"))
 
-    // Room + SQLCipher
+    // Room
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
-    implementation("net.zetetic:sqlcipher:4.5.6")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-core:1.0.0")
 
-    // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-
-    // Coroutines & Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+    // SQLCipher for encrypted DB
+    implementation("net.zetetic:android-database-sqlcipher:4.5.3")
 
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")
@@ -116,6 +111,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.1")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
-
-}
 }
