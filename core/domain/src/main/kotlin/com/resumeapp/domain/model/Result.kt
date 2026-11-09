@@ -24,6 +24,6 @@ sealed interface Result<out T> {
         inline fun <T> failure(errorMessage: String): Result<T> = Failure(errorMessage)
         inline fun <T> failure(exception: Exception): Result<T> = Failure(exception.message ?: exception.javaClass.simpleName)
         inline fun <T> runCatching(block: () -> T): Result<T> =
-            try { Success(block()) } catch (e: Exception) { Failure(e) }
+            try { Success(block()) } catch (e: Exception) { Failure(e.message ?: e.javaClass.simpleName) }
     }
 }

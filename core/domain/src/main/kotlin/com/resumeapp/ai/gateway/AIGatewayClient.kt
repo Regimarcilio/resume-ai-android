@@ -2,6 +2,7 @@ package com.resumeapp.ai.gateway
 
 import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
 /**
  * AI Gateway Client Interface - EngAI Pattern

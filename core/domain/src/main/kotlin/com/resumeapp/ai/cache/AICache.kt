@@ -1,5 +1,7 @@
 package com.resumeapp.ai.cache
 
+import kotlinx.serialization.Serializable
+
 /**
  * AI Cache Interface - Semantic cache for AI responses
  * Implemented in core:ai module with Room

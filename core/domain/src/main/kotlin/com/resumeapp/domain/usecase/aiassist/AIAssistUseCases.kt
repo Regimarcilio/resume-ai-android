@@ -45,7 +45,7 @@ class ImproveBulletsUseCase constructor(
         val experienceLevel: String? = null // Junior, Mid, Senior, Lead
     )
 
-    override fun invoke(params: Params): Result<List<String>> {
+    override suspend fun invoke(params: Params): Result<List<String>> {
         return try {
             val prompt = buildImproveBulletsPrompt(params)
 
@@ -67,7 +67,7 @@ class ImproveBulletsUseCase constructor(
                     val bullets = parseBullets(result.value.content, params.maxBullets)
                     Success(bullets)
                 }
-                is Failure -> Failure(result.error.message)
+                is Failure -> Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -117,7 +117,7 @@ class ImproveBulletsUseCase constructor(
         return content.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .map { it.replace("^[\u2022\-\*\d\.\s]+".toRegex(), "").trim() }
+            .map { it.replace("^[\\u2022\\-\\*\\d\\.\\s]+".toRegex(), "").trim() }
             .filter { it.isNotBlank() }
             .take(maxBullets)
     }
@@ -139,7 +139,7 @@ class ExtractKeywordsUseCase constructor(
         val maxKeywords: Int = 20
     )
 
-    override fun invoke(params: Params): Result<List<String>> {
+    override suspend fun invoke(params: Params): Result<List<String>> {
         return try {
             val prompt = """
                 Extraia as ${params.maxKeywords} palavras-chave mais relevantes desta descrição de vaga para otimização ATS:
@@ -173,7 +173,7 @@ class ExtractKeywordsUseCase constructor(
                     val keywords = parseKeywords(result.value.content)
                     Success(keywords)
                 }
-                is Failure -> Failure(result.error.message)
+                is Failure -> Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -202,7 +202,7 @@ class ExtractKeywordsUseCase constructor(
         return content.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .map { it.replace("^[\"\-\*\d\.\s]+".toRegex(), "").replace("[\s]+$".toRegex(), "") }
+            .map { it.replace("^[\"\\-\\*\\d\\.\\s]+".toRegex(), "").replace("[\\s]+$".toRegex(), "") }
             .filter { it.isNotBlank() }
             .distinct()
             .take(20)
@@ -234,7 +234,7 @@ class RephraseSectionUseCase constructor(
         SHORT, MEDIUM, LONG
     }
 
-    override fun invoke(params: Params): Result<String> {
+    override suspend fun invoke(params: Params): Result<String> {
         return try {
             val toneInstructions = when (params.tone) {
                 Tone.PROFESSIONAL -> "Tom profissional e corporativo"
@@ -288,7 +288,7 @@ class RephraseSectionUseCase constructor(
 
             when (result) {
                 is Success -> Success(result.value.content.trim())
-                is Failure -> Failure(result.error.message)
+                is Failure -> Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -312,7 +312,7 @@ class SuggestTemplatesUseCase constructor(
         val maxSuggestions: Int = 3
     )
 
-    override fun invoke(params: Params): Result<List<Template>> {
+    override suspend fun invoke(params: Params): Result<List<Template>> {
         return try {
             val allTemplates = templateRepository.getAllActive()
 
@@ -329,6 +329,7 @@ class SuggestTemplatesUseCase constructor(
                     SectionType.PROJECTS -> {
                         if (template.category == TemplateCategory.CREATIVE) score += 10
                     }
+                    else -> {}
                 }
 
                 // Premium bonus for Pro users (would check subscription)

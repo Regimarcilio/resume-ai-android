@@ -1,5 +1,7 @@
 package com.resumeapp.ai.trace
 
+import kotlinx.serialization.Serializable
+
 /**
  * Trace Logger Interface - Logging AI interactions for observability
  * Implemented in core:ai module with Room
