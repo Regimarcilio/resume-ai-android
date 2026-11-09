@@ -19,7 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "resume-ai-android"
 
 // Core modules
-include("core:common")
 include("core:data")
 include("core:domain")
 include("core:ai")

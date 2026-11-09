@@ -49,7 +49,7 @@ android {
 
 dependencies {
     // Core modules
-    api(project(":core:common"))
+    api(project(":core:domain"))
     api(project(":core:domain"))
 
     // Room

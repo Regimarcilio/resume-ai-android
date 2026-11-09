@@ -19,10 +19,9 @@ java {
 
 dependencies {
     // Core modules
-    api(project(":core:common"))
     api(project(":core:domain"))
 
-    // Network
+    // Network (only interfaces, no Android deps)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
     implementation("com.squareup.moshi:moshi:1.15.1")

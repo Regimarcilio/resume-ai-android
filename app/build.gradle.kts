@@ -60,7 +60,7 @@ android {
 
 dependencies {
     // Core modules
-    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:ai"))

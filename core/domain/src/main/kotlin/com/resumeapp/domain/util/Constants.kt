@@ -1,4 +1,4 @@
-package com.resumeapp.common.util
+package com.resumeapp.domain.util
 
 object Constants {
     // PDF Service
