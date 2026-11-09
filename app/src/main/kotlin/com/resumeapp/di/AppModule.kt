@@ -31,7 +31,6 @@ import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
-import com.resumeapp.data.sync.SyncModule
 import com.resumeapp.pdf.di.PdfModule
 import dagger.hilt.android.EntryPoint
 import dagger.hilt.android.InstallIn
@@ -53,12 +52,19 @@ import com.resumeapp.ai.guardrail.GuardrailPipelineImpl
 import com.resumeapp.ai.trace.TraceLogger
 import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
+import com.resumeapp.data.sync.SyncManager
+import com.resumeapp.data.sync.OfflineFirstRepository
+import com.resumeapp.data.cache.RoomAICache
+import com.resumeapp.data.repository.ResumeRepositoryImpl
+import com.resumeapp.data.repository.PdfRepositoryImpl
+import com.resumeapp.domain.repository.PdfRepository
+import com.resumeapp.domain.repository.ResumeRepository
 
 /**
  * Main Application Module - Provides application-level dependencies
  * All singletons that live for the entire app lifecycle
  */
-@Module
+@Module(includes = [SyncModule::class])
 @InstallIn(SingletonComponent::class)
 object AppModule {
 

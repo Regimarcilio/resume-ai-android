@@ -1,4 +1,4 @@
-package com.resumeapp.data.sync
+package com.resumeapp.di
 
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.repository.ResumeRepositoryImpl
@@ -12,11 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import jakarta.inject.Singleton
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.SingletonComponent
 
+/**
+ * Sync Module - Provides sync-related dependencies as plain Dagger module
+ * Included in AppModule via @Module(includes = [SyncModule::class])
+ */
 @Module
-@InstallIn(SingletonComponent::class)
 object SyncModule {
 
     @Provides
