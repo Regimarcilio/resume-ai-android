@@ -31,7 +31,6 @@ import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
-import com.resumeapp.ai.di.AiModule
 import com.resumeapp.data.sync.SyncModule
 import com.resumeapp.pdf.di.PdfModule
 import dagger.hilt.android.EntryPoint
@@ -48,6 +47,9 @@ import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.guardrail.GuardrailPipeline
+import com.resumeapp.ai.guardrail.InputSanitizer
+import com.resumeapp.ai.guardrail.OutputValidator
+import com.resumeapp.ai.guardrail.GuardrailPipelineImpl
 import com.resumeapp.ai.trace.TraceLogger
 import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
@@ -154,6 +156,13 @@ object NetworkModule {
         .client(okHttpClient)
         .addConverterFactory(retrofit2.converter.moshi.MoshiConverterFactory.create(moshi))
         .build()
+
+    @Provides
+    @Singleton
+    fun provideGuardrailPipeline(): GuardrailPipeline = com.resumeapp.ai.di.AiModule().provideGuardrailPipeline(
+        com.resumeapp.ai.di.AiModule().provideInputSanitizer(),
+        com.resumeapp.ai.di.AiModule().provideOutputValidator()
+    )
 
     @Provides
     @Singleton
