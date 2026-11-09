@@ -6,7 +6,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.resumeapp.data.db.converters.Converters
 import com.resumeapp.domain.model.*
-import com.resumeapp.pdf.repository.PdfCacheEntry
 
 @Database(
     entities = [
@@ -14,10 +13,10 @@ import com.resumeapp.pdf.repository.PdfCacheEntry
         ResumeSection::class,
         Template::class,
         ATSScore::class,
-        AICacheEntry::class,
-        TraceEntry::class,
+        AICacheEntity::class,
+        TraceEntity::class,
         SubscriptionStatus::class,
-        PdfCacheEntry::class
+        PdfCacheEntity::class
     ],
     version = 2,
     exportSchema = true
@@ -32,7 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun aiCacheDao(): AICacheDao
     abstract fun traceDao(): TraceDao
     abstract fun subscriptionDao(): SubscriptionDao
-    abstract fun pdfCacheDao(): com.resumeapp.pdf.repository.PdfCacheDao
+    abstract fun pdfCacheDao(): PdfCacheDao
 
     companion object {
         @Volatile

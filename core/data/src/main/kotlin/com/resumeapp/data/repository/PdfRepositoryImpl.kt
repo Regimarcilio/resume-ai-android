@@ -1,5 +1,7 @@
 package com.resumeapp.data.repository
 
+import com.resumeapp.data.db.AppDatabase
+import com.resumeapp.data.db.PdfCacheEntity
 import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.repository.PdfRepository
@@ -16,7 +18,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PdfRepositoryImpl @Inject constructor(
-    private val context: android.content.Context
+    private val context: android.content.Context,
+    private val database: AppDatabase
 ) : PdfRepository {
 
     private val fontFile by lazy {
@@ -29,7 +32,25 @@ class PdfRepositoryImpl @Inject constructor(
         watermark: Boolean
     ): Result<ByteArray> {
         return try {
+            // Check cache first
+            val cached = database.pdfCacheDao().getCached(resume.id, template, watermark).await()
+            cached?.let {
+                return Result.Success(it.pdfData)
+            }
+
             val pdfBytes = generatePdfDocument(resume, template, watermark)
+
+            // Cache the result
+            val cacheEntry = PdfCacheEntity(
+                id = "${resume.id}_${template}_${watermark}",
+                resumeId = resume.id,
+                template = template,
+                watermark = watermark,
+                pdfData = pdfBytes,
+                createdAt = System.currentTimeMillis()
+            )
+            database.pdfCacheDao().insert(cacheEntry).await()
+
             Result.Success(pdfBytes)
         } catch (e: Exception) {
             Result.Failure(e.message ?: "PDF generation failed")
@@ -37,7 +58,7 @@ class PdfRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearCache(): Result<Unit> {
-        // No-op for local generation
+        database.pdfCacheDao().deleteAll().await()
         return Result.Success(Unit)
     }
 
@@ -89,12 +110,12 @@ class PdfRepositoryImpl @Inject constructor(
 
         // Sections
         y = addSection(document, page, contentStream, font, y, margin, "Summary", resume.summary)
-        y = addSection(document, page, contentStream, font, y, margin, "Experience", 
+        y = addSection(document, page, contentStream, font, y, margin, "Experience",
             resume.experience.map { "${it.role} at ${it.company} (${it.startDate} - ${it.endDate})\n${it.description}" }.joinToString("\n\n"))
-        y = addSection(document, page, contentStream, font, y, margin, "Education", 
+        y = addSection(document, page, contentStream, font, y, margin, "Education",
             resume.education.map { "${it.degree} at ${it.institution} (${it.startDate} - ${it.endDate})" }.joinToString("\n"))
         y = addSection(document, page, contentStream, font, y, margin, "Skills", resume.skills.joinToString(", "))
-        y = addSection(document, page, contentStream, font, y, margin, "Languages", 
+        y = addSection(document, page, contentStream, font, y, margin, "Languages",
             resume.languages.map { "${it.language} (${it.proficiency})" }.joinToString(", "))
 
         if (watermark) {

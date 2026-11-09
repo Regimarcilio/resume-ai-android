@@ -2,19 +2,18 @@ package com.resumeapp.data.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.resumeapp.domain.model.*
 
 @Dao
 interface AICacheDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entry: AICacheEntry): Long
+    suspend fun insert(entry: AICacheEntity): Long
 
     @Update
-    suspend fun update(entry: AICacheEntry): Int
+    suspend fun update(entry: AICacheEntity): Int
 
     @Delete
-    suspend fun delete(entry: AICacheEntry)
+    suspend fun delete(entry: AICacheEntity)
 
     @Query("DELETE FROM ai_cache WHERE id = :id")
     suspend fun deleteById(id: String): Int
@@ -26,17 +25,17 @@ interface AICacheDao {
     suspend fun deleteAll(): Int
 
     @Query("SELECT * FROM ai_cache WHERE promptHash = :promptHash AND promptType = :promptType")
-    suspend fun getByPromptHash(promptHash: String, promptType: String): AICacheEntry?
+    suspend fun getByPromptHash(promptHash: String, promptType: String): AICacheEntity?
 
     @Query("SELECT * FROM ai_cache WHERE promptType = :promptType ORDER BY createdAt DESC LIMIT :limit")
-    suspend fun getByPromptType(promptType: String, limit: Int): List<AICacheEntry>
+    suspend fun getByPromptType(promptType: String, limit: Int): List<AICacheEntity>
 
     @Query("SELECT * FROM ai_cache ORDER BY createdAt DESC LIMIT :limit")
-    suspend fun getRecent(limit: Int): List<AICacheEntry>
+    suspend fun getRecent(limit: Int): List<AICacheEntity>
 
     // For semantic similarity search (requires custom function or post-processing)
-    @RawQuery(observedEntities = [AICacheEntry::class])
-    fun findSimilar(query: androidx.room.RawQuery): AICacheEntry?
+    @RawQuery(observedEntities = [AICacheEntity::class])
+    fun findSimilar(query: androidx.room.RawQuery): AICacheEntity?
 
     @Query("SELECT COUNT(*) FROM ai_cache")
     suspend fun count(): Int
@@ -46,22 +45,22 @@ interface AICacheDao {
 interface TraceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entry: TraceEntry): Long
+    suspend fun insert(entry: TraceEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(entries: List<TraceEntry>)
+    suspend fun insertAll(entries: List<TraceEntity>)
 
-    @Query("DELETE FROM traces WHERE createdAt < :cutoff")
-    suspend fun deleteOldEntries(cutoff: Long): Int
+    @Query("DELETE FROM traces WHERE timestamp < :cutoff")
+    suspend fun deleteOldEntries(cutoff: String): Int
 
     @Query("DELETE FROM traces")
     suspend fun deleteAll(): Int
 
     @Query("SELECT * FROM traces WHERE promptType = :promptType ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun getByPromptType(promptType: String, limit: Int): List<TraceEntry>
+    suspend fun getByPromptType(promptType: String, limit: Int): List<TraceEntity>
 
     @Query("SELECT * FROM traces ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun getRecent(limit: Int): List<TraceEntry>
+    suspend fun getRecent(limit: Int): List<TraceEntity>
 
     @Query("SELECT COUNT(*) FROM traces WHERE cacheHit = 1")
     suspend fun countCacheHits(): Int
@@ -99,4 +98,20 @@ interface SubscriptionDao {
 
     @Query("DELETE FROM subscription_status")
     suspend fun clear(): Int
+}
+
+@Dao
+interface PdfCacheDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(entry: PdfCacheEntity): Long
+
+    @Query("SELECT * FROM pdf_cache WHERE resumeId = :resumeId AND template = :template AND watermark = :watermark")
+    suspend fun getCached(resumeId: String, template: String, watermark: Boolean): PdfCacheEntity?
+
+    @Query("DELETE FROM pdf_cache WHERE createdAt < :cutoff")
+    suspend fun deleteOldEntries(cutoff: Long): Int
+
+    @Query("DELETE FROM pdf_cache")
+    suspend fun deleteAll(): Int
 }

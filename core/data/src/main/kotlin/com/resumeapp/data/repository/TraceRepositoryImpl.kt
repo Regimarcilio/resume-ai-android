@@ -4,6 +4,7 @@ import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.mapper.TraceMapper
 import com.resumeapp.ai.trace.TraceEntry
 import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.repository.TraceRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,9 +13,9 @@ import javax.inject.Singleton
 class TraceRepositoryImpl @Inject constructor(
     private val dao: TraceDao,
     private val mapper: TraceMapper
-) : com.resumeapp.domain.repository.TraceRepository {
+) : TraceRepository {
 
-    override suspend fun getAll(): Result<List<com.resumeapp.ai.trace.TraceEntry>> {
+    override suspend fun getAll(): Result<List<TraceEntry>> {
         return try {
             val entries = dao.getRecent(100).await()
             Result.Success(entries.map { mapper.toDomain(it) })
@@ -23,7 +24,7 @@ class TraceRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getById(id: String): Result<com.resumeapp.ai.trace.TraceEntry> {
+    override suspend fun getById(id: String): Result<TraceEntry> {
         return try {
             Result.Failure(Exception("Not implemented for traces"))
         } catch (e: Exception) {
@@ -31,9 +32,9 @@ class TraceRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun save(entry: com.resumeapp.ai.trace.TraceEntry): Result<com.resumeapp.ai.trace.TraceEntry> {
+    override suspend fun save(entry: TraceEntry): Result<TraceEntry> {
         return try {
-            val entity = com.resumeapp.data.mapper.TraceMapper.toEntity(entry)
+            val entity = TraceMapper.toEntity(entry)
             Result.Success(entry)
         } catch (e: Exception) {
             Result.Failure(e)
@@ -48,7 +49,7 @@ class TraceRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observeAll(): kotlinx.coroutines.flow.Flow<List<com.resumeapp.ai.trace.TraceEntry>> {
+    override fun observeAll(): kotlinx.coroutines.flow.Flow<List<TraceEntry>> {
         return kotlinx.coroutines.flow.emptyFlow()
     }
 }

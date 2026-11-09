@@ -4,7 +4,7 @@ import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.data.db.AICacheDao
-import com.resumeapp.data.db.AICacheEntry
+import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
 import javax.inject.Inject
