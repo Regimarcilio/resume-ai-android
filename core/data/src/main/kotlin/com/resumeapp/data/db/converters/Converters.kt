@@ -12,8 +12,6 @@ class Converters {
     private val gson = Gson()
     private val sectionItemsType: Type = object : TypeToken<List<SectionItem>>() {}.type
     private val stringListType: Type = object : TypeToken<List<String>>() {}.type
-    private val floatArrayType: Type = object : TypeToken<FloatArray>() {}.type
-    private val suggestionListType: Type = object : TypeToken<List<ATSSuggestion>>() {}.type
     private val consentPurposeSetType: Type = object : TypeToken<Set<ConsentPurpose>>() {}.type
     private val featureFlagSetType: Type = object : TypeToken<Set<FeatureFlag>>() {}.type
 
@@ -39,29 +37,6 @@ class Converters {
         return gson.toJson(list, stringListType)
     }
 
-    // ===== AICacheEntry.embeddingJson =====
-    @TypeConverter
-    fun fromFloatArrayJson(json: String): FloatArray {
-        val list = gson.fromJson(json, floatArrayType)
-        return list.toFloatArray()
-    }
-
-    @TypeConverter
-    fun toFloatArrayJson(array: FloatArray): String {
-        return gson.toJson(array.toList(), floatArrayType)
-    }
-
-    // ===== ATSScore.missingKeywordsJson & suggestionsJson =====
-    @TypeConverter
-    fun fromSuggestionsJson(json: String): List<ATSSuggestion> {
-        return gson.fromJson(json, suggestionListType)
-    }
-
-    @TypeConverter
-    fun toSuggestionsJson(suggestions: List<ATSSuggestion>): String {
-        return gson.toJson(suggestions, suggestionListType)
-    }
-
     // ===== ConsentRecord.purposes =====
     @TypeConverter
     fun fromConsentPurposeSetJson(json: String): Set<ConsentPurpose> {
@@ -73,7 +48,7 @@ class Converters {
         return gson.toJson(set, consentPurposeSetType)
     }
 
-    // ===== SubscriptionStatus.features =====
+    // ===== SubscriptionStatusEntity.featuresJson =====
     @TypeConverter
     fun fromFeatureFlagSetJson(json: String): Set<FeatureFlag> {
         return gson.fromJson(json, featureFlagSetType)
