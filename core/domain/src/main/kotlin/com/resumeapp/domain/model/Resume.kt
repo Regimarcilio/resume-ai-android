@@ -134,7 +134,9 @@ data class TraceEntry(
     val latencyMs: Long,
     val cacheHit: Boolean,
     val promptSanitized: String
-)
+) {
+    fun toJson(): String = com.google.gson.Gson().toJson(this)
+}
 
 @Serializable
 data class ConsentRecord(

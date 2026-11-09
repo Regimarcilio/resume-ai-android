@@ -1,13 +1,13 @@
 package com.resumeapp.data.mapper
 
-import com.resumeapp.ai.trace.TraceEntry
 import com.resumeapp.data.db.TraceEntity
+import com.resumeapp.domain.model.TraceEntry
 
 class TraceMapper {
 
     fun toDomain(entity: TraceEntity): TraceEntry {
         return TraceEntry(
-            traceId = entity.traceId,
+            id = entity.traceId,
             timestamp = entity.timestamp,
             model = entity.model,
             promptType = entity.promptType,
@@ -23,7 +23,7 @@ class TraceMapper {
 
     fun toEntity(entry: TraceEntry): TraceEntity {
         return TraceEntity(
-            traceId = entry.traceId,
+            traceId = entry.id,
             timestamp = entry.timestamp,
             model = entry.model,
             promptType = entry.promptType,

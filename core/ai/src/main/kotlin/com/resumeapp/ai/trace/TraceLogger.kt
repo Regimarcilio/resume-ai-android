@@ -5,6 +5,7 @@ import androidx.datastore.preferences.DataStore
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.resumeapp.domain.model.TraceEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -39,22 +40,6 @@ interface TraceLogger {
     fun getTodaysCost(): Double
 }
 
-data class TraceEntry(
-    val traceId: String,
-    val timestamp: String,
-    val model: String,
-    val promptType: String,
-    val promptTokens: Int,
-    val completionTokens: Int,
-    val totalTokens: Int,
-    val costUsd: Double,
-    val latencyMs: Long,
-    val cacheHit: Boolean,
-    val promptSanitized: String
-) {
-    fun toJson(): String = com.google.gson.Gson().toJson(this)
-}
-
 class TraceLoggerImpl @Inject constructor(
     private val context: Context,
     private val traceDataStore: DataStore<androidx.datastore.preferences.Preferences>
@@ -81,7 +66,7 @@ class TraceLoggerImpl @Inject constructor(
         promptSanitized: String
     ) {
         val entry = TraceEntry(
-            traceId = traceId,
+            id = traceId,
             timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).format(Date()),
             model = model,
             promptType = promptType,
@@ -168,3 +153,5 @@ class TraceUploader @Inject constructor(
         }
     }
 }
+
+private fun TraceEntry.toJson(): String = com.google.gson.Gson().toJson(this)

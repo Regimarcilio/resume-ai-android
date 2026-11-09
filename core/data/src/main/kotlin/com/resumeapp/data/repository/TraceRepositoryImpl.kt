@@ -2,8 +2,8 @@ package com.resumeapp.data.repository
 
 import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.mapper.TraceMapper
-import com.resumeapp.ai.trace.TraceEntry
 import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.TraceEntry
 import com.resumeapp.domain.repository.TraceRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

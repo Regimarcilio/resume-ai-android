@@ -1,6 +1,6 @@
 package com.resumeapp.domain.repository
 
-import com.resumeapp.ai.trace.TraceEntry
+import com.resumeapp.domain.model.TraceEntry
 import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.flow.Flow
 
