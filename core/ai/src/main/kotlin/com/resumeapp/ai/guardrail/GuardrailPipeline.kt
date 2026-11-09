@@ -48,7 +48,7 @@ class InputSanitizer {
             val name = match.groupValues[1]
             // Skip common words that might match
             if (name.lowercase() in setOf("the", "and", "or", "but", "for", "with", "from", "to", "in", "on", "at", "by", "a", "i", "me", "my", "we", "our", "you", "your", "he", "his", "she", "her", "it", "its", "they", "them", "their")) {
-                match.input.substring(match.range)
+                match.value
             } else {
                 "***NAME***"
             }
