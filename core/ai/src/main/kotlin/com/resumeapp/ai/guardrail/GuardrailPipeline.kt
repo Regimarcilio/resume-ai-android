@@ -1,6 +1,7 @@
 package com.resumeapp.ai.guardrail
 
 import com.resumeapp.ai.gateway.AIResponse
+import jakarta.inject.Inject
 
 /**
  * Guardrail Pipeline - Input sanitization + Output validation
@@ -124,9 +125,9 @@ class OutputValidator {
 }
 
 /**
- * Guardrail Pipeline - Combines sanitizer and validator
+ * Guardrail Pipeline Implementation - Combines sanitizer and validator
  */
-class GuardrailPipeline @Inject constructor(
+class GuardrailPipelineImpl @Inject constructor(
     private val inputSanitizer: InputSanitizer,
     private val outputValidator: OutputValidator
 ) : GuardrailPipeline {
@@ -135,7 +136,7 @@ class GuardrailPipeline @Inject constructor(
         return inputSanitizer.sanitizeInput(prompt)
     }
     
-    override fun validateOutput(response: com.resumeapp.ai.gateway.AIResponse): com.resumeapp.ai.gateway.AIResponse {
+    override fun validateOutput(response: AIResponse): AIResponse {
         return outputValidator.validateOutput(response)
     }
 }

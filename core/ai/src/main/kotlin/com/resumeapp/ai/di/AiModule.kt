@@ -37,7 +37,7 @@ abstract class AiModule {
     fun provideGuardrailPipeline(
         inputSanitizer: InputSanitizer,
         outputValidator: OutputValidator
-    ): GuardrailPipeline = GuardrailPipeline(inputSanitizer, outputValidator)
+    ): GuardrailPipeline = GuardrailPipelineImpl(inputSanitizer, outputValidator)
 
     @Provides
     @Singleton
