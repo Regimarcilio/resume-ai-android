@@ -1,27 +1,20 @@
 package com.resumeapp.ai.di
 
-import android.content.Context
-import com.resumeapp.ai.cache.AICache
-import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.guardrail.GuardrailPipelineImpl
 import com.resumeapp.ai.guardrail.InputSanitizer
 import com.resumeapp.ai.guardrail.OutputValidator
-import com.resumeapp.ai.trace.TraceLogger
-import com.resumeapp.ai.trace.TraceLoggerImpl
-import com.resumeapp.ai.trace.TraceUploader
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Singleton
 
 /**
- * AI Module - Hilt module for AI dependencies
- * Provides all AI-related dependencies: gateways, guardrails, tracing
+ * AI Module - Hilt module for AI dependencies (core:ai)
+ * Provides only pure Kotlin dependencies: guardrails
  * AICache is provided by core:data module (RoomAICache)
- * AIGatewayClient is provided by app module
+ * AIGatewayClient, TraceLogger, TraceUploader are provided by app module
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -41,12 +34,4 @@ abstract class AiModule {
         inputSanitizer: InputSanitizer,
         outputValidator: OutputValidator
     ): GuardrailPipeline = GuardrailPipelineImpl(inputSanitizer, outputValidator)
-
-    @Provides
-    @Singleton
-    fun provideTraceLogger(@ApplicationContext context: Context): TraceLogger = TraceLoggerImpl(context)
-
-    @Provides
-    @Singleton
-    fun provideTraceUploader(@ApplicationContext context: Context, traceLogger: TraceLogger): TraceUploader = TraceUploader(traceLogger, context)
 }

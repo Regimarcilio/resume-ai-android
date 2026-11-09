@@ -13,31 +13,13 @@ import java.util.Locale
 import java.util.concurrent.Executors
 
 /**
- * Trace Logger - EngAI Pattern
+ * Trace Logger Implementation - EngAI Pattern
  * Logs all AI interactions to JSONL files for auditability and FinOps
+ * Interface is in core:ai module
  */
-interface TraceLogger {
-    fun log(
-        traceId: String,
-        model: String,
-        promptType: String,
-        promptTokens: Int,
-        completionTokens: Int,
-        totalTokens: Int,
-        costUsd: Double,
-        latencyMs: Long,
-        cacheHit: Boolean,
-        promptSanitized: String
-    )
-    
-    fun getTraceFlow(): Flow<TraceEntry>
-    fun rotateLogs()
-    fun getTodaysCost(): Double
-}
-
 class TraceLoggerImpl @Inject constructor(
     private val context: Context
-) : TraceLogger {
+) : com.resumeapp.ai.trace.TraceLogger {
 
     private val traceDir = File(context.filesDir, "traces")
     private val gson = Gson()
@@ -123,7 +105,7 @@ class TraceLoggerImpl @Inject constructor(
  * Trace Uploader - Batch uploads traces to observability backend
  */
 class TraceUploader @Inject constructor(
-    private val traceLogger: TraceLogger,
+    private val traceLogger: com.resumeapp.ai.trace.TraceLogger,
     private val context: Context
 ) {
     

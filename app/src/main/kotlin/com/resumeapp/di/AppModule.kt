@@ -49,6 +49,7 @@ import com.resumeapp.ai.gateway.AIGatewayClientImpl
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.trace.TraceLogger
+import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
 
 /**
@@ -169,6 +170,14 @@ object NetworkModule {
         traceLogger = traceLogger,
         traceUploader = traceUploader
     )
+
+    @Provides
+    @Singleton
+    fun provideTraceLogger(@ApplicationContext context: Context): TraceLogger = TraceLoggerImpl(context)
+
+    @Provides
+    @Singleton
+    fun provideTraceUploader(@ApplicationContext context: Context, traceLogger: TraceLogger): TraceUploader = TraceUploader(traceLogger, context)
 }
 
 /**

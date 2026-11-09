@@ -1,9 +1,11 @@
 package com.resumeapp.ai.gateway
 
+import android.content.Context
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.trace.TraceLogger
 import com.resumeapp.ai.trace.TraceUploader
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.tasks.await
@@ -18,11 +20,13 @@ class AIGatewayClientImpl @Inject constructor(
     private val guardrailPipeline: GuardrailPipeline,
     private val aiCache: AICache,
     private val traceLogger: TraceLogger,
-    private val traceUploader: TraceUploader
+    private val traceUploader: TraceUploader,
+    @com.resumeapp.di.ApplicationContext private val context: Context
 ) : AIGatewayClient {
 
-    private val baseUrl = "http://localhost:8080" // From BuildConfig in real app
+    private val baseUrl = "http://10.0.2.2:8081" // Android emulator localhost
     private val mediaType = "application/json; charset=utf-8".toMediaType()
+    private val apiKey = "test-api-key" // From BuildConfig in real app
 
     override suspend fun complete(request: AIRequest): Result<AIResponse> {
         val startTime = System.currentTimeMillis()
@@ -121,7 +125,7 @@ class AIGatewayClientImpl @Inject constructor(
 
         val httpRequest = Request.Builder()
             .url(url)
-            .header("Authorization", "Bearer ${BuildConfig.AI_GATEWAY_API_KEY}")
+            .header("Authorization", "Bearer $apiKey")
             .header("X-Request-ID", requestId)
             .post(requestBody)
             .build()
@@ -209,7 +213,7 @@ class AIGatewayClientImpl @Inject constructor(
         } finally {
             call.cancel()
         }
-    }.flowOn(kotlinx.coroutines.Dispatchers.IO)
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun healthCheck(): Boolean {
         val url = URL("$baseUrl/health")
@@ -236,7 +240,7 @@ class AIGatewayClientImpl @Inject constructor(
 
         val httpRequest = Request.Builder()
             .url(url)
-            .header("Authorization", "Bearer ${BuildConfig.AI_GATEWAY_API_KEY}")
+            .header("Authorization", "Bearer $apiKey")
             .header("X-Request-ID", requestId)
             .header("Content-Type", "application/json")
             .post(requestBody)
