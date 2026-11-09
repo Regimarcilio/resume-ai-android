@@ -1,21 +1,14 @@
 package com.resumeapp.domain.model
 
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import com.resumeapp.data.db.converters.Converters
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-@Entity(tableName = "resumes")
-@TypeConverters(Converters::class)
 data class Resume(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val userId: String,
     val templateId: String,
-    @Embedded val personalInfo: PersonalInfo = PersonalInfo(),
+    val personalInfo: PersonalInfo = PersonalInfo(),
     val sections: List<ResumeSection> = emptyList(),
     val atsScore: ATSScore? = null,
     val createdAt: Long = System.currentTimeMillis(),
@@ -30,7 +23,6 @@ data class Resume(
 }
 
 @Serializable
-@Embedded
 data class PersonalInfo(
     val fullName: String = "",
     val email: String = "",
@@ -42,9 +34,8 @@ data class PersonalInfo(
 )
 
 @Serializable
-@Entity(tableName = "resume_sections")
 data class ResumeSection(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val resumeId: String,
     val type: SectionType = SectionType.CUSTOM,
     val title: String = "",
@@ -74,9 +65,8 @@ data class SectionItem(
 )
 
 @Serializable
-@Entity(tableName = "templates")
 data class Template(
-    @PrimaryKey val id: String,
+    val id: String,
     val name: String,
     val description: String,
     val category: TemplateCategory = TemplateCategory.MODERN,
@@ -92,7 +82,6 @@ enum class TemplateCategory {
 }
 
 @Serializable
-@Entity(tableName = "ats_scores", primaryKeys = ["resumeId"])
 data class ATSScore(
     val resumeId: String,
     val overallScore: Int = 0,
@@ -116,12 +105,11 @@ data class ATSSuggestion(
 @Serializable
 enum class SuggestionType {
     ADD_KEYWORD, REPHRASE, ADD_METRIC, FORMAT_FIX, REORDER
-)
+}
 
 @Serializable
-@Entity(tableName = "ai_cache")
 data class AICacheEntry(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val promptHash: String,
     val promptType: String,
     val embeddingJson: String = "[]", // FloatArray serialized as JSON
@@ -134,9 +122,8 @@ data class AICacheEntry(
 )
 
 @Serializable
-@Entity(tableName = "traces")
 data class TraceEntry(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val timestamp: String,
     val model: String,
     val promptType: String,
