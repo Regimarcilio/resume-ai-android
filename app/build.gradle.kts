@@ -105,8 +105,8 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // PDF (local generation with pdfbox-android for offline)
-    implementation("org.apache.pdfbox:pdfbox-android:3.0.2")
+    // PDF (local generation with pdfbox for offline)
+    implementation("org.apache.pdfbox:pdfbox:3.0.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
