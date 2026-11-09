@@ -1,23 +1,24 @@
 package com.resumeapp.domain.usecase.resume
 
-import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.PersonalInfo
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.ResumeSection
+import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.Result.Success
+import com.resumeapp.domain.model.Result.Failure
+import com.resumeapp.domain.model.SectionType
 import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.domain.usecase.AsyncUseCase
 import com.resumeapp.domain.usecase.IdParams
-import com.resumeapp.domain.usecase.NoParams
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import com.resumeapp.domain.usecase.SearchParams
+import kotlinx.serialization.Serializable
 
 /**
  * Create Resume UseCase
  * Creates a new resume from a template
  */
-class CreateResumeUseCase @Inject constructor(
-    private val resumeRepository: ResumeRepository,
-    private val coroutineScope: CoroutineScope
+class CreateResumeUseCase constructor(
+    private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<CreateResumeUseCase.Params, Resume> {
 
     @Serializable
@@ -26,32 +27,32 @@ class CreateResumeUseCase @Inject constructor(
         val userId: String
     )
 
-    override fun invoke(params: Params): Result<Resume> = coroutineScope.runBlocking {
-        try {
+    override fun invoke(params: Params): Result<Resume> {
+        return try {
             val resume = Resume(
                 userId = params.userId,
                 templateId = params.templateId,
-                personalInfo = com.resumeapp.domain.model.PersonalInfo(),
+                personalInfo = PersonalInfo(),
                 sections = defaultSectionsForTemplate(params.templateId)
             )
-            
+
             val saved = resumeRepository.save(resume)
-            Result.Success(saved)
+            Success(saved)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
-    private fun defaultSectionsForTemplate(templateId: String): List<com.resumeapp.domain.model.ResumeSection> {
+    private fun defaultSectionsForTemplate(templateId: String): List<ResumeSection> {
         val sectionTypes = listOf(
-            com.resumeapp.domain.model.SectionType.EXPERIENCE,
-            com.resumeapp.domain.model.SectionType.EDUCATION,
-            com.resumeapp.domain.model.SectionType.SKILLS,
-            com.resumeapp.domain.model.SectionType.PROJECTS
+            SectionType.EXPERIENCE,
+            SectionType.EDUCATION,
+            SectionType.SKILLS,
+            SectionType.PROJECTS
         )
-        
+
         return sectionTypes.mapIndexed { index, type ->
-            com.resumeapp.domain.model.ResumeSection(
+            ResumeSection(
                 resumeId = "", // Will be set after resume creation
                 type = type,
                 title = type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
@@ -67,17 +68,17 @@ class CreateResumeUseCase @Inject constructor(
  * Get Resume UseCase
  * Retrieves a resume by ID with all sections
  */
-class GetResumeUseCase @Inject constructor(
+class GetResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<IdParams, Resume> {
 
     override fun invoke(params: IdParams): Result<Resume> {
         return try {
             resumeRepository.getById(params.id)
-                ?.let { Result.Success(it) }
-                ?: Result.failure("Resume not found: ${params.id}")
+                ?.let { Success(it) }
+                ?: Failure("Resume not found: ${params.id}")
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -86,17 +87,17 @@ class GetResumeUseCase @Inject constructor(
  * Get All Resumes UseCase
  * Lists all resumes for a user
  */
-class GetAllResumesUseCase @Inject constructor(
+class GetAllResumesUseCase constructor(
     private val resumeRepository: ResumeRepository
-) : AsyncUseCase<com.resumeapp.domain.usecase.SearchParams, List<com.resumeapp.domain.model.Resume>> {
+) : AsyncUseCase<SearchParams, List<Resume>> {
 
-    override fun invoke(params: com.resumeapp.domain.usecase.SearchParams): Result<List<com.resumeapp.domain.model.Resume>> {
+    override fun invoke(params: SearchParams): Result<List<Resume>> {
         return try {
-            val userId = params.filters["userId"] ?: return Result.Failure(Exception("userId required"))
+            val userId = params.filters["userId"] ?: return Failure("userId required")
             val resumes = resumeRepository.getAllByUserId(userId)
-            Result.Success(resumes)
+            Success(resumes)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -105,21 +106,21 @@ class GetAllResumesUseCase @Inject constructor(
  * Update Resume UseCase
  * Updates resume metadata (template, personal info)
  */
-class UpdateResumeUseCase @Inject constructor(
+class UpdateResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
-) : AsyncUseCase<UpdateResumeUseCase.Params, com.resumeapp.domain.model.Resume> {
+) : AsyncUseCase<UpdateResumeUseCase.Params, Resume> {
 
     @Serializable
     data class Params(
         val resumeId: String,
         val templateId: String? = null,
-        val personalInfo: com.resumeapp.domain.model.PersonalInfo? = null
+        val personalInfo: PersonalInfo? = null
     )
 
-    override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
+    override fun invoke(params: Params): Result<Resume> {
         return try {
             val existing = resumeRepository.getById(params.resumeId)
-                ?: return Result.failure("Resume not found: ${params.resumeId}")
+                ?: return Failure("Resume not found: ${params.resumeId}")
 
             val updated = existing.copy(
                 templateId = params.templateId ?: existing.templateId,
@@ -129,9 +130,9 @@ class UpdateResumeUseCase @Inject constructor(
             )
 
             resumeRepository.update(updated)
-            Result.Success(updated)
+            Success(updated)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -140,16 +141,16 @@ class UpdateResumeUseCase @Inject constructor(
  * Delete Resume UseCase
  * Deletes a resume and all its sections
  */
-class DeleteResumeUseCase @Inject constructor(
+class DeleteResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
 ) : AsyncUseCase<IdParams, Unit> {
 
     override fun invoke(params: IdParams): Result<Unit> {
         return try {
             resumeRepository.deleteById(params.id)
-            Result.Success(Unit)
+            Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -158,9 +159,9 @@ class DeleteResumeUseCase @Inject constructor(
  * Duplicate Resume UseCase
  * Creates a copy of an existing resume
  */
-class DuplicateResumeUseCase @Inject constructor(
+class DuplicateResumeUseCase constructor(
     private val resumeRepository: ResumeRepository
-) : AsyncUseCase<DuplicateResumeUseCase.Params, com.resumeapp.domain.model.Resume> {
+) : AsyncUseCase<DuplicateResumeUseCase.Params, Resume> {
 
     @Serializable
     data class Params(
@@ -168,10 +169,10 @@ class DuplicateResumeUseCase @Inject constructor(
         val newTitle: String? = null
     )
 
-    override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
+    override fun invoke(params: Params): Result<Resume> {
         return try {
             val original = resumeRepository.getById(params.resumeId)
-                ?: return Result.failure("Resume not found: ${params.resumeId}")
+                ?: return Failure("Resume not found: ${params.resumeId}")
 
             val duplicate = original.copy(
                 id = java.util.UUID.randomUUID().toString(),
@@ -184,9 +185,9 @@ class DuplicateResumeUseCase @Inject constructor(
             )
 
             val saved = resumeRepository.save(duplicate)
-            Result.Success(saved)
+            Success(saved)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -195,9 +196,9 @@ class DuplicateResumeUseCase @Inject constructor(
  * Reorder Sections UseCase
  * Changes the order of sections in a resume
  */
-class ReorderSectionsUseCase @Inject constructor(
+class ReorderSectionsUseCase constructor(
     private val resumeRepository: ResumeRepository
-) : AsyncUseCase<ReorderSectionsUseCase.Params, com.resumeapp.domain.model.Resume> {
+) : AsyncUseCase<ReorderSectionsUseCase.Params, Resume> {
 
     @Serializable
     data class Params(
@@ -205,10 +206,10 @@ class ReorderSectionsUseCase @Inject constructor(
         val sectionOrders: Map<String, Int> // sectionId -> newOrder
     )
 
-    override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
+    override fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
-                ?: return Result.failure("Resume not found: ${params.resumeId}")
+                ?: return Failure("Resume not found: ${params.resumeId}")
 
             val updatedSections = resume.sections.map { section ->
                 params.sectionOrders[section.id]?.let { newOrder ->
@@ -223,9 +224,9 @@ class ReorderSectionsUseCase @Inject constructor(
             )
 
             resumeRepository.update(updated)
-            Result.Success(updated)
+            Success(updated)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -234,9 +235,9 @@ class ReorderSectionsUseCase @Inject constructor(
  * Update Section UseCase
  * Updates a specific section's items
  */
-class UpdateSectionUseCase @Inject constructor(
+class UpdateSectionUseCase constructor(
     private val resumeRepository: ResumeRepository
-) : AsyncUseCase<UpdateSectionUseCase.Params, com.resumeapp.domain.model.Resume> {
+) : AsyncUseCase<UpdateSectionUseCase.Params, Resume> {
 
     @Serializable
     data class Params(
@@ -246,10 +247,10 @@ class UpdateSectionUseCase @Inject constructor(
         val isVisible: Boolean? = null
     )
 
-    override fun invoke(params: Params): Result<com.resumeapp.domain.model.Resume> {
+    override fun invoke(params: Params): Result<Resume> {
         return try {
             val resume = resumeRepository.getById(params.resumeId)
-                ?: return Result.failure("Resume not found: ${params.resumeId}")
+                ?: return Failure("Resume not found: ${params.resumeId}")
 
             val updatedSections = resume.sections.map { section ->
                 if (section.id == params.sectionId) {
@@ -267,9 +268,9 @@ class UpdateSectionUseCase @Inject constructor(
             )
 
             resumeRepository.update(updated)
-            Result.Success(updated)
+            Success(updated)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }

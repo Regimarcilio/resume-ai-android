@@ -1,34 +1,39 @@
 package com.resumeapp.domain.usecase.aiassist
 
-import com.resumeapp.domain.model.Result
-import com.resumeapp.domain.model.Resume
-import com.resumeapp.domain.model.SectionItem
-import com.resumeapp.domain.repository.ResumeRepository
-import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.gateway.AIGatewayClient
+import com.resumeapp.ai.gateway.AIRequest
+import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.trace.TraceLogger
+import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.Result.Success
+import com.resumeapp.domain.model.Result.Failure
+import com.resumeapp.domain.model.Resume
+import com.resumeapp.domain.model.SectionItem
+import com.resumeapp.domain.model.SectionType
+import com.resumeapp.domain.model.Template
+import com.resumeapp.domain.model.TemplateCategory
+import com.resumeapp.domain.repository.ResumeRepository
+import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.usecase.AsyncUseCase
-import com.resumeapp.domain.usecase.IdParams
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import kotlinx.serialization.Serializable
 
 /**
  * Improve Bullets UseCase
  * Enhances bullet points in experience/project sections using AI
  */
-class ImproveBulletsUseCase @Inject constructor(
-    private val aiGatewayClient: com.resumeapp.ai.gateway.AIGatewayClient,
-    private val aiCache: com.resumeapp.ai.cache.AICache,
-    private val guardrailPipeline: com.resumeapp.ai.guardrail.GuardrailPipeline,
-    private val traceLogger: com.resumeapp.ai.trace.TraceLogger
+class ImproveBulletsUseCase constructor(
+    private val aiGatewayClient: AIGatewayClient,
+    private val aiCache: AICache,
+    private val guardrailPipeline: GuardrailPipeline,
+    private val traceLogger: TraceLogger
 ) : AsyncUseCase<ImproveBulletsUseCase.Params, List<String>> {
 
     @Serializable
     data class Params(
-        val sectionType: com.resumeapp.domain.model.SectionType,
-        val currentItems: List<com.resumeapp.domain.model.SectionItem>,
+        val sectionType: SectionType,
+        val currentItems: List<SectionItem>,
         val context: ResumeContext,
         val maxBullets: Int = 5
     )
@@ -42,10 +47,9 @@ class ImproveBulletsUseCase @Inject constructor(
 
     override fun invoke(params: Params): Result<List<String>> {
         return try {
-            // Build prompt for bullet improvement
             val prompt = buildImproveBulletsPrompt(params)
-            
-            val request = com.resumeapp.ai.gateway.AIRequest(
+
+            val request = AIRequest(
                 prompt = prompt,
                 model = "gpt-4o-mini",
                 maxTokens = 800,
@@ -56,19 +60,17 @@ class ImproveBulletsUseCase @Inject constructor(
                 )
             )
 
-            val result = com.resumeapp.ai.gateway.AIGatewayClient.complete(request)
-            
-            return when (result) {
-                is Result.Success -> {
+            val result = aiGatewayClient.complete(request)
+
+            when (result) {
+                is Success -> {
                     val bullets = parseBullets(result.value.content, params.maxBullets)
-                    Result.Success(bullets)
+                    Success(bullets)
                 }
-                is Result.Failure -> {
-                    Result.Failure(result.error)
-                }
+                is Failure -> Failure(result.error.message)
             }
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
@@ -103,7 +105,7 @@ class ImproveBulletsUseCase @Inject constructor(
         """
     }
 
-    private fun buildContextInfo(context: com.resumeapp.domain.usecase.aiassist.ImproveBulletsUseCase.ResumeContext): String {
+    private fun buildContextInfo(context: ResumeContext): String {
         val parts = mutableListOf<String>()
         context.targetRole?.let { parts.add("Cargo alvo: $it") }
         context.industry?.let { parts.add("Indústria: $it") }
@@ -125,10 +127,10 @@ class ImproveBulletsUseCase @Inject constructor(
  * Extract Keywords UseCase
  * Extracts relevant keywords from job description for ATS optimization
  */
-class ExtractKeywordsUseCase @Inject constructor(
-    private val aiGatewayClient: com.resumeapp.ai.gateway.AIGatewayClient,
-    private val aiCache: com.resumeapp.ai.cache.AICache,
-    private val traceLogger: com.resumeapp.ai.trace.TraceLogger
+class ExtractKeywordsUseCase constructor(
+    private val aiGatewayClient: AIGatewayClient,
+    private val aiCache: AICache,
+    private val traceLogger: TraceLogger
 ) : AsyncUseCase<ExtractKeywordsUseCase.Params, List<String>> {
 
     @Serializable
@@ -155,8 +157,8 @@ class ExtractKeywordsUseCase @Inject constructor(
                 - Certificações exigidas
                 - Anos de experiência
             """
-            
-            val request = com.resumeapp.ai.gateway.AIRequest(
+
+            val request = AIRequest(
                 prompt = prompt.trimIndent(),
                 model = "gpt-4o-mini",
                 maxTokens = 500,
@@ -164,32 +166,38 @@ class ExtractKeywordsUseCase @Inject constructor(
                 metadata = mapOf("prompt_type" to "extract_keywords")
             )
 
-            val result = com.resumeapp.ai.gateway.AIGatewayClient.complete(request)
-            
-            return when (result) {
-                is Result.Success -> {
+            val result = aiGatewayClient.complete(request)
+
+            when (result) {
+                is Success -> {
                     val keywords = parseKeywords(result.value.content)
-                    Result.Success(keywords)
+                    Success(keywords)
                 }
-                is Result.Failure -> {
-                    Result.Failure(result.error)
-                }
+                is Failure -> Failure(result.error.message)
             }
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 
     private fun parseKeywords(content: String): List<String> {
         try {
-            val json = com.google.gson.JsonParser.parseString(content.trim())
-            if (json.isJsonArray) {
-                return json.asJsonArray.map { it.asString }.toList()
+            // Try JSON parsing
+            val json = content.trim()
+            if (json.startsWith("[") && json.endsWith("]")) {
+                // Simple JSON array parsing without external deps
+                return json
+                    .removePrefix("[")
+                    .removeSuffix("]")
+                    .split(",")
+                    .map { it.trim().trim('"') }
+                    .filter { it.isNotBlank() }
+                    .distinct()
             }
         } catch (e: Exception) {
             // Fallback: parse line by line
         }
-        
+
         // Fallback: split by lines/comma
         return content.lines()
             .map { it.trim() }
@@ -205,9 +213,9 @@ class ExtractKeywordsUseCase @Inject constructor(
  * Rephrase Section UseCase
  * Rewrites a section with different tone/style
  */
-class RephraseSectionUseCase @Inject constructor(
-    private val aiGatewayClient: com.resumeapp.ai.gateway.AIGatewayClient,
-    private val traceLogger: com.resumeapp.ai.trace.TraceLogger
+class RephraseSectionUseCase constructor(
+    private val aiGatewayClient: AIGatewayClient,
+    private val traceLogger: TraceLogger
 ) : AsyncUseCase<RephraseSectionUseCase.Params, String> {
 
     @Serializable
@@ -267,8 +275,8 @@ class RephraseSectionUseCase @Inject constructor(
                 - Otimizado para ATS
                 - Retorne APENAS o texto reescrito, sem explicações
             """
-            
-            val request = com.resumeapp.ai.gateway.AIRequest(
+
+            val request = AIRequest(
                 prompt = prompt.trimIndent(),
                 model = "gpt-4o-mini",
                 maxTokens = 500,
@@ -276,14 +284,14 @@ class RephraseSectionUseCase @Inject constructor(
                 metadata = mapOf("prompt_type" to "rephrase")
             )
 
-            val result = com.resumeapp.ai.gateway.AIGatewayClient.complete(request)
-            
-            return when (result) {
-                is Result.Success -> Result.Success(result.value.content.trim())
-                is Result.Failure -> Result.Failure(result.error)
+            val result = aiGatewayClient.complete(request)
+
+            when (result) {
+                is Success -> Success(result.value.content.trim())
+                is Failure -> Failure(result.error.message)
             }
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
@@ -292,46 +300,46 @@ class RephraseSectionUseCase @Inject constructor(
  * Suggest Templates UseCase
  * Recommends templates based on resume content and target role
  */
-class SuggestTemplatesUseCase @Inject constructor(
-    private val aiGatewayClient: com.resumeapp.ai.gateway.AIGatewayClient,
-    private val templateRepository: com.resumeapp.domain.repository.TemplateRepository
-) : AsyncUseCase<SuggestTemplatesUseCase.Params, List<com.resumeapp.domain.model.Template>> {
+class SuggestTemplatesUseCase constructor(
+    private val aiGatewayClient: AIGatewayClient,
+    private val templateRepository: TemplateRepository
+) : AsyncUseCase<SuggestTemplatesUseCase.Params, List<Template>> {
 
     @Serializable
     data class Params(
-        val resume: com.resumeapp.domain.model.Resume,
+        val resume: Resume,
         val targetRole: String? = null,
         val maxSuggestions: Int = 3
     )
 
-    override fun invoke(params: Params): Result<List<com.resumeapp.domain.model.Template>> {
+    override fun invoke(params: Params): Result<List<Template>> {
         return try {
-            val allTemplates = com.resumeapp.domain.repository.TemplateRepository.getAllActive()
-            
+            val allTemplates = templateRepository.getAllActive()
+
             // Simple scoring based on category and premium status
             val scored = allTemplates.map { template ->
                 var score = 0
-                
+
                 // Category matching
                 when (params.resume.sections.firstOrNull()?.type) {
-                    com.resumeapp.domain.model.SectionType.EXPERIENCE -> {
-                        if (template.category == com.resumeapp.domain.model.TemplateCategory.ATS_OPTIMIZED) score += 10
-                        if (template.category == com.resumeapp.domain.model.TemplateCategory.MODERN) score += 5
+                    SectionType.EXPERIENCE -> {
+                        if (template.category == TemplateCategory.ATS_OPTIMIZED) score += 10
+                        if (template.category == TemplateCategory.MODERN) score += 5
                     }
-                    com.resumeapp.domain.model.SectionType.PROJECTS -> {
-                        if (template.category == com.resumeapp.domain.model.TemplateCategory.CREATIVE) score += 10
+                    SectionType.PROJECTS -> {
+                        if (template.category == TemplateCategory.CREATIVE) score += 10
                     }
                 }
-                
+
                 // Premium bonus for Pro users (would check subscription)
-                if (!it.isPremium) score += 5
-                
+                if (!template.isPremium) score += 5
+
                 template to score
-            }.sortedByDescending { it.second }.take(3).map { it.first }
-            
-            Result.Success(scored)
+            }.sortedByDescending { it.second }.take(params.maxSuggestions).map { it.first }
+
+            Success(scored)
         } catch (e: Exception) {
-            Result.failure(e.message ?: e.javaClass.simpleName)
+            Failure(e.message ?: e.javaClass.simpleName)
         }
     }
 }
