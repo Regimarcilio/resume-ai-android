@@ -24,7 +24,6 @@ import com.resumeapp.data.prefs.SubscriptionPrefsImpl
 import com.resumeapp.data.repository.ResumeRepositoryImpl
 import com.resumeapp.data.repository.TemplateRepositoryImpl
 import com.resumeapp.data.repository.ATSScoreRepositoryImpl
-import com.resumeapp.data.repository.AICacheRepositoryImpl
 import com.resumeapp.data.repository.TraceRepositoryImpl
 import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.domain.repository.TemplateRepository
@@ -57,10 +56,8 @@ import com.resumeapp.data.sync.OfflineFirstRepository
 import com.resumeapp.data.cache.RoomAICache
 import com.resumeapp.data.repository.ResumeRepositoryImpl
 import com.resumeapp.data.repository.PdfRepositoryImpl
-import com.resumeapp.data.repository.AICacheRepositoryImpl
 import com.resumeapp.domain.repository.PdfRepository
 import com.resumeapp.domain.repository.ResumeRepository
-import com.resumeapp.domain.repository.AICacheRepository
 
 /**
  * Main Application Module - Provides application-level dependencies
@@ -111,13 +108,9 @@ object AppModule {
         AppDatabase::class.java,
         "resume_db"
     )
-        .openHelperFactory(SQLCipherOpenHelperFactory(masterKey))
+        .openHelperFactory(SQLCipherOpenHelperFactory(masterKey.keyGenParameterSpec?.run { "unused" } ?: ""))
         .fallbackToDestructiveMigration() // Only for dev, use proper migrations in prod
         .build()
-
-    @Provides
-    @Singleton
-    fun provideSQLCipherOpenHelperFactory(masterKey: MasterKey) = SQLCipherOpenHelperFactory(masterKey)
 
     @Provides
     @Singleton

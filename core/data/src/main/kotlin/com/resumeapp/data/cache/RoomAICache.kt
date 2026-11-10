@@ -9,13 +9,11 @@ import com.resumeapp.data.db.AICacheDao
 import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
-import jakarta.inject.Singleton
 
 /**
  * Room-backed AI Cache implementation - Semantic and exact caching
  * Moved to core:data to avoid circular dependency with core:ai
  */
-@Singleton
 class RoomAICache constructor(
     private val dao: AICacheDao,
     private val database: AppDatabase,

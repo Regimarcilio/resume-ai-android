@@ -9,8 +9,7 @@ import androidx.datastore.preferences.core.getLong
 import androidx.datastore.preferences.core.getString
 import androidx.datastore.preferences.core.setLong
 import androidx.datastore.preferences.core.setString
-import androidx.datastore.preferences.rxjava3.preferences
-import androidx.datastore.rxjava3.RxDataStore
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.resumeapp.domain.model.ConsentPurpose
@@ -24,10 +23,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
-import io.reactivex.rxjava3.core.Flowable
+import kotlinx.coroutines.runBlocking
 import java.lang.reflect.Type
-import java.util.concurrent.TimeUnit
 
 /**
  * User Preferences Interface - Abstracts DataStore implementation
@@ -87,49 +84,49 @@ class UserPrefsImpl constructor(
     private val gson = Gson()
 
     override val userId: String
-        get() = dataStore.data.firstOrNull()?.getString(USER_ID_KEY) ?: ""
+        get() = runBlocking { dataStore.data.firstOrNull()?.getString(USER_ID_KEY) ?: "" }
 
     override val subscriptionTier: SubscriptionTier
-        get() {
+        get() = runBlocking {
             val tierStr = dataStore.data.firstOrNull()?.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name
-            return SubscriptionTier.valueOf(tierStr)
+            SubscriptionTier.valueOf(tierStr)
         }
 
     override val subscriptionExpiryDate: Long?
-        get() {
+        get() = runBlocking {
             val expiry = dataStore.data.firstOrNull()?.getLong(SUBSCRIPTION_EXPIRY_KEY)
-            return if (expiry > 0) expiry else null
+            if (expiry > 0) expiry else null
         }
 
     override val purchaseToken: String?
-        get() = dataStore.data.firstOrNull()?.getString(PURCHASE_TOKEN_KEY)
+        get() = runBlocking { dataStore.data.firstOrNull()?.getString(PURCHASE_TOKEN_KEY) }
 
     override val preferredTemplateId: String?
-        get() = dataStore.data.firstOrNull()?.getString(PREFERRED_TEMPLATE_ID_KEY)
+        get() = runBlocking { dataStore.data.firstOrNull()?.getString(PREFERRED_TEMPLATE_ID_KEY) }
 
     override val aiUsageCount: Int
-        get() = dataStore.data.firstOrNull()?.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0
+        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }
 
     override val lastSyncAt: Long
-        get() = dataStore.data.firstOrNull()?.getLong(LAST_SYNC_AT_KEY) ?: 0L
+        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(LAST_SYNC_AT_KEY) ?: 0L }
 
     override val consentVersion: String?
-        get() = dataStore.data.firstOrNull()?.getString(CONSENT_VERSION_KEY)
+        get() = runBlocking { dataStore.data.firstOrNull()?.getString(CONSENT_VERSION_KEY) }
 
     override val consentTimestamp: Long?
-        get() {
+        get() = runBlocking {
             val ts = dataStore.data.firstOrNull()?.getLong(CONSENT_TIMESTAMP_KEY)
-            return if (ts > 0) ts else null
+            if (ts > 0) ts else null
         }
 
     override val consentAccepted: Boolean
-        get() = dataStore.data.firstOrNull()?.getLong(CONSENT_ACCEPTED_KEY) == 1L
+        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(CONSENT_ACCEPTED_KEY) == 1L }
 
     override val consentPurposes: Set<String>
-        get() {
+        get() = runBlocking {
             val json = dataStore.data.firstOrNull()?.getString(CONSENT_PURPOSES_KEY) ?: "[]"
             val type = object : TypeToken<Set<String>>() {}.type
-            return try {
+            try {
                 Gson().fromJson(json, type)
             } catch (e: Exception) {
                 emptySet()
@@ -137,7 +134,7 @@ class UserPrefsImpl constructor(
         }
 
     override val consentPolicyHash: String?
-        get() = dataStore.data.firstOrNull()?.getString(CONSENT_POLICY_HASH_KEY)
+        get() = runBlocking { dataStore.data.firstOrNull()?.getString(CONSENT_POLICY_HASH_KEY) }
 
     // Flows
     override val userIdFlow: Flow<String> = dataStore.data
@@ -168,24 +165,26 @@ class UserPrefsImpl constructor(
     override val consentRecordFlow: Flow<com.resumeapp.domain.model.ConsentRecord?> = dataStore.data
         .map { prefs ->
             val accepted = prefs.getLong(CONSENT_ACCEPTED_KEY) == 1L
-            if (!accepted) return@map null
-            val purposesJson = prefs.getString(CONSENT_PURPOSES_KEY) ?: "[]"
-            val purposes = try {
-                val type = object : TypeToken<Set<String>>() {}.type
-                Gson().fromJson(purposesJson, type)
-            } catch (e: Exception) {
-                emptySet<String>()
+            if (!accepted) null
+            else {
+                val purposesJson = prefs.getString(CONSENT_PURPOSES_KEY) ?: "[]"
+                val purposes = try {
+                    val type = object : TypeToken<Set<String>>() {}.type
+                    Gson().fromJson(purposesJson, type)
+                } catch (e: Exception) {
+                    emptySet<String>()
+                }
+                com.resumeapp.domain.model.ConsentRecord(
+                    version = prefs.getString(CONSENT_VERSION_KEY) ?: "",
+                    timestamp = prefs.getLong(CONSENT_TIMESTAMP_KEY),
+                    policyHash = prefs.getString(CONSENT_POLICY_HASH_KEY) ?: "",
+                    accepted = accepted,
+                    purposes = purposes.map { ConsentPurpose.valueOf(it) }.toSet()
+                )
             }
-            com.resumeapp.domain.model.ConsentRecord(
-                version = prefs.getString(CONSENT_VERSION_KEY) ?: "",
-                timestamp = prefs.getLong(CONSENT_TIMESTAMP_KEY),
-                policyHash = prefs.getString(CONSENT_POLICY_HASH_KEY) ?: "",
-                accepted = accepted,
-                purposes = purposes.map { ConsentPurpose.valueOf(it) }
-            )
         }
         .distinctUntilChanged()
-        .catch { emit(null) }
+        .catch { }
 
     override suspend fun setUserId(userId: String) {
         dataStore.edit { it.putString(USER_ID_KEY, userId) }
