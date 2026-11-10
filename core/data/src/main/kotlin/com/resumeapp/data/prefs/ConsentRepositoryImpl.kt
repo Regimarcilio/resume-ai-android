@@ -2,48 +2,78 @@ package com.resumeapp.data.prefs
 
 import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.domain.model.ConsentPurpose
+import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.Result.Success
+import com.resumeapp.domain.model.Result.Failure
+import com.resumeapp.domain.repository.ConsentRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-
-interface ConsentRepository {
-    val currentConsent: ConsentRecord?
-    val consentFlow: Flow<ConsentRecord?>
-    val hasValidConsent: Boolean
-    val hasPurpose: (ConsentPurpose) -> Boolean
-
-    suspend fun accept(record: ConsentRecord)
-    suspend fun revoke()
-    suspend fun updatePurposes(purposes: Set<ConsentPurpose>)
-}
 
 class ConsentRepositoryImpl constructor(
     private val userPrefs: UserPrefs
 ) : ConsentRepository {
 
-    override val currentConsent: ConsentRecord?
+    override suspend fun save(record: ConsentRecord): Result<Unit> {
+        return try {
+            userPrefs.updateConsent(record)
+            Success(Unit)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+
+    override suspend fun getLatest(userId: String): Result<ConsentRecord?> {
+        return try {
+            val record = runBlocking { userPrefs.consentRecordFlow.first() }
+            Success(record)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+
+    override suspend fun getAll(userId: String): Result<List<ConsentRecord>> {
+        return try {
+            val record = runBlocking { userPrefs.consentRecordFlow.first() }
+            Success(record?.let { listOf(it) } ?: emptyList())
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+
+    override suspend fun hasConsent(userId: String, purpose: String): Result<Boolean> {
+        return try {
+            val hasPurpose = userPrefs.consentPurposes.contains(purpose)
+            Success(hasPurpose)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+
+    // Legacy interface methods for backward compatibility
+    val currentConsent: ConsentRecord?
         get() = runBlocking { userPrefs.consentRecordFlow.first() }
 
-    override val consentFlow: Flow<ConsentRecord?> = userPrefs.consentRecordFlow
+    val consentFlow: Flow<ConsentRecord?> = userPrefs.consentRecordFlow
 
-    override val hasValidConsent: Boolean
+    val hasValidConsent: Boolean
         get() = userPrefs.consentAccepted
 
-    override val hasPurpose: (com.resumeapp.domain.model.ConsentPurpose) -> Boolean = { purpose ->
+    val hasPurpose: (ConsentPurpose) -> Boolean = { purpose ->
         userPrefs.consentPurposes.contains(purpose.name)
     }
 
-    override suspend fun accept(record: ConsentRecord) {
+    suspend fun accept(record: ConsentRecord) {
         userPrefs.updateConsent(record)
     }
 
-    override suspend fun revoke() {
+    suspend fun revoke() {
         userPrefs.clearConsent()
     }
 
-    override suspend fun updatePurposes(purposes: Set<com.resumeapp.domain.model.ConsentPurpose>) {
+    suspend fun updatePurposes(purposes: Set<ConsentPurpose>) {
         val current = runBlocking { userPrefs.consentRecordFlow.first() }
-            ?: com.resumeapp.domain.model.ConsentRecord(
+            ?: ConsentRecord(
                 version = "1.0",
                 timestamp = System.currentTimeMillis(),
                 policyHash = "",
