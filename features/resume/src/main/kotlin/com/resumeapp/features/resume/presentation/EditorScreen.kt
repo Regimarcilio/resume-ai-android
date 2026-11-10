@@ -39,7 +39,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavController
 import androidx.navigation.compose.NavHost
@@ -53,7 +53,7 @@ fun ResumeNavHost(
     navController: NavController,
     startDestination: String = "list"
 ) {
-    val viewModel = hiltViewModel<ResumeListViewModel>()
+    val viewModel = viewModel<ResumeListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NavHost(navController, startDestination) {
@@ -189,7 +189,7 @@ fun EditorScreen(
     resumeId: String,
     onBack: () -> Unit
 ) {
-    val viewModel = hiltViewModel<EditorViewModel>(resumeId = resumeId)
+    val viewModel = viewModel<EditorViewModel>(resumeId = resumeId)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {

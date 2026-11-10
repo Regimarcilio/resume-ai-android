@@ -44,7 +44,7 @@ import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavController
 import androidx.navigation.compose.NavHost
@@ -56,7 +56,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun SettingsScreen() {
-    val viewModel = hiltViewModel<SettingsViewModel>()
+    val viewModel = viewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -260,7 +260,7 @@ fun SettingRow(
 // My Data Screen (LGPD Art. 18)
 @Composable
 fun MyDataScreen() {
-    val viewModel = hiltViewModel<MyDataViewModel>()
+    val viewModel = viewModel<MyDataViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {

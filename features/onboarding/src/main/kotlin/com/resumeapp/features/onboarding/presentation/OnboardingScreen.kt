@@ -54,7 +54,7 @@ import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Error
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Policy
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.TemplatePicker
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Welcome
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -67,7 +67,7 @@ fun OnboardingNavHost(
     navController: NavController,
     startDestination: String = "welcome"
 ) {
-    val viewModel = hiltViewModel<OnboardingViewModel>()
+    val viewModel = viewModel<OnboardingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NavHost(navController, startDestination) {

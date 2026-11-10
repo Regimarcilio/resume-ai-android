@@ -41,7 +41,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavController
 import androidx.navigation.compose.NavHost
@@ -54,7 +54,7 @@ import androidx.compose.foundation.layout.Spacer
 fun TemplateGalleryScreen(
     onSelect: (Template) -> Unit
 ) {
-    val viewModel = hiltViewModel<TemplateGalleryViewModel>()
+    val viewModel = viewModel<TemplateGalleryViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {

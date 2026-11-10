@@ -68,7 +68,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavController
 import androidx.navigation.compose.NavHost
@@ -87,7 +87,7 @@ fun ATSScreen(
     resumeId: String,
     onBack: () -> Unit
 ) {
-    val viewModel = hiltViewModel<ATSViewModel>(resumeId = resumeId)
+    val viewModel = viewModel<ATSViewModel>(resumeId = resumeId)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
