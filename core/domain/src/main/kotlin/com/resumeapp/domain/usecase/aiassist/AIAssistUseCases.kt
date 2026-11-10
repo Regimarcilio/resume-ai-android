@@ -6,6 +6,7 @@ import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.trace.TraceLogger
+import com.resumeapp.ai.gateway.Result as GatewayResult
 import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Result.Success
 import com.resumeapp.domain.model.Result.Failure
@@ -53,7 +54,7 @@ class ImproveBulletsUseCase constructor(
                 prompt = prompt,
                 model = "gpt-4o-mini",
                 maxTokens = 800,
-                temperature = 0.7f,
+                temperature = 0.7,
                 metadata = mapOf(
                     "prompt_type" to "improve_bullets",
                     "section_type" to params.sectionType.name
@@ -63,13 +64,13 @@ class ImproveBulletsUseCase constructor(
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Result.Success -> {
+                is GatewayResult.Success -> {
                     val aiResponse = result.value
                     val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
                     val bullets = parseBullets(content, params.maxBullets)
                     Result.Success(bullets)
                 }
-                is Result.Failure -> Result.Failure(result.errorMessage)
+                is GatewayResult.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -164,20 +165,20 @@ class ExtractKeywordsUseCase constructor(
                 prompt = prompt.trimIndent(),
                 model = "gpt-4o-mini",
                 maxTokens = 500,
-                temperature = 0.3f,
+                temperature = 0.3,
                 metadata = mapOf("prompt_type" to "extract_keywords")
             )
 
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Result.Success -> {
+                is GatewayResult.Success -> {
                     val aiResponse = result.value
                     val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
                     val keywords = parseKeywords(content)
                     Result.Success(keywords)
                 }
-                is Result.Failure -> Result.Failure(result.errorMessage)
+                is GatewayResult.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -284,19 +285,19 @@ class RephraseSectionUseCase constructor(
                 prompt = prompt.trimIndent(),
                 model = "gpt-4o-mini",
                 maxTokens = 500,
-                temperature = 0.5f,
+                temperature = 0.5,
                 metadata = mapOf("prompt_type" to "rephrase")
             )
 
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Result.Success -> {
+                is GatewayResult.Success -> {
                     val aiResponse = result.value
                     val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
                     Result.Success(content.trim())
                 }
-                is Result.Failure -> Result.Failure(result.errorMessage)
+                is GatewayResult.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)

@@ -4,11 +4,10 @@ import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
+import com.resumeapp.ai.gateway.Result as GatewayResult
 import com.resumeapp.domain.model.ATSScore
 import com.resumeapp.domain.model.ATSSuggestion
 import com.resumeapp.domain.model.Result
-import com.resumeapp.domain.model.Result.Success
-import com.resumeapp.domain.model.Result.Failure
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.model.SectionType
@@ -168,19 +167,19 @@ class AnalyzeATSUseCase constructor(
             prompt = prompt,
             model = "gpt-4o-mini",
             maxTokens = 500,
-            temperature = 0.3f,
+            temperature = 0.3,
             metadata = mapOf("prompt_type" to "ats_keywords")
         )
 
         val result = aiGatewayClient.complete(request)
 
         return when (result) {
-            is Result.Success -> {
+            is GatewayResult.Success -> {
                 val aiResponse = result.value
                 val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
                 parseAIResponse(content)
             }
-            is Result.Failure -> {
+            is GatewayResult.Failure -> {
                 // Fallback: basic keyword extraction
                 extractKeywordsFallback(resume)
             }
