@@ -276,6 +276,29 @@ class UpdateSectionUseCase constructor(
 }
 
 /**
+ * Save Resume UseCase
+ * Saves/updates a resume
+ */
+class SaveResumeUseCase constructor(
+    private val resumeRepository: ResumeRepository
+) : AsyncUseCase<SaveResumeUseCase.Params, Resume> {
+
+    @Serializable
+    data class Params(
+        val resume: Resume
+    )
+
+    override suspend operator fun invoke(params: Params): Result<Resume> {
+        return try {
+            val saved = resumeRepository.save(params.resume)
+            Success(saved)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+}
+
+/**
  * Add Section UseCase
  * Adds a new section to a resume
  */
