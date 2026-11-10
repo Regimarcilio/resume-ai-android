@@ -16,9 +16,8 @@ class ResumeRepositoryImpl constructor(
 
     override suspend fun save(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
-        database.runInTransaction {
-            resumeDao.insert(entity)
-        }
+        // Insert resume
+        resumeDao.insert(entity)
         
         // Save sections
         resume.sections.forEachIndexed { index, section ->
