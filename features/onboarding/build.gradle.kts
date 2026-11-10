@@ -54,8 +54,8 @@ dependencies {
     implementation(project(":core:ai"))
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    ksp("com.google.dagger:hilt-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.48")
+    ksp("com.google.dagger:hilt-compiler:2.48")
 
     // Compose
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
