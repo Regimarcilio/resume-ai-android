@@ -73,9 +73,10 @@ class RoomAICache constructor(
     }
 
     override fun stats(): CacheStats {
-        val size = exactCache.size.toLong() + withContext(Dispatchers.IO) { dao.count() }
+        // Run DB query in blocking mode for sync stats
+        val dbCount = withContext(Dispatchers.IO) { dao.count() }
+        val size = exactCache.size.toLong() + dbCount
         val misses = totalRequests - cacheHits
-        val hitRate = if (totalRequests > 0) cacheHits.toDouble() / totalRequests else 0.0
         return CacheStats(
             hits = cacheHits,
             misses = misses,
@@ -85,7 +86,7 @@ class RoomAICache constructor(
     }
 
     override fun stream(): Flow<CacheEntry> = flow {
-        // Emit all cached entries
+        // Emit all cached entries from memory
         exactCache.forEach { (key, response) ->
             emit(CacheEntry(
                 key = key,
@@ -95,8 +96,8 @@ class RoomAICache constructor(
                 lastAccessed = System.currentTimeMillis()
             ))
         }
-        // Also emit from Room
-        val roomEntries = withContext(Dispatchers.IO) { dao.getAll() }
+        // Also emit from Room (asynchronously)
+        val roomEntries = withContext(Dispatchers.IO) { dao.getAllCached() }
         roomEntries.forEach { entity ->
             val entry = mapper.toDomain(entity)
             emit(entry)

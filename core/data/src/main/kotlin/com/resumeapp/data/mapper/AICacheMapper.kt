@@ -5,7 +5,6 @@ import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.Usage
 import com.resumeapp.ai.gateway.Choice
 import com.resumeapp.ai.gateway.Message
-import com.resumeapp.ai.cache.CachedResponse
 import com.resumeapp.ai.cache.CacheEntry
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

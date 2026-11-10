@@ -39,6 +39,9 @@ interface AICacheDao {
 
     @Query("SELECT COUNT(*) FROM ai_cache")
     suspend fun count(): Int
+
+    @Query("SELECT * FROM ai_cache ORDER BY createdAt DESC")
+    suspend fun getAllCached(): List<AICacheEntity>
 }
 
 @Dao
