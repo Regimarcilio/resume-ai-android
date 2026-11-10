@@ -61,17 +61,8 @@ android {
 dependencies {
     // Core modules
     implementation(project(":core:domain"))
-    implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:ai"))
-
-    // Feature modules
-    implementation(project(":features:resume"))
-    implementation(project(":features:ats"))
-    implementation(project(":features:ai-assist"))
-    implementation(project(":features:templates"))
-    implementation(project(":features:settings"))
-    implementation(project(":features:onboarding"))
 
     // Compose (using BOM)
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))

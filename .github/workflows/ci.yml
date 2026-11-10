@@ -83,7 +83,7 @@ jobs:
           done
 
       - name: Build minimal app
-        run: ./gradlew :app:assembleDebug --no-daemon --no-configuration-cache -x :features:resume:compileDebugKotlin -x :features:ats:compileDebugKotlin -x :features:ai-assist:compileDebugKotlin -x :features:templates:compileDebugKotlin -x :features:settings:compileDebugKotlin -x :features:onboarding:compileDebugKotlin --continue
+        run: ./gradlew :app:assembleDebug --no-daemon --no-configuration-cache --continue
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
