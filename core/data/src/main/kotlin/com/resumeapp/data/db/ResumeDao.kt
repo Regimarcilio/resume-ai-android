@@ -42,7 +42,7 @@ interface ResumeDao {
     @Query("SELECT * FROM resumes WHERE templateId = :templateId")
     suspend fun getByTemplateId(templateId: String): List<ResumeEntity>
 
-    @Query("SELECT * FROM resumes WHERE userId = :userId AND (fullName LIKE :query OR summary LIKE :query OR email LIKE :query) ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM resumes WHERE userId = :userId AND (fullName LIKE :query OR summary LIKE :query OR email LIKE :query) AND (templateId = :templateId OR :templateId IS NULL) ORDER BY updatedAt DESC")
     suspend fun search(userId: String, query: String, templateId: String?): List<ResumeEntity>
 }
 
