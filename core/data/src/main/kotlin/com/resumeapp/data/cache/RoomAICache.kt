@@ -9,7 +9,6 @@ import com.resumeapp.data.db.AICacheDao
 import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
-import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
 /**
@@ -17,7 +16,7 @@ import jakarta.inject.Singleton
  * Moved to core:data to avoid circular dependency with core:ai
  */
 @Singleton
-class RoomAICache @Inject constructor(
+class RoomAICache constructor(
     private val dao: AICacheDao,
     private val database: AppDatabase,
     private val mapper: AICacheMapper

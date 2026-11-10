@@ -1,6 +1,7 @@
 package com.resumeapp.ai.gateway
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /**
  * AI Gateway Data Models
@@ -17,7 +18,7 @@ data class AIRequest(
     val promptType: String = "general",
     val metadata: Map<String, String>? = null
 ) {
-    fun toJson(): String = kotlinx.serialization.json.Json.encodeToString(this)
+    fun toJson(): String = Json.encodeToString(this)
 }
 
 @Serializable
@@ -29,7 +30,7 @@ data class AIResponse(
     val latencyMs: Long = 0,
     val cacheHit: Boolean = false
 ) {
-    fun toJson(): String = kotlinx.serialization.json.Json.encodeToString(this)
+    fun toJson(): String = Json.encodeToString(this)
 }
 
 @Serializable

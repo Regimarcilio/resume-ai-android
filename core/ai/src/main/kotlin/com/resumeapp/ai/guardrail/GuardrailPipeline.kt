@@ -93,7 +93,7 @@ class OutputValidator {
     ).map { it.toRegex() }
 
     fun validateOutput(response: AIResponse): AIResponse {
-        val content = response.content
+        val content = response.choices.firstOrNull()?.message?.content ?: ""
         
         // Check for refusal
         val isRefusal = refusalPatterns.any { it.containsMatchIn(content) }

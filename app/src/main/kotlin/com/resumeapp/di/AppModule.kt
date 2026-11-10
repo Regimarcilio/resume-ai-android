@@ -57,8 +57,10 @@ import com.resumeapp.data.sync.OfflineFirstRepository
 import com.resumeapp.data.cache.RoomAICache
 import com.resumeapp.data.repository.ResumeRepositoryImpl
 import com.resumeapp.data.repository.PdfRepositoryImpl
+import com.resumeapp.data.repository.AICacheRepositoryImpl
 import com.resumeapp.domain.repository.PdfRepository
 import com.resumeapp.domain.repository.ResumeRepository
+import com.resumeapp.domain.repository.AICacheRepository
 
 /**
  * Main Application Module - Provides application-level dependencies
@@ -244,7 +246,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideAICacheRepository(impl: AICacheRepositoryImpl): AICacheRepository = impl
+    fun provideAICacheRepository(impl: RoomAICache): AICacheRepository = impl
 
     @Provides
     @Singleton

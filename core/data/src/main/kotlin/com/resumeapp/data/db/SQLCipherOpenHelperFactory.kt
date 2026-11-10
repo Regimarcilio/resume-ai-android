@@ -18,16 +18,13 @@ class SQLCipherOpenHelperFactory(
     override fun create(configuration: RoomDatabase.Configuration): SupportSQLiteOpenHelper {
         val context = configuration.context
         val name = configuration.name
-        val callback = configuration.callback
+        val passphrase = masterKey.keyGenParameterSpec?.run { "unused" } ?: ""
         
-        return SQLiteOpenHelper(
+        return object : SQLiteOpenHelper(
             context,
             name,
-            null, // factory
-            configuration.version,
-            object : SQLiteOpenHelper.ConfigurationBuilder()
-                .passphrase(masterKey.keyGenParameterSpec?.run { "unused" } ?: "")
-                .build()
+            null,
+            configuration.version
         ) {
             override fun onConfigure(db: SQLiteDatabase) {
                 super.onConfigure(db)
@@ -36,6 +33,14 @@ class SQLCipherOpenHelperFactory(
                 db.rawExecSQL("PRAGMA kdf_iter = 64000")
                 db.rawExecSQL("PRAGMA cipher_hmac_algorithm = HMAC_SHA512")
                 db.rawExecSQL("PRAGMA kdf_algorithm = PBKDF2_HMAC_SHA512")
+            }
+            
+            override fun getReadableDatabase(): SQLiteDatabase {
+                return super.getReadableDatabase(passphrase)
+            }
+            
+            override fun getWritableDatabase(): SQLiteDatabase {
+                return super.getWritableDatabase(passphrase)
             }
         }
     }

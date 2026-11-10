@@ -2,6 +2,7 @@ package com.resumeapp.ai.cache
 
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
+import kotlinx.serialization.Serializable
 
 /**
  * AI Cache Interface - Semantic and exact caching
