@@ -141,7 +141,7 @@ class PdfRepositoryImpl constructor(
         y = addSection(document, page, contentStream, font, y, margin, "Languages", languagesContent)
 
         if (watermark) {
-            addWatermark(page)
+            addWatermark(page, document)
         }
 
         contentStream.close()
@@ -209,13 +209,13 @@ class PdfRepositoryImpl constructor(
         return currentY
     }
 
-    private fun addWatermark(page: PDPage) {
+    private fun addWatermark(page: PDPage, document: PDDocument) {
         val watermarkStream = PDPageContentStream(page, PDPageContentStream.AppendMode.APPEND, true, true)
         watermarkStream.setNonStrokingColor(200f/255f, 200f/255f, 200f/255f)
         val watermarkFont = if (fontFile.exists()) {
-            PDType0Font.load(watermarkStream, fontFile)
+            PDType0Font.load(document, fontFile)
         } else {
-            PDType0Font.load(watermarkStream, context.assets.open("fonts/Roboto-Regular.ttf"))
+            PDType0Font.load(document, context.assets.open("fonts/Roboto-Regular.ttf"))
         }
         watermarkStream.setFont(watermarkFont, 60f)
         val matrix = java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0), page.mediaBox.width / 2.0, page.mediaBox.height / 2.0)
