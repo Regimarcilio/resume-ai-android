@@ -9,11 +9,11 @@ import com.resumeapp.ai.gateway.AIResponse
  */
 interface AICache {
     fun generateCacheKey(request: AIRequest): String
-    fun get(key: String): AIResponse?
-    fun put(key: String, response: AIResponse)
-    fun invalidate(key: String)
-    fun clear()
-    fun getStats(): CacheStats
+    suspend fun get(key: String): AIResponse?
+    suspend fun put(key: String, response: AIResponse)
+    suspend fun invalidate(key: String)
+    suspend fun clear()
+    suspend fun getStats(): CacheStats
 }
 
 data class CacheStats(

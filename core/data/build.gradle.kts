@@ -58,6 +58,7 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.datastore:datastore-core:1.0.0")
+    implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
 
     // SQLCipher for encrypted DB
     implementation("net.zetetic:android-database-sqlcipher:4.5.3")
@@ -84,6 +85,9 @@ dependencies {
 
     // Jakarta inject for @Singleton annotation
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+
+    // Gson for mappers
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

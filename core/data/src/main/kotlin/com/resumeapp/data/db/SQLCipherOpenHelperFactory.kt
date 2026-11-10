@@ -4,47 +4,43 @@ import android.content.Context
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import net.zetetic.database.sqlcipher.SQLCipherDatabase
+import net.zetetic.database.sqlcipher.SQLiteDatabase
+import net.zetetic.database.sqlcipher.SQLiteOpenHelper
 
 class SQLCipherOpenHelperFactory(
     private val masterKey: androidx.security.crypto.MasterKey
 ) : RoomDatabase.OpenHelperFactory() {
 
-    override fun create(
-        configuration: RoomDatabase.Configuration
-    ): SupportSQLiteOpenHelper {
+    override fun create(configuration: RoomDatabase.Configuration): SupportSQLiteOpenHelper {
+        val key = masterKey.keyGenParameterSpec?.run { "unused" } ?: ""
+        
         return object : SupportSQLiteOpenHelper.Configuration(configuration) {
             override fun createOpenHelper(): SupportSQLiteOpenHelper {
                 return object : SupportSQLiteOpenHelper(this) {
                     override fun onCreate(db: SupportSQLiteDatabase) {
-                        // Room will call this when creating the database
-                        // SQLCipher will handle encryption automatically
+                        // Room handles schema creation
                     }
 
                     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                        // Handle migrations here if needed
+                        // Handle migrations
                     }
 
                     override fun onDowngrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                        // Handle downgrades if needed
+                        // Handle downgrades
                     }
 
                     override fun onConfigure(db: SupportSQLiteDatabase) {
                         super.onConfigure(db)
-                        // SQLCipher specific configurations
-                        if (db is net.zetetic.database.sqlcipher.SQLCipherDatabase) {
-                            // Set cipher page size for better performance
+                        if (db is SQLiteDatabase) {
+                            // SQLCipher specific configurations
                             db.rawExecSQL("PRAGMA cipher_page_size = 4096")
-                            // Set KDF iterations for security vs performance balance
                             db.rawExecSQL("PRAGMA kdf_iter = 64000")
-                            // Use HMAC for integrity
                             db.rawExecSQL("PRAGMA cipher_hmac_algorithm = HMAC_SHA512")
-                            // Use PBKDF2 for key derivation
                             db.rawExecSQL("PRAGMA kdf_algorithm = PBKDF2_HMAC_SHA512")
                         }
                     }
-                }.createOpenHelper()
+                }
             }
-        }
+        }.createOpenHelper()
     }
 }

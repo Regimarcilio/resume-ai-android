@@ -9,8 +9,8 @@ import androidx.datastore.preferences.core.getLong
 import androidx.datastore.preferences.core.getString
 import androidx.datastore.preferences.core.setLong
 import androidx.datastore.preferences.core.setString
-import androidx.datastore.preferences.rxpreferences2
-import androidx.datastore.rx.RxDataStore
+import androidx.datastore.preferences.rxjava3.preferences
+import androidx.datastore.rxjava3.RxDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.resumeapp.domain.model.ConsentPurpose
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.tasks.await
+import io.reactivex.rxjava3.core.Flowable
 import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 

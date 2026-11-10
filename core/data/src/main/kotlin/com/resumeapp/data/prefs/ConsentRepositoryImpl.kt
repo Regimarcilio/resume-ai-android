@@ -15,7 +15,7 @@ interface ConsentRepository {
     suspend fun updatePurposes(purposes: Set<ConsentPurpose>)
 }
 
-class ConsentRepositoryImpl @Inject constructor(
+class ConsentRepositoryImpl constructor(
     private val userPrefs: UserPrefs
 ) : ConsentRepository {
 

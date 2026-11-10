@@ -14,7 +14,7 @@ interface SubscriptionPrefs {
     suspend fun clearSubscriptionStatus()
 }
 
-class SubscriptionPrefsImpl @Inject constructor(
+class SubscriptionPrefsImpl constructor(
     private val userPrefs: UserPrefs
 ) : SubscriptionPrefs {
 
