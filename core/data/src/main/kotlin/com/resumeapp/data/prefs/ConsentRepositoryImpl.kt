@@ -4,6 +4,7 @@ import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.domain.model.ConsentPurpose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 interface ConsentRepository {
     val currentConsent: ConsentRecord?

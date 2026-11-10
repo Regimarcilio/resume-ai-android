@@ -33,13 +33,7 @@ class ResumeMapper {
             id = entity.id,
             userId = entity.userId,
             templateId = entity.templateId,
-            fullName = personalInfo.fullName,
-            email = personalInfo.email,
-            phone = personalInfo.phone,
-            location = personalInfo.location,
-            linkedin = personalInfo.linkedin,
-            portfolio = personalInfo.portfolio,
-            summary = personalInfo.summary,
+            personalInfo = personalInfo,
             sections = sections,
             atsScore = null, // Loaded separately
             createdAt = entity.createdAt,
@@ -49,26 +43,18 @@ class ResumeMapper {
     }
 
     fun toEntity(resume: Resume): com.resumeapp.data.db.ResumeEntity {
-        val personalInfo = com.resumeapp.domain.model.PersonalInfo(
-            fullName = resume.fullName,
-            email = resume.email,
-            phone = resume.phone,
-            location = resume.location,
-            linkedin = resume.linkedin,
-            portfolio = resume.portfolio,
-            summary = resume.summary
-        )
+        val personalInfo = resume.personalInfo
         return com.resumeapp.data.db.ResumeEntity(
             id = resume.id,
             userId = resume.userId,
             templateId = resume.templateId,
-            fullName = resume.fullName,
-            email = resume.email,
-            phone = resume.phone,
-            location = resume.location,
-            linkedin = resume.linkedin,
-            portfolio = resume.portfolio,
-            summary = resume.summary,
+            fullName = personalInfo.fullName,
+            email = personalInfo.email,
+            phone = personalInfo.phone,
+            location = personalInfo.location,
+            linkedin = personalInfo.linkedin,
+            portfolio = personalInfo.portfolio,
+            summary = personalInfo.summary,
             personalInfoJson = gson.toJson(personalInfo),
             sectionsJson = gson.toJson(resume.sections),
             createdAt = resume.createdAt,

@@ -5,6 +5,7 @@ import com.resumeapp.domain.model.SubscriptionTier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 interface SubscriptionPrefs {
     val currentStatus: SubscriptionStatus
