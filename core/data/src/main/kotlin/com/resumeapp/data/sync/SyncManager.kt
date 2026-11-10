@@ -105,13 +105,13 @@ sealed interface SyncState {
 sealed interface SyncOperation {
     val id: String
     val createdAt: Long
-    var retryCount: Int
+    abstract var retryCount: Int
     fun incrementRetry() { retryCount++ }
 
     data class GeneratePdf(
         override val id: String,
         override val createdAt: Long,
-        var retryCount: Int,
+        override var retryCount: Int,
         val resumeId: String,
         val template: String,
         val watermark: Boolean
@@ -120,7 +120,7 @@ sealed interface SyncOperation {
     data class AiAssist(
         override val id: String,
         override val createdAt: Long,
-        var retryCount: Int,
+        override var retryCount: Int,
         val promptHash: String,
         val promptType: String,
         val contextJson: String
@@ -129,7 +129,7 @@ sealed interface SyncOperation {
     data class ATSScore(
         override val id: String,
         override val createdAt: Long,
-        var retryCount: Int,
+        override var retryCount: Int,
         val resumeId: String,
         val jobDescription: String
     ) : SyncOperation
@@ -137,7 +137,7 @@ sealed interface SyncOperation {
     data class SubscriptionUpdate(
         override val id: String,
         override val createdAt: Long,
-        var retryCount: Int,
+        override var retryCount: Int,
         val purchaseToken: String
     ) : SyncOperation
 }

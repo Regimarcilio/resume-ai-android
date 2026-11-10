@@ -2,7 +2,6 @@ package com.resumeapp.data.cache
 
 import com.resumeapp.domain.ai.cache.AICache
 import com.resumeapp.domain.ai.cache.CacheStats
-import com.resumeapp.domain.ai.cache.CachedResponse
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.data.db.AICacheDao
@@ -22,7 +21,7 @@ class RoomAICache constructor(
     private val mapper: AICacheMapper
 ) : AICache {
 
-    private val exactCache = java.util.concurrent.ConcurrentHashMap<String, CachedResponse>()
+    private val exactCache = java.util.concurrent.ConcurrentHashMap<String, AIResponse>()
     private var totalRequests = 0L
     private var cacheHits = 0L
 
@@ -37,25 +36,23 @@ class RoomAICache constructor(
         // Check exact cache first (fast)
         exactCache[key]?.let { cached ->
             cacheHits++
-            return cached.response.copy(cacheHit = true)
+            return cached.copy(cacheHit = true)
         }
 
         // Check Room cache (persisted)
         val entry = withContext(Dispatchers.IO) { dao.getByPromptHash(key, "") }
         entry?.let { roomEntry ->
-            val response = mapper.toDomain(roomEntry, cacheHit = true)
-            val cached = CachedResponse(key, response)
-            exactCache[key] = cached // Populate in-memory cache
+            val response = mapper.toDomain(roomEntry, cacheHit = true).response
+            exactCache[key] = response.copy(cacheHit = true) // Populate in-memory cache
             cacheHits++
-            return response
+            return response.copy(cacheHit = true)
         }
 
         return null
     }
 
     override suspend fun put(key: String, response: AIResponse) {
-        val cached = CachedResponse(key, response)
-        exactCache[key] = cached
+        exactCache[key] = response
 
         // Persist to Room
         val entry = mapper.toEntity(key, response)

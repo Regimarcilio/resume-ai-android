@@ -5,11 +5,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.getLong
-import androidx.datastore.preferences.core.getString
-import androidx.datastore.preferences.core.setLong
-import androidx.datastore.preferences.core.setString
+import androidx.datastore.preferences.core.preferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.core.DataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.resumeapp.domain.model.ConsentPurpose
@@ -64,8 +62,8 @@ interface UserPrefs {
  */
 class UserPrefsImpl constructor(
     private val context: Context,
-    private val dataStore: androidx.datastore.preferences.DataStore<Preferences>,
-    private val masterKey: androidx.security.crypto.MasterKey
+    private val dataStore: DataStore<Preferences>,
+    private val masterKey: MasterKey
 ) : UserPrefs {
 
     // Keys
@@ -85,47 +83,47 @@ class UserPrefsImpl constructor(
     private val gson = Gson()
 
     override val userId: String
-        get() = runBlocking { dataStore.data.first()?.getString(USER_ID_KEY) ?: "" }
+        get() = runBlocking { dataStore.data.first().getString(USER_ID_KEY) ?: "" }
 
     override val subscriptionTier: SubscriptionTier
         get() = runBlocking {
-            val tierStr = dataStore.data.first()?.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name
+            val tierStr = dataStore.data.first().getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name
             SubscriptionTier.valueOf(tierStr)
         }
 
     override val subscriptionExpiryDate: Long?
         get() = runBlocking {
-            val expiry = dataStore.data.first()?.getLong(SUBSCRIPTION_EXPIRY_KEY)
+            val expiry = dataStore.data.first().getLong(SUBSCRIPTION_EXPIRY_KEY)
             if (expiry > 0) expiry else null
         }
 
     override val purchaseToken: String?
-        get() = runBlocking { dataStore.data.first()?.getString(PURCHASE_TOKEN_KEY) }
+        get() = runBlocking { dataStore.data.first().getString(PURCHASE_TOKEN_KEY) }
 
     override val preferredTemplateId: String?
-        get() = runBlocking { dataStore.data.first()?.getString(PREFERRED_TEMPLATE_ID_KEY) }
+        get() = runBlocking { dataStore.data.first().getString(PREFERRED_TEMPLATE_ID_KEY) }
 
     override val aiUsageCount: Int
-        get() = runBlocking { dataStore.data.first()?.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }
+        get() = runBlocking { dataStore.data.first().getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }
 
     override val lastSyncAt: Long
-        get() = runBlocking { dataStore.data.first()?.getLong(LAST_SYNC_AT_KEY) ?: 0L }
+        get() = runBlocking { dataStore.data.first().getLong(LAST_SYNC_AT_KEY) ?: 0L }
 
     override val consentVersion: String?
-        get() = runBlocking { dataStore.data.first()?.getString(CONSENT_VERSION_KEY) }
+        get() = runBlocking { dataStore.data.first().getString(CONSENT_VERSION_KEY) }
 
     override val consentTimestamp: Long?
         get() = runBlocking {
-            val ts = dataStore.data.first()?.getLong(CONSENT_TIMESTAMP_KEY)
+            val ts = dataStore.data.first().getLong(CONSENT_TIMESTAMP_KEY)
             if (ts > 0) ts else null
         }
 
     override val consentAccepted: Boolean
-        get() = runBlocking { dataStore.data.first()?.getLong(CONSENT_ACCEPTED_KEY) == 1L }
+        get() = runBlocking { dataStore.data.first().getLong(CONSENT_ACCEPTED_KEY) == 1L }
 
     override val consentPurposes: Set<String>
         get() = runBlocking {
-            val json = dataStore.data.first()?.getString(CONSENT_PURPOSES_KEY) ?: "[]"
+            val json = dataStore.data.first().getString(CONSENT_PURPOSES_KEY) ?: "[]"
             val type = object : TypeToken<Set<String>>() {}.type
             try {
                 Gson().fromJson(json, type)
@@ -135,7 +133,7 @@ class UserPrefsImpl constructor(
         }
 
     override val consentPolicyHash: String?
-        get() = runBlocking { dataStore.data.first()?.getString(CONSENT_POLICY_HASH_KEY) }
+        get() = runBlocking { dataStore.data.first().getString(CONSENT_POLICY_HASH_KEY) }
 
     // Flows
     override val userIdFlow: Flow<String> = dataStore.data

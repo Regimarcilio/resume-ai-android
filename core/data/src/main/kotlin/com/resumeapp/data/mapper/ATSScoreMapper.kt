@@ -14,24 +14,14 @@ class ATSScoreMapper {
     private val stringListType: Type = object : TypeToken<List<String>>() {}.type
 
     fun toDomain(entity: com.resumeapp.data.db.ATSScoreEntity): ATSScore {
-        val missingKeywords = gson.fromJson(
-            entity.missingKeywordsJson,
-            stringListType
-        ) ?: emptyList()
-
-        val suggestions = gson.fromJson(
-            entity.suggestionsJson,
-            suggestionListType
-        ) ?: emptyList()
-
         return ATSScore(
             resumeId = entity.resumeId,
             overallScore = entity.overallScore,
             keywordMatch = entity.keywordMatch,
             formattingScore = entity.formattingScore,
             sectionCompleteness = entity.sectionCompleteness,
-            missingKeywordsJson = com.google.gson.Gson().toJson(missingKeywords),
-            suggestionsJson = com.google.gson.Gson().toJson(suggestions),
+            missingKeywordsJson = entity.missingKeywordsJson,
+            suggestionsJson = entity.suggestionsJson,
             analyzedAt = entity.analyzedAt
         )
     }
@@ -43,8 +33,8 @@ class ATSScoreMapper {
             keywordMatch = score.keywordMatch,
             formattingScore = score.formattingScore,
             sectionCompleteness = score.sectionCompleteness,
-            missingKeywordsJson = gson.toJson(score.missingKeywords),
-            suggestionsJson = gson.toJson(score.suggestions),
+            missingKeywordsJson = score.missingKeywordsJson,
+            suggestionsJson = score.suggestionsJson,
             analyzedAt = score.analyzedAt
         )
     }

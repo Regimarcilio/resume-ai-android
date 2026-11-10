@@ -1,7 +1,6 @@
 package com.resumeapp.domain.repository
 
 import com.resumeapp.domain.model.TraceEntry
-import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -13,22 +12,22 @@ interface TraceRepository {
     /**
      * Get all traces (recent first)
      */
-    suspend fun getAll(): Result<List<TraceEntry>>
+    suspend fun getAll(): List<TraceEntry>
 
     /**
      * Get trace by ID
      */
-    suspend fun getById(id: String): Result<TraceEntry>
+    suspend fun getById(id: String): TraceEntry?
 
     /**
      * Save a trace entry
      */
-    suspend fun save(entry: TraceEntry): Result<TraceEntry>
+    suspend fun save(entry: TraceEntry): TraceEntry
 
     /**
      * Delete trace by ID
      */
-    suspend fun delete(id: String): Result<Unit>
+    suspend fun delete(id: String)
 
     /**
      * Observe all traces as flow

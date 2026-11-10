@@ -24,11 +24,11 @@ class OfflineFirstRepository @Inject constructor(
 ) {
 
     // Resume operations (always work offline - local DB)
-    suspend fun createResume(resume: Resume) = resumeRepository.createResume(resume)
-    suspend fun getResume(id: String) = resumeRepository.getResume(id)
-    suspend fun updateResume(resume: Resume) = resumeRepository.updateResume(resume)
-    suspend fun deleteResume(id: String) = resumeRepository.deleteResume(id)
-    suspend fun getResumes(userId: String) = resumeRepository.getResumes(userId)
+    suspend fun createResume(resume: Resume) = resumeRepository.save(resume)
+    suspend fun getResume(id: String) = resumeRepository.getById(id)
+    suspend fun updateResume(resume: Resume) = resumeRepository.update(resume)
+    suspend fun deleteResume(id: String) = resumeRepository.deleteById(id)
+    suspend fun getResumes(userId: String) = resumeRepository.getAllByUserId(userId)
 
     // PDF generation - works offline with cached results, queues for server when needed
     suspend fun generatePdf(resume: Resume, template: String, watermark: Boolean) = pdfRepository.generatePdf(resume, template, watermark)
