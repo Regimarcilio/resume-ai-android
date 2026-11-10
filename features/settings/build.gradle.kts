@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -51,6 +52,10 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:ai"))
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.50")
+    ksp("com.google.dagger:hilt-compiler:2.50")
 
     // Compose
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
