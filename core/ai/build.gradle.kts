@@ -38,9 +38,6 @@ group = "com.resumeapp.ai"
 version = "1.0.0"
 
 dependencies {
-    // Core modules
-    api(project(":core:domain"))
-
     // Network (only interfaces, no Android deps)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
