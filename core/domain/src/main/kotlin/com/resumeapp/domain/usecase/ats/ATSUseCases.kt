@@ -8,6 +8,8 @@ import com.resumeapp.ai.gateway.Result as GatewayResult
 import com.resumeapp.domain.model.ATSScore
 import com.resumeapp.domain.model.ATSSuggestion
 import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.Result.Success
+import com.resumeapp.domain.model.Result.Failure
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.model.SectionType
