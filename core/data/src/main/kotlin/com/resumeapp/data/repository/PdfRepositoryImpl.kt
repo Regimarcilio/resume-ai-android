@@ -219,9 +219,9 @@ class PdfRepositoryImpl constructor(
         }
         watermarkStream.setFont(watermarkFont, 60f)
         // Create rotation matrix using pdfbox's own Matrix class with explicit types
-        val angle = Math.toRadians(45.0)
-        val centerX = page.mediaBox.width / 2.0
-        val centerY = page.mediaBox.height / 2.0
+        val angle = Math.toRadians(45.0).toFloat()
+        val centerX = (page.mediaBox.width / 2.0).toFloat()
+        val centerY = (page.mediaBox.height / 2.0).toFloat()
         val matrix = org.apache.pdfbox.util.Matrix.getRotateInstance(angle, centerX, centerY)
         watermarkStream.setTextMatrix(matrix)
         watermarkStream.newLineAtOffset(page.mediaBox.width / 2 - 150, page.mediaBox.height / 2 - 50)
