@@ -1,21 +1,41 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm")
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
 }
 
-kotlin {
-    jvmToolchain(17)
+android {
+    namespace = "com.resumeapp.domain"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 24
+        targetSdk = 34
+        consumerProguardFiles("consumer-rules.pro")
+    }
+    buildTypes {
+        getByName("release") {
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("debug") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 group = "com.resumeapp.domain"
 version = "1.0.0"
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
 
 dependencies {
     // Kotlin
@@ -38,6 +58,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("com.google.truth:truth:1.1.5")
+    testImplementation("org.robolectric:robolectric:4.11")
 }
 
 dependencies {
