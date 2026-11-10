@@ -1,25 +1,25 @@
-package com.resumeapp.di
+package com.resumeapp.di.modules
 
 import com.resumeapp.data.db.AppDatabase
-import com.resumeapp.data.repository.ResumeRepositoryImpl
-import com.resumeapp.data.repository.PdfRepositoryImpl
 import com.resumeapp.data.cache.RoomAICache
 import com.resumeapp.domain.repository.PdfRepository
 import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
+import com.resumeapp.data.sync.SyncManager
+import com.resumeapp.data.sync.OfflineFirstRepository
 import kotlinx.coroutines.Dispatchers
-import jakarta.inject.Singleton
-import dagger.Module
-import dagger.Provides
 import dagger.hilt.android.InstallIn
 import dagger.hilt.android.components.SingletonComponent
+import dagger.hilt.android.scopes.Singleton
+import dagger.Module
+import dagger.Provides
 
 /**
- * Sync Module - Provides sync-related dependencies as plain Dagger module
+ * Sync Module - Provides sync-related dependencies
  */
-@Module
 @InstallIn(SingletonComponent::class)
+@Module
 object SyncModule {
 
     @Provides
