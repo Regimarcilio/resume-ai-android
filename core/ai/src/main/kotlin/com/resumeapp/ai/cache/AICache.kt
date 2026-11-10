@@ -16,7 +16,7 @@ interface AICache {
     suspend fun put(key: String, response: AIResponse)
     suspend fun remove(key: String)
     suspend fun clear()
-    fun stats(): CacheStats
+    suspend fun stats(): CacheStats
     fun stream(): Flow<CacheEntry>
 }
 

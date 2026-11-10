@@ -72,8 +72,7 @@ class RoomAICache constructor(
         withContext(Dispatchers.IO) { dao.deleteAll() }
     }
 
-    override fun stats(): CacheStats {
-        // Run DB query in blocking mode for sync stats
+    override suspend fun stats(): CacheStats {
         val dbCount = withContext(Dispatchers.IO) { dao.count() }
         val size = exactCache.size.toLong() + dbCount
         val misses = totalRequests - cacheHits
