@@ -15,6 +15,7 @@ import jakarta.inject.Inject
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val recordConsentUseCase: RecordConsentUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase
 ) : ViewModel() {

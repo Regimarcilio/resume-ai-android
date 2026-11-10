@@ -273,3 +273,65 @@ object PreferencesModule {
     @Singleton
     fun provideSubscriptionPrefs(userPrefs: UserPrefs): SubscriptionPrefs = SubscriptionPrefsImpl(userPrefs)
 }
+
+/**
+ * UseCase Module - All UseCase bindings for Hilt
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object UseCaseModule {
+
+    // Resume UseCases
+    @Provides
+    @Singleton
+    fun provideCreateResumeUseCase(resumeRepository: ResumeRepository): CreateResumeUseCase = CreateResumeUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetResumeUseCase(resumeRepository: ResumeRepository): GetResumeUseCase = GetResumeUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetAllResumesUseCase(resumeRepository: ResumeRepository): GetAllResumesUseCase = GetAllResumesUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideUpdateResumeUseCase(resumeRepository: ResumeRepository): UpdateResumeUseCase = UpdateResumeUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideDeleteResumeUseCase(resumeRepository: ResumeRepository): DeleteResumeUseCase = DeleteResumeUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideDuplicateResumeUseCase(resumeRepository: ResumeRepository): DuplicateResumeUseCase = DuplicateResumeUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideReorderSectionsUseCase(resumeRepository: ResumeRepository): ReorderSectionsUseCase = ReorderSectionsUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideUpdateSectionUseCase(resumeRepository: ResumeRepository): UpdateSectionUseCase = UpdateSectionUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideAddSectionUseCase(resumeRepository: ResumeRepository): AddSectionUseCase = AddSectionUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideDeleteSectionUseCase(resumeRepository: ResumeRepository): DeleteSectionUseCase = DeleteSectionUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideSaveResumeUseCase(resumeRepository: ResumeRepository): SaveResumeUseCase = SaveResumeUseCase(resumeRepository)
+
+    // Onboarding UseCases
+    @Provides
+    @Singleton
+    fun provideRecordConsentUseCase(consentRepository: com.resumeapp.domain.repository.ConsentRepository): RecordConsentUseCase = RecordConsentUseCase(consentRepository)
+
+    @Provides
+    @Singleton
+    fun provideCompleteOnboardingUseCase(resumeRepository: ResumeRepository): CompleteOnboardingUseCase = CompleteOnboardingUseCase(resumeRepository)
+}
