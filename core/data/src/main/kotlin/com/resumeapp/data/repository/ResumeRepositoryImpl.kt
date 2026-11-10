@@ -17,29 +17,26 @@ class ResumeRepositoryImpl constructor(
 
     override suspend fun save(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
-        database.runInTransaction {
-            resumeDao.insert(entity).await()
-            
-            // Save sections
-            resume.sections.forEachIndexed { index, section ->
-                val sectionEntity = mapper.toEntity(section, entity.id, index)
-                sectionDao.insert(sectionEntity).await()
-            }
+        val resumeId = database.runInTransaction { resumeDao.insert(entity) }
+        
+        // Save sections
+        resume.sections.forEachIndexed { index, section ->
+            val sectionEntity = mapper.toEntity(section, entity.id, index)
+            sectionDao.insert(sectionEntity).await()
         }
         return resume
     }
 
     override suspend fun update(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
-        database.runInTransaction {
-            resumeDao.update(entity).await()
-            
-            // Update sections - delete and re-insert
-            sectionDao.deleteByResumeId(entity.id).await()
-            resume.sections.forEachIndexed { index, section ->
-                val sectionEntity = mapper.toEntity(section, entity.id, index)
-                sectionDao.insert(sectionEntity).await()
-            }
+        // Update resume first
+        resumeDao.update(entity).await()
+        
+        // Update sections - delete and re-insert
+        sectionDao.deleteByResumeId(entity.id).await()
+        resume.sections.forEachIndexed { index, section ->
+            val sectionEntity = mapper.toEntity(section, entity.id, index)
+            sectionDao.insert(sectionEntity).await()
         }
         return resume
     }
