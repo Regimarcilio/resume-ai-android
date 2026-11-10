@@ -260,13 +260,17 @@ object PreferencesModule {
 
     @Provides
     @Singleton
-    fun provideUserPrefs(impl: UserPrefsImpl): UserPrefs = impl
+    fun provideUserPrefs(
+        @ApplicationContext context: Context,
+        dataStore: androidx.datastore.preferences.DataStore<androidx.datastore.preferences.core.Preferences>,
+        masterKey: androidx.security.crypto.MasterKey
+    ): UserPrefs = UserPrefsImpl(context, dataStore, masterKey)
 
     @Provides
     @Singleton
-    fun provideConsentRepository(impl: ConsentRepositoryImpl): ConsentRepository = impl
+    fun provideConsentRepository(userPrefs: UserPrefs): ConsentRepository = ConsentRepositoryImpl(userPrefs)
 
     @Provides
     @Singleton
-    fun provideSubscriptionPrefs(impl: SubscriptionPrefsImpl): SubscriptionPrefs = impl
+    fun provideSubscriptionPrefs(userPrefs: UserPrefs): SubscriptionPrefs = SubscriptionPrefsImpl(userPrefs)
 }

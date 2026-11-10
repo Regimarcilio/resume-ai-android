@@ -64,7 +64,7 @@ interface UserPrefs {
 /**
  * DataStore Implementation of UserPrefs
  */
-class UserPrefsImpl @Inject constructor(
+class UserPrefsImpl constructor(
     private val context: Context,
     private val dataStore: androidx.datastore.preferences.DataStore<Preferences>,
     private val masterKey: androidx.security.crypto.MasterKey

@@ -22,3 +22,13 @@ data class CacheStats(
     val totalRequests: Long,
     val cacheHits: Long
 )
+
+/**
+ * Cache entry for Room persistence
+ */
+@Serializable
+data class CachedResponse(
+    val key: String,
+    val response: AIResponse,
+    val createdAt: Long = System.currentTimeMillis()
+)
