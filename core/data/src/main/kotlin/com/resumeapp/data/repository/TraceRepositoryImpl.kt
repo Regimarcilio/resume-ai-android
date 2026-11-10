@@ -4,7 +4,6 @@ import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.mapper.TraceMapper
 import com.resumeapp.domain.model.TraceEntry
 import com.resumeapp.domain.repository.TraceRepository
-import kotlinx.coroutines.tasks.await
 
 class TraceRepositoryImpl constructor(
     private val dao: TraceDao,
@@ -12,7 +11,7 @@ class TraceRepositoryImpl constructor(
 ) : TraceRepository {
 
     override suspend fun getAll(): List<TraceEntry> {
-        val entries = dao.getRecent(100).await()
+        val entries = dao.getRecent(100)
         return entries.map { mapper.toDomain(it) }
     }
 
@@ -23,7 +22,7 @@ class TraceRepositoryImpl constructor(
 
     override suspend fun save(entry: TraceEntry): TraceEntry {
         val entity = mapper.toEntity(entry)
-        dao.insert(entity).await()
+        dao.insert(entity)
         return entry
     }
 

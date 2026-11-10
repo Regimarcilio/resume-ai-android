@@ -11,23 +11,23 @@ class ATSScoreRepositoryImpl constructor(
     private val mapper: ATSScoreMapper
 ) : ATSScoreRepository {
 
-    override fun save(score: ATSScore): ATSScore {
+    override suspend fun save(score: ATSScore): ATSScore {
         val entity = mapper.toEntity(score)
         atsScoreDao.insert(entity).await()
         return score
     }
 
-    override fun getByResumeId(resumeId: String): ATSScore? {
+    override suspend fun getByResumeId(resumeId: String): ATSScore? {
         val entity = atsScoreDao.getByResumeId(resumeId).await()
         return entity?.let { mapper.toDomain(it) }
     }
 
-    override fun getAllByUserId(userId: String): List<ATSScore> {
+    override suspend fun getAllByUserId(userId: String): List<ATSScore> {
         val entities = atsScoreDao.getAllByUserId(userId).await()
         return entities.map { mapper.toDomain(it) }
     }
 
-    override fun delete(score: ATSScore) {
+    override suspend fun delete(score: ATSScore) {
         atsScoreDao.deleteByResumeId(score.resumeId).await()
     }
 }

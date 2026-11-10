@@ -5,7 +5,6 @@ import com.resumeapp.data.db.PdfCacheEntity
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.repository.PdfRepository
-import kotlinx.coroutines.tasks.await
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -29,7 +28,7 @@ class PdfRepositoryImpl constructor(
         watermark: Boolean
     ): ByteArray {
         // Check cache first
-        val cached = database.pdfCacheDao().getCached(resume.id, template, watermark).await()
+        val cached = database.pdfCacheDao().getCached(resume.id, template, watermark)
         if (cached != null) {
             return cached.pdfData
         }
@@ -45,13 +44,13 @@ class PdfRepositoryImpl constructor(
             pdfData = pdfBytes,
             createdAt = System.currentTimeMillis()
         )
-        database.pdfCacheDao().insert(cacheEntry).await()
+        database.pdfCacheDao().insert(cacheEntry)
 
         return pdfBytes
     }
 
     override suspend fun clearCache() {
-        database.pdfCacheDao().deleteAll().await()
+        database.pdfCacheDao().deleteAll()
     }
 
     private fun generatePdfDocument(
@@ -213,13 +212,13 @@ class PdfRepositoryImpl constructor(
         val watermarkStream = PDPageContentStream(page, PDPageContentStream.AppendMode.APPEND, true, true)
         watermarkStream.setNonStrokingColor(200f/255f, 200f/255f, 200f/255f)
         val watermarkFont = if (fontFile.exists()) {
-            PDType0Font.load(watermarkStream.getResources(), fontFile)
+            PDType0Font.load(watermarkStream, fontFile)
         } else {
-            PDType0Font.load(watermarkStream.getResources(), context.assets.open("fonts/Roboto-Regular.ttf"))
+            PDType0Font.load(watermarkStream, context.assets.open("fonts/Roboto-Regular.ttf"))
         }
         watermarkStream.setFont(watermarkFont, 60f)
-        watermarkStream.beginText()
-        watermarkStream.setTextMatrix(java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0)))
+        val matrix = java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0), page.mediaBox.width / 2.0, page.mediaBox.height / 2.0)
+        watermarkStream.setTextMatrix(matrix)
         watermarkStream.newLineAtOffset(page.mediaBox.width / 2 - 150, page.mediaBox.height / 2 - 50)
         watermarkStream.showText("RESUME AI")
         watermarkStream.endText()
