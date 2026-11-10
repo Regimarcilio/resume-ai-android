@@ -49,6 +49,7 @@ android {
 dependencies {
     // Core modules
     api(project(":core:domain"))
+    api(project(":core:ai"))
 
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
