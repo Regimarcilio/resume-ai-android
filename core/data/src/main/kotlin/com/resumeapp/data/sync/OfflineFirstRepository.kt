@@ -7,6 +7,7 @@ import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
+import com.resumeapp.ai.gateway.Result as GatewayResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,12 @@ class OfflineFirstRepository @Inject constructor(
     suspend fun generatePdf(resume: Resume, template: String, watermark: Boolean) = pdfRepository.generatePdf(resume, template, watermark)
 
     // AI Assist - works offline with cached results, queues for server
-    suspend fun aiChatCompletion(request: AIRequest): AIResponse = aiGatewayClient.complete(request).getOrThrow()
+    suspend fun aiChatCompletion(request: AIRequest): AIResponse = aiGatewayClient.complete(request).let { result ->
+        when (result) {
+            is GatewayResult.Success -> result.value
+            is GatewayResult.Failure -> throw IllegalStateException(result.errorMessage)
+        }
+    }
 
     // ATS Scoring - fully offline (on-device)
     suspend fun calculateATSScore(resumeId: String, jobDescription: String) = 

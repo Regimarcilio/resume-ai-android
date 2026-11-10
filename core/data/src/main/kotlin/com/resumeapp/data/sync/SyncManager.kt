@@ -5,6 +5,7 @@ import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.domain.repository.PdfRepository
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
+import com.resumeapp.ai.gateway.Result as GatewayResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

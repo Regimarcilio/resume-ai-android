@@ -1,7 +1,8 @@
 package com.resumeapp.data.cache
 
-import com.resumeapp.domain.ai.cache.AICache
-import com.resumeapp.domain.ai.cache.CacheStats
+import com.resumeapp.ai.cache.AICache
+import com.resumeapp.ai.cache.CacheStats
+import com.resumeapp.ai.cache.CacheEntry
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.data.db.AICacheDao
@@ -9,6 +10,8 @@ import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 /**
@@ -25,7 +28,7 @@ class RoomAICache constructor(
     private var totalRequests = 0L
     private var cacheHits = 0L
 
-    override fun generateCacheKey(request: AIRequest): String {
+    fun generateCacheKey(request: AIRequest): String {
         val content = "${request.promptType}:${request.model}:${request.prompt}"
         return hashSHA256(content)
     }
@@ -59,7 +62,7 @@ class RoomAICache constructor(
         withContext(Dispatchers.IO) { dao.insert(entry) }
     }
 
-    override suspend fun invalidate(key: String) {
+    override suspend fun remove(key: String) {
         exactCache.remove(key)
         withContext(Dispatchers.IO) { dao.deleteById(key) }
     }
@@ -69,10 +72,35 @@ class RoomAICache constructor(
         withContext(Dispatchers.IO) { dao.deleteAll() }
     }
 
-    override suspend fun getStats(): CacheStats {
-        val size = exactCache.size + withContext(Dispatchers.IO) { dao.count() }
+    override fun stats(): CacheStats {
+        val size = exactCache.size.toLong() + withContext(Dispatchers.IO) { dao.count() }
+        val misses = totalRequests - cacheHits
         val hitRate = if (totalRequests > 0) cacheHits.toDouble() / totalRequests else 0.0
-        return CacheStats(size, hitRate, totalRequests, cacheHits)
+        return CacheStats(
+            hits = cacheHits,
+            misses = misses,
+            size = size,
+            evictions = 0
+        )
+    }
+
+    override fun stream(): Flow<CacheEntry> = flow {
+        // Emit all cached entries
+        exactCache.forEach { (key, response) ->
+            emit(CacheEntry(
+                key = key,
+                response = response,
+                createdAt = System.currentTimeMillis(),
+                accessCount = 0,
+                lastAccessed = System.currentTimeMillis()
+            ))
+        }
+        // Also emit from Room
+        val roomEntries = withContext(Dispatchers.IO) { dao.getAll() }
+        roomEntries.forEach { entity ->
+            val entry = mapper.toDomain(entity)
+            emit(entry)
+        }
     }
 
     private fun hashSHA256(input: String): String {

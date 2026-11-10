@@ -5,7 +5,8 @@ import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.Usage
 import com.resumeapp.ai.gateway.Choice
 import com.resumeapp.ai.gateway.Message
-import com.resumeapp.domain.ai.cache.CachedResponse
+import com.resumeapp.ai.cache.CachedResponse
+import com.resumeapp.ai.cache.CacheEntry
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -13,12 +14,14 @@ class AICacheMapper {
 
     private val gson = Gson()
 
-    fun toDomain(entity: com.resumeapp.data.db.AICacheEntity, cacheHit: Boolean = false): com.resumeapp.domain.ai.cache.CachedResponse {
+    fun toDomain(entity: com.resumeapp.data.db.AICacheEntity, cacheHit: Boolean = false): CacheEntry {
         val response = gson.fromJson(entity.response, com.resumeapp.ai.gateway.AIResponse::class.java).copy(cacheHit = cacheHit)
-        return CachedResponse(
+        return CacheEntry(
             key = entity.id,
             response = response,
-            createdAt = entity.createdAt
+            createdAt = entity.createdAt,
+            accessCount = 0,
+            lastAccessed = System.currentTimeMillis()
         )
     }
 
