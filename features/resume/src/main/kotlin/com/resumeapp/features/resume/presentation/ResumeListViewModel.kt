@@ -8,14 +8,11 @@ import com.resumeapp.domain.usecase.resume.CreateResumeUseCase
 import com.resumeapp.domain.usecase.resume.DeleteResumeUseCase
 import com.resumeapp.domain.usecase.resume.GetAllResumesUseCase
 import com.resumeapp.features.resume.presentation.ResumeListItem
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import jakarta.inject.Inject
 
-@HiltViewModel
-class ResumeListViewModel @Inject constructor(
+class ResumeListViewModel(
     private val getAllResumesUseCase: GetAllResumesUseCase,
     private val createResumeUseCase: CreateResumeUseCase,
     private val deleteResumeUseCase: DeleteResumeUseCase

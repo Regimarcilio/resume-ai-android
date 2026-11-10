@@ -12,12 +12,10 @@ import com.resumeapp.domain.usecase.ats.AnalyzeATSUseCase
 import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.usecase.Result.Success
 import com.resumeapp.domain.usecase.Result.Failure
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import jakarta.inject.Inject
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.filled.School
@@ -28,8 +26,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.ui.graphics.vector.ImageVector
 
-@HiltViewModel
-class EditorViewModel @Inject constructor(
+class EditorViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val getResumeUseCase: GetResumeUseCase,
     private val saveResumeUseCase: SaveResumeUseCase,

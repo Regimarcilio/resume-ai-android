@@ -7,14 +7,11 @@ import com.resumeapp.domain.model.ConsentPurpose
 import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.domain.usecase.onboarding.RecordConsentUseCase
 import com.resumeapp.domain.usecase.onboarding.CompleteOnboardingUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import jakarta.inject.Inject
 
-@HiltViewModel
-class OnboardingViewModel @Inject constructor(
+class OnboardingViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val recordConsentUseCase: RecordConsentUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase

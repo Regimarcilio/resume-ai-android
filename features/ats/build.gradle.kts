@@ -3,7 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -65,10 +64,6 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    ksp("com.google.dagger:hilt-compiler:2.50")
-    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
 
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")
