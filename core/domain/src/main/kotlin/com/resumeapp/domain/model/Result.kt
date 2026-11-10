@@ -31,7 +31,7 @@ sealed interface Result<out T> {
      * Returns the value if Success, throws exception if Failure
      */
     fun getOrThrow(): T = when (this) {
-        is Success<*> -> value
+        is Success<*> -> value as T
         is Failure -> throw IllegalStateException(errorMessage)
     }
 }
