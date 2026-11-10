@@ -85,8 +85,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.50")
+    ksp("com.google.dagger:hilt-compiler:2.50")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Jakarta inject for @Singleton annotation
