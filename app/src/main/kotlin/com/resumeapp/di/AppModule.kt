@@ -25,12 +25,13 @@ import com.resumeapp.data.repository.ResumeRepositoryImpl
 import com.resumeapp.data.repository.TemplateRepositoryImpl
 import com.resumeapp.data.repository.ATSScoreRepositoryImpl
 import com.resumeapp.data.repository.TraceRepositoryImpl
+import com.resumeapp.data.repository.PdfRepositoryImpl
 import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.domain.repository.TemplateRepository
 import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
-import com.resumeapp.pdf.di.PdfModule
+import com.resumeapp.domain.repository.PdfRepository
 import dagger.hilt.android.EntryPoint
 import dagger.hilt.android.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
@@ -243,6 +244,10 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideTraceRepository(impl: TraceRepositoryImpl): TraceRepository = impl
+
+    @Provides
+    @Singleton
+    fun providePdfRepository(impl: PdfRepositoryImpl): PdfRepository = impl
 }
 
 /**
