@@ -18,7 +18,7 @@ data class AIRequest(
     val promptType: String = "general",
     val metadata: Map<String, String>? = null
 ) {
-    fun toJson(): String = Json.encodeToString(this)
+    fun toJson(): String = kotlinx.serialization.json.Json.encodeToString(AIRequest.serializer(), this)
 }
 
 @Serializable
@@ -30,7 +30,7 @@ data class AIResponse(
     val latencyMs: Long = 0,
     val cacheHit: Boolean = false
 ) {
-    fun toJson(): String = Json.encodeToString(this)
+    fun toJson(): String = kotlinx.serialization.json.Json.encodeToString(AIResponse.serializer(), this)
 }
 
 @Serializable
