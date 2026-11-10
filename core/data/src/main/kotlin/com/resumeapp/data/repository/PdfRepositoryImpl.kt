@@ -140,7 +140,7 @@ class PdfRepositoryImpl constructor(
         y = addSection(document, page, contentStream, font, y, margin, "Languages", languagesContent)
 
         if (watermark) {
-            addWatermark(page, contentStream)
+            addWatermark(page)
         }
 
         contentStream.close()
@@ -208,7 +208,7 @@ class PdfRepositoryImpl constructor(
         return currentY
     }
 
-    private fun addWatermark(page: PDPage, contentStream: PDPageContentStream) {
+    private fun addWatermark(page: PDPage) {
         val watermarkStream = PDPageContentStream(page, PDPageContentStream.AppendMode.APPEND, true, true)
         watermarkStream.setNonStrokingColor(200f/255f, 200f/255f, 200f/255f)
         val watermarkFont = if (fontFile.exists()) {

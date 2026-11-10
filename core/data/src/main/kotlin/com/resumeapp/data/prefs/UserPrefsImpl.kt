@@ -7,8 +7,6 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.core.DataStore
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.resumeapp.domain.model.ConsentPurpose
 import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.domain.model.SubscriptionStatus
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import java.lang.reflect.Type
 
 /**
@@ -62,8 +59,7 @@ interface UserPrefs {
  */
 class UserPrefsImpl constructor(
     private val context: Context,
-    private val dataStore: DataStore<Preferences>,
-    private val masterKey: MasterKey
+    private val dataStore: DataStore<Preferences>
 ) : UserPrefs {
 
     // Keys
@@ -94,7 +90,7 @@ class UserPrefsImpl constructor(
     override val subscriptionExpiryDate: Long?
         get() = runBlocking {
             val expiry = dataStore.data.map { it[SUBSCRIPTION_EXPIRY_KEY] }.first()
-            if (expiry > 0) expiry else null
+            if (expiry != null && expiry > 0) expiry else null
         }
 
     override val purchaseToken: String?
@@ -115,7 +111,7 @@ class UserPrefsImpl constructor(
     override val consentTimestamp: Long?
         get() = runBlocking {
             val ts = dataStore.data.map { it[CONSENT_TIMESTAMP_KEY] }.first()
-            if (ts > 0) ts else null
+            if (ts != null && ts > 0) ts else null
         }
 
     override val consentAccepted: Boolean
@@ -240,13 +236,13 @@ class UserPrefsImpl constructor(
     override suspend fun clearAll() {
         dataStore.edit { prefs ->
             prefs.remove(USER_ID_KEY)
-            prefs.putString(SUBSCRIPTION_TIER_KEY, com.resumeapp.domain.model.SubscriptionTier.FREE.name)
+            prefs[SUBSCRIPTION_TIER_KEY] = com.resumeapp.domain.model.SubscriptionTier.FREE.name
             prefs.remove(SUBSCRIPTION_EXPIRY_KEY)
             prefs.remove(PURCHASE_TOKEN_KEY)
             prefs.remove(PREFERRED_TEMPLATE_ID_KEY)
-            prefs.putLong(AI_USAGE_COUNT_KEY, 0L)
+            prefs[AI_USAGE_COUNT_KEY] = 0L
             prefs.remove(LAST_SYNC_AT_KEY)
-            prefs.putLong(CONSENT_ACCEPTED_KEY, 0L)
+            prefs[CONSENT_ACCEPTED_KEY] = 0L
             prefs.remove(CONSENT_VERSION_KEY)
             prefs.remove(CONSENT_TIMESTAMP_KEY)
             prefs.remove(CONSENT_PURPOSES_KEY)

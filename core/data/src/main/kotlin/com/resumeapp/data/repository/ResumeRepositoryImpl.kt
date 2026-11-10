@@ -52,7 +52,9 @@ class ResumeRepositoryImpl constructor(
 
     override suspend fun search(params: com.resumeapp.domain.usecase.SearchParams): List<Resume> {
         // Delegate to DAO with search params
-        val resumes = resumeDao.search(userId = params.userId, query = params.query, templateId = params.templateId)
+        val userId = params.filters["userId"] ?: ""
+        val templateId = params.filters["templateId"]
+        val resumes = resumeDao.search(userId = userId, query = params.query, templateId = templateId)
         return resumes.map { mapper.toDomain(it) }
     }
 
