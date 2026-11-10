@@ -48,7 +48,6 @@ import dagger.hilt.android.scopes.ApplicationContext
 import dagger.hilt.android.scopes.Singleton
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
@@ -161,7 +160,7 @@ object NetworkModule {
         okHttpClient: okhttp3.OkHttpClient,
         moshi: com.squareup.moshi.Moshi
     ): retrofit2.Retrofit = retrofit2.Retrofit.Builder()
-        .baseUrl(BuildConfig.AI_GATEWAY_BASE_URL)
+        .baseUrl("https://api.openai.com/v1/") // Default, overridden by build config
         .client(okHttpClient)
         .addConverterFactory(retrofit2.converter.moshi.MoshiConverterFactory.create(moshi))
         .build()
