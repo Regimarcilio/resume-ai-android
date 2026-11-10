@@ -2,6 +2,7 @@ package com.resumeapp.features.onboarding.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.SavedStateHandle
 import com.resumeapp.domain.model.ConsentPurpose
 import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.features.onboarding.domain.RecordConsentUseCase

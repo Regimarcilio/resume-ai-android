@@ -2,6 +2,7 @@ package com.resumeapp.features.resume.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.SavedStateHandle
 import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.SectionType
@@ -29,7 +30,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 @HiltViewModel
 class EditorViewModel @Inject constructor(
-    private val resumeId: String,
+    private val savedStateHandle: SavedStateHandle,
     private val getResumeUseCase: GetResumeUseCase,
     private val saveResumeUseCase: SaveResumeUseCase,
     private val updateSectionUseCase: UpdateSectionUseCase,
@@ -39,6 +40,8 @@ class EditorViewModel @Inject constructor(
     private val improveBulletsUseCase: ImproveBulletsUseCase,
     private val analyzeATSUseCase: AnalyzeATSUseCase
 ) : ViewModel() {
+
+    private val resumeId: String = savedStateHandle.get("resumeId") ?: ""
 
     private val _uiState = MutableStateFlow(EditorUiState.Loading)
     val uiState = _uiState.asStateFlow()

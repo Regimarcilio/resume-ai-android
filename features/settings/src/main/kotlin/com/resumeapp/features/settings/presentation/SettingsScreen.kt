@@ -303,7 +303,7 @@ fun MyDataScreen() {
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(listOf(
+                        val rightActions = listOf(
                             RightAction("Confirmar Processamento", "Ver para quais finalidades seus dados são processados", Icons.Default.CheckCircle, { /* navigate */ }),
                             RightAction("Acessar Dados", "Visualizar todos os seus dados armazenados", Icons.Default.Visibility, { /* navigate */ }),
                             RightAction("Corrigir Dados", "Atualize ou corrija informações incorretas", Icons.Default.Edit, { /* navigate */ }),
@@ -311,7 +311,8 @@ fun MyDataScreen() {
                             RightAction("Eliminar Desnecessários", "Remova cache, logs e dados temporários", Icons.Default.CleaningServices, { /* navigate */ }),
                             RightAction("Portabilidade", "Exporte todos os seus dados em JSON", Icons.Default.Download, { /* navigate */ }),
                             RightAction("Excluir Tudo", "Apague TODOS os dados irreversivelmente", Icons.Default.DeleteForever, { /* navigate */ }, MaterialTheme.colorScheme.error)
-                        ) { action ->
+                        )
+                        items(rightActions) { action ->
                             ActionCard(
                                 title = action.title,
                                 description = action.description,
