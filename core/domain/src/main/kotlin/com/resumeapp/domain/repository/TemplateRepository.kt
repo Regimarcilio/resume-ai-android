@@ -12,35 +12,35 @@ interface TemplateRepository {
     /**
      * Get all active templates
      */
-    fun getAllActive(): List<Template>
+    suspend fun getAllActive(): List<Template>
 
     /**
      * Get template by ID
      */
-    fun getById(id: String): Template?
+    suspend fun getById(id: String): Template?
 
     /**
      * Get templates by category
      */
-    fun getByCategory(category: TemplateCategory): List<Template>
+    suspend fun getByCategory(category: TemplateCategory): List<Template>
 
     /**
      * Get premium templates
      */
-    fun getPremiumTemplates(): List<Template>
+    suspend fun getPremiumTemplates(): List<Template>
 
     /**
      * Get free templates
      */
-    fun getFreeTemplates(): List<Template>
+    suspend fun getFreeTemplates(): List<Template>
 
     /**
      * Save a template (for admin/seed)
      */
-    fun save(template: Template): Template
+    suspend fun save(template: Template): Template
 
     /**
      * Update a template
      */
-    fun update(template: Template): Template
+    suspend fun update(template: Template): Template
 }

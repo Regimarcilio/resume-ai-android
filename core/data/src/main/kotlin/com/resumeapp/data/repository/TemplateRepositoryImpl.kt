@@ -12,38 +12,38 @@ class TemplateRepositoryImpl constructor(
     private val mapper: TemplateMapper
 ) : TemplateRepository {
 
-    override suspend fun getAllActive(): List<Template> {
+    override fun getAllActive(): List<Template> {
         val templates = templateDao.getAllActive().await()
         return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun getById(id: String): Template? {
+    override fun getById(id: String): Template? {
         val entity = templateDao.getById(id).await()
         return entity?.let { mapper.toDomain(it) }
     }
 
-    override suspend fun getByCategory(category: TemplateCategory): List<Template> {
+    override fun getByCategory(category: TemplateCategory): List<Template> {
         val templates = templateDao.getByCategory(category.name).await()
         return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun getPremiumTemplates(): List<Template> {
+    override fun getPremiumTemplates(): List<Template> {
         val templates = templateDao.getPremiumTemplates().await()
         return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun getFreeTemplates(): List<Template> {
+    override fun getFreeTemplates(): List<Template> {
         val templates = templateDao.getFreeTemplates().await()
         return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun save(template: Template): Template {
+    override fun save(template: Template): Template {
         val entity = mapper.toEntity(template)
         templateDao.insert(entity).await()
         return template
     }
 
-    override suspend fun update(template: Template): Template {
+    override fun update(template: Template): Template {
         val entity = mapper.toEntity(template)
         templateDao.update(entity).await()
         return template

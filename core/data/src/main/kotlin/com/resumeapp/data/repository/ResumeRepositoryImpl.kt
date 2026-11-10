@@ -15,7 +15,7 @@ class ResumeRepositoryImpl constructor(
     private val mapper: ResumeMapper
 ) : ResumeRepository {
 
-    override suspend fun save(resume: Resume): Resume {
+    override fun save(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
         val resumeId = database.runInTransaction { resumeDao.insert(entity) }
         
@@ -27,7 +27,7 @@ class ResumeRepositoryImpl constructor(
         return resume
     }
 
-    override suspend fun update(resume: Resume): Resume {
+    override fun update(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
         // Update resume first
         resumeDao.update(entity).await()
@@ -41,27 +41,27 @@ class ResumeRepositoryImpl constructor(
         return resume
     }
 
-    override suspend fun getById(id: String): Resume? {
+    override fun getById(id: String): Resume? {
         val entity = resumeDao.getById(id).await()
         return entity?.let { mapper.toDomain(it) }
     }
 
-    override suspend fun getAllByUserId(userId: String): List<Resume> {
+    override fun getAllByUserId(userId: String): List<Resume> {
         val resumes = resumeDao.getAllByUserId(userId).await()
         return resumes.map { mapper.toDomain(it) }
     }
 
-    override suspend fun search(params: com.resumeapp.domain.usecase.SearchParams): List<Resume> {
+    override fun search(params: com.resumeapp.domain.usecase.SearchParams): List<Resume> {
         // Delegate to DAO with search params
         val resumes = resumeDao.search(userId = params.userId, query = params.query, templateId = params.templateId).await()
         return resumes.map { mapper.toDomain(it) }
     }
 
-    override suspend fun deleteById(id: String) {
+    override fun deleteById(id: String) {
         resumeDao.deleteById(id).await()
     }
 
-    override suspend fun countByUserId(userId: String): Int {
+    override fun countByUserId(userId: String): Int {
         return resumeDao.countByUserId(userId).await()
     }
 }

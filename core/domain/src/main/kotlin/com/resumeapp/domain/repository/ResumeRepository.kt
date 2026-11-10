@@ -12,35 +12,35 @@ interface ResumeRepository {
     /**
      * Save a new resume
      */
-    fun save(resume: Resume): Resume
+    suspend fun save(resume: Resume): Resume
 
     /**
      * Update an existing resume
      */
-    fun update(resume: Resume): Resume
+    suspend fun update(resume: Resume): Resume
 
     /**
      * Get resume by ID
      */
-    fun getById(id: String): Resume?
+    suspend fun getById(id: String): Resume?
 
     /**
      * Get all resumes for a user
      */
-    fun getAllByUserId(userId: String): List<Resume>
+    suspend fun getAllByUserId(userId: String): List<Resume>
 
     /**
      * Search resumes with filters
      */
-    fun search(params: SearchParams): List<Resume>
+    suspend fun search(params: SearchParams): List<Resume>
 
     /**
      * Delete resume by ID
      */
-    fun deleteById(id: String)
+    suspend fun deleteById(id: String)
 
     /**
      * Get resume count for user
      */
-    fun countByUserId(userId: String): Int
+    suspend fun countByUserId(userId: String): Int
 }

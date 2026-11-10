@@ -30,8 +30,8 @@ class PdfRepositoryImpl constructor(
     ): ByteArray {
         // Check cache first
         val cached = database.pdfCacheDao().getCached(resume.id, template, watermark).await()
-        cached?.let {
-            return it.pdfData
+        if (cached != null) {
+            return cached.pdfData
         }
 
         val pdfBytes = generatePdfDocument(resume, template, watermark)

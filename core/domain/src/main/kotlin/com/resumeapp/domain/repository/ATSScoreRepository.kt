@@ -11,20 +11,20 @@ interface ATSScoreRepository {
     /**
      * Save ATS score
      */
-    fun save(score: ATSScore): ATSScore
+    suspend fun save(score: ATSScore): ATSScore
 
     /**
      * Get ATS score by resume ID
      */
-    fun getByResumeId(resumeId: String): ATSScore?
+    suspend fun getByResumeId(resumeId: String): ATSScore?
 
     /**
      * Get all ATS scores for a user
      */
-    fun getAllByUserId(userId: String): List<ATSScore>
+    suspend fun getAllByUserId(userId: String): List<ATSScore>
 
     /**
      * Delete ATS score
      */
-    fun delete(score: ATSScore)
+    suspend fun delete(score: ATSScore)
 }
