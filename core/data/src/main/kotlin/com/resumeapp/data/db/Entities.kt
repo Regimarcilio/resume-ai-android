@@ -2,7 +2,6 @@ package com.resumeapp.data.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.resumeapp.data.db.converters.Converters
 
 @Entity(tableName = "resumes")
 data class ResumeEntity(
