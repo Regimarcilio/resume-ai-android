@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android") version "2.48"
 }
 
 android {
@@ -85,6 +86,10 @@ dependencies {
 
     // Jakarta inject for @Singleton annotation
     implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.48")
+    ksp("com.google.dagger:hilt-compiler:2.48")
 
     // Gson for mappers
     implementation("com.google.code.gson:gson:2.10.1")
