@@ -17,8 +17,8 @@ import com.resumeapp.data.db.AICacheDao
 import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.prefs.UserPrefs
 import com.resumeapp.data.prefs.UserPrefsImpl
-import com.resumeapp.data.prefs.ConsentRepository
 import com.resumeapp.data.prefs.ConsentRepositoryImpl
+import com.resumeapp.domain.repository.ConsentRepository
 import com.resumeapp.data.prefs.SubscriptionPrefs
 import com.resumeapp.data.prefs.SubscriptionPrefsImpl
 import com.resumeapp.data.repository.ResumeRepositoryImpl
