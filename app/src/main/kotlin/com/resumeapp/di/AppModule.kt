@@ -108,7 +108,6 @@ object AppModule {
         AppDatabase::class.java,
         "resume_db"
     )
-        .openHelperFactory(SQLCipherOpenHelperFactory(masterKey.keyGenParameterSpec?.run { "unused" } ?: ""))
         .fallbackToDestructiveMigration() // Only for dev, use proper migrations in prod
         .build()
 
