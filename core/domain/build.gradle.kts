@@ -38,6 +38,9 @@ group = "com.resumeapp.domain"
 version = "1.0.0"
 
 dependencies {
+    // Core modules
+    api(project(":core:ai"))
+
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
