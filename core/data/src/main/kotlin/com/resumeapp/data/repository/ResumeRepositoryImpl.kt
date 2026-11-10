@@ -6,6 +6,7 @@ import com.resumeapp.data.db.ResumeSectionDao
 import com.resumeapp.data.mapper.ResumeMapper
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.repository.ResumeRepository
+import kotlinx.coroutines.tasks.await
 
 class ResumeRepositoryImpl constructor(
     private val database: AppDatabase,
@@ -16,12 +17,12 @@ class ResumeRepositoryImpl constructor(
 
     override suspend fun save(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
-        val resumeId = database.runInTransaction { resumeDao.insert(entity) }
+        val resumeId = database.withTransaction { resumeDao.insert(entity).await() }
         
         // Save sections
         resume.sections.forEachIndexed { index, section ->
             val sectionEntity = mapper.toEntity(section, entity.id, index)
-            sectionDao.insert(sectionEntity)
+            sectionDao.insert(sectionEntity).await()
         }
         return resume
     }
@@ -29,24 +30,24 @@ class ResumeRepositoryImpl constructor(
     override suspend fun update(resume: Resume): Resume {
         val entity = mapper.toEntity(resume)
         // Update resume first
-        resumeDao.update(entity)
+        resumeDao.update(entity).await()
         
         // Update sections - delete and re-insert
-        sectionDao.deleteByResumeId(entity.id)
+        sectionDao.deleteByResumeId(entity.id).await()
         resume.sections.forEachIndexed { index, section ->
             val sectionEntity = mapper.toEntity(section, entity.id, index)
-            sectionDao.insert(sectionEntity)
+            sectionDao.insert(sectionEntity).await()
         }
         return resume
     }
 
     override suspend fun getById(id: String): Resume? {
-        val entity = resumeDao.getById(id)
+        val entity = resumeDao.getById(id).await()
         return entity?.let { mapper.toDomain(it) }
     }
 
     override suspend fun getAllByUserId(userId: String): List<Resume> {
-        val resumes = resumeDao.getAllByUserId(userId)
+        val resumes = resumeDao.getAllByUserId(userId).await()
         return resumes.map { mapper.toDomain(it) }
     }
 
@@ -54,15 +55,15 @@ class ResumeRepositoryImpl constructor(
         // Delegate to DAO with search params
         val userId = params.filters["userId"] ?: ""
         val templateId = params.filters["templateId"]
-        val resumes = resumeDao.search(userId = userId, query = params.query, templateId = templateId)
+        val resumes = resumeDao.search(userId = userId, query = params.query, templateId = templateId).await()
         return resumes.map { mapper.toDomain(it) }
     }
 
     override suspend fun deleteById(id: String) {
-        resumeDao.deleteById(id)
+        resumeDao.deleteById(id).await()
     }
 
     override suspend fun countByUserId(userId: String): Int {
-        return resumeDao.countByUserId(userId)
+        return resumeDao.countByUserId(userId).await()
     }
 }
