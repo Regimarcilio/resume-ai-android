@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 interface SubscriptionPrefs {
     val currentStatus: SubscriptionStatus
@@ -22,7 +24,7 @@ class SubscriptionPrefsImpl constructor(
 
     private val _status = MutableStateFlow<SubscriptionStatus?>(null)
     override val statusFlow: Flow<SubscriptionStatus> = _status
-        .map { it ?: SubscriptionStatus() }
+        .map { (it as SubscriptionStatus?) ?: SubscriptionStatus() }
         .distinctUntilChanged()
 
     override val currentStatus: SubscriptionStatus

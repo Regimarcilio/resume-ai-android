@@ -20,7 +20,7 @@ class ResumeMapper {
 
     fun toDomain(entity: com.resumeapp.data.db.ResumeEntity): Resume {
         val sections = gson.fromJson(
-            entity.sectionsJson, 
+            entity.sectionsJson,
             resumeSectionListType
         ) ?: emptyList()
 
@@ -57,6 +57,7 @@ class ResumeMapper {
             summary = personalInfo.summary,
             personalInfoJson = gson.toJson(personalInfo),
             sectionsJson = gson.toJson(resume.sections),
+            atsScoreJson = resume.atsScore?.let { gson.toJson(it) } ?: "",
             createdAt = resume.createdAt,
             updatedAt = resume.updatedAt,
             version = resume.version
@@ -69,7 +70,7 @@ class ResumeMapper {
             resumeId = resumeId,
             type = section.type.name,
             title = section.title,
-            itemsJson = gson.toJson(section.items),
+            itemsJson = section.itemsJson, // Use the JSON string directly
             order = section.order,
             isVisible = section.isVisible
         )
@@ -86,7 +87,7 @@ class ResumeMapper {
             resumeId = entity.resumeId,
             type = SectionType.valueOf(entity.type),
             title = entity.title,
-            items = items,
+            itemsJson = entity.itemsJson,
             order = entity.order,
             isVisible = entity.isVisible
         )

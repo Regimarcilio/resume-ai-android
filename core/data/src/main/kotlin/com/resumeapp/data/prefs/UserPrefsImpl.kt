@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.getString
 import androidx.datastore.preferences.core.getLong
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.datastore.preferences.DataStore
+import androidx.datastore.core.DataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.resumeapp.domain.model.ConsentPurpose
@@ -64,7 +64,7 @@ interface UserPrefs {
  */
 class UserPrefsImpl constructor(
     private val context: Context,
-    private val dataStore: androidx.datastore.preferences.DataStore<Preferences>,
+    private val dataStore: DataStore<Preferences>,
     private val masterKey: MasterKey
 ) : UserPrefs {
 
