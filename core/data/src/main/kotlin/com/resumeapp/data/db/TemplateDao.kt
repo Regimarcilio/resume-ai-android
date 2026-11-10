@@ -67,6 +67,6 @@ interface ATSScoreDao {
     @Query("SELECT * FROM ats_scores WHERE overallScore >= :minScore")
     suspend fun getScoresAbove(minScore: Int): List<ATSScoreEntity>
 
-    @Query("SELECT * FROM ats_scores")
+    @Query("SELECT * FROM ats_scores WHERE resumeId IN (SELECT id FROM resumes WHERE userId = :userId)")
     suspend fun getAllByUserId(userId: String): List<ATSScoreEntity>
 }
