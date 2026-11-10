@@ -1,8 +1,8 @@
 package com.resumeapp.data.cache
 
-import com.resumeapp.ai.cache.AICache
-import com.resumeapp.ai.cache.CacheStats
-import com.resumeapp.ai.cache.CachedResponse
+import com.resumeapp.domain.ai.cache.AICache
+import com.resumeapp.domain.ai.cache.CacheStats
+import com.resumeapp.domain.ai.cache.CachedResponse
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.data.db.AICacheDao

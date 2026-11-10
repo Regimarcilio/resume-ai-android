@@ -64,9 +64,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
-    // Jakarta inject for @Singleton annotation
-    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
-
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")

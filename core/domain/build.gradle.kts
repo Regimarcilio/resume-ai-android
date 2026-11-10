@@ -60,21 +60,3 @@ dependencies {
     testImplementation("com.google.truth:truth:1.1.5")
     testImplementation("org.robolectric:robolectric:4.11")
 }
-
-dependencies {
-    // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
-
-    // Gson for JSON serialization in TraceEntry.toJson()
-    implementation("com.google.code.gson:gson:2.10.1")
-
-    // Testing
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.20")
-    testImplementation("io.mockk:mockk:1.13.13")
-    testImplementation("com.google.truth:truth:1.1.5")
-}

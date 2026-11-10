@@ -43,7 +43,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
-import com.resumeapp.ai.cache.AICache
+import com.resumeapp.domain.ai.cache.AICache
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.guardrail.InputSanitizer
 import com.resumeapp.ai.guardrail.OutputValidator

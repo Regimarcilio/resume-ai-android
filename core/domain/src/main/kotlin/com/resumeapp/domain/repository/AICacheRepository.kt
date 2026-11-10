@@ -1,6 +1,6 @@
 package com.resumeapp.domain.repository
 
-import com.resumeapp.ai.cache.AICache
+import com.resumeapp.domain.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 

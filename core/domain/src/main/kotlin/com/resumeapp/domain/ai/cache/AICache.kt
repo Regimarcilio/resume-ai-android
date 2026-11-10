@@ -1,4 +1,4 @@
-package com.resumeapp.ai.cache
+package com.resumeapp.domain.ai.cache
 
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
