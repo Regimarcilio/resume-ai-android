@@ -5,10 +5,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.getString
-import androidx.datastore.preferences.core.getLong
-import androidx.datastore.preferences.core.putString
-import androidx.datastore.preferences.core.putLong
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.core.DataStore
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -87,47 +83,47 @@ class UserPrefsImpl constructor(
     private val gson = Gson()
 
     override val userId: String
-        get() = runBlocking { dataStore.data.map { it.getString(USER_ID_KEY) ?: "" }.first() }
+        get() = runBlocking { dataStore.data.map { it[USER_ID_KEY] ?: "" }.first() }
 
     override val subscriptionTier: SubscriptionTier
         get() = runBlocking {
-            val tierStr = dataStore.data.map { it.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name }.first()
+            val tierStr = dataStore.data.map { it[SUBSCRIPTION_TIER_KEY] ?: SubscriptionTier.FREE.name }.first()
             SubscriptionTier.valueOf(tierStr)
         }
 
     override val subscriptionExpiryDate: Long?
         get() = runBlocking {
-            val expiry = dataStore.data.map { it.getLong(SUBSCRIPTION_EXPIRY_KEY) }.first()
+            val expiry = dataStore.data.map { it[SUBSCRIPTION_EXPIRY_KEY] }.first()
             if (expiry > 0) expiry else null
         }
 
     override val purchaseToken: String?
-        get() = runBlocking { dataStore.data.map { it.getString(PURCHASE_TOKEN_KEY) }.first() }
+        get() = runBlocking { dataStore.data.map { it[PURCHASE_TOKEN_KEY] }.first() }
 
     override val preferredTemplateId: String?
-        get() = runBlocking { dataStore.data.map { it.getString(PREFERRED_TEMPLATE_ID_KEY) }.first() }
+        get() = runBlocking { dataStore.data.map { it[PREFERRED_TEMPLATE_ID_KEY] }.first() }
 
     override val aiUsageCount: Int
-        get() = runBlocking { dataStore.data.map { it.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }.first() }
+        get() = runBlocking { dataStore.data.map { (it[AI_USAGE_COUNT_KEY] ?: 0L).toInt() }.first() }
 
     override val lastSyncAt: Long
-        get() = runBlocking { dataStore.data.map { it.getLong(LAST_SYNC_AT_KEY) ?: 0L }.first() }
+        get() = runBlocking { dataStore.data.map { it[LAST_SYNC_AT_KEY] ?: 0L }.first() }
 
     override val consentVersion: String?
-        get() = runBlocking { dataStore.data.map { it.getString(CONSENT_VERSION_KEY) }.first() }
+        get() = runBlocking { dataStore.data.map { it[CONSENT_VERSION_KEY] }.first() }
 
     override val consentTimestamp: Long?
         get() = runBlocking {
-            val ts = dataStore.data.map { it.getLong(CONSENT_TIMESTAMP_KEY) }.first()
+            val ts = dataStore.data.map { it[CONSENT_TIMESTAMP_KEY] }.first()
             if (ts > 0) ts else null
         }
 
     override val consentAccepted: Boolean
-        get() = runBlocking { dataStore.data.map { it.getLong(CONSENT_ACCEPTED_KEY) == 1L }.first() }
+        get() = runBlocking { dataStore.data.map { (it[CONSENT_ACCEPTED_KEY] ?: 0L) == 1L }.first() }
 
     override val consentPurposes: Set<String>
         get() = runBlocking {
-            val json = dataStore.data.map { it.getString(CONSENT_PURPOSES_KEY) ?: "[]" }.first()
+            val json = dataStore.data.map { it[CONSENT_PURPOSES_KEY] ?: "[]" }.first()
             val type = object : TypeToken<Set<String>>() {}.type
             try {
                 Gson().fromJson(json, type)
@@ -137,18 +133,18 @@ class UserPrefsImpl constructor(
         }
 
     override val consentPolicyHash: String?
-        get() = runBlocking { dataStore.data.map { it.getString(CONSENT_POLICY_HASH_KEY) }.first() }
+        get() = runBlocking { dataStore.data.map { it[CONSENT_POLICY_HASH_KEY] }.first() }
 
     // Flows
     override val userIdFlow: Flow<String> = dataStore.data
-        .map { it.getString(USER_ID_KEY) ?: "" }
+        .map { it[USER_ID_KEY] ?: "" }
         .distinctUntilChanged()
 
     override val subscriptionStatusFlow: Flow<com.resumeapp.domain.model.SubscriptionStatus> = dataStore.data
         .map { prefs ->
-            val tier = SubscriptionTier.valueOf(prefs.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name)
-            val expiry = prefs.getLong(SUBSCRIPTION_EXPIRY_KEY)
-            val token = prefs.getString(PURCHASE_TOKEN_KEY)
+            val tier = SubscriptionTier.valueOf(prefs[SUBSCRIPTION_TIER_KEY] ?: SubscriptionTier.FREE.name)
+            val expiry = prefs[SUBSCRIPTION_EXPIRY_KEY] ?: 0L
+            val token = prefs[PURCHASE_TOKEN_KEY]
             val isActive = when {
                 tier == com.resumeapp.domain.model.SubscriptionTier.FREE -> true
                 expiry > 0 -> System.currentTimeMillis() < expiry
@@ -159,7 +155,7 @@ class UserPrefsImpl constructor(
                 tier = tier,
                 expiryDate = if (expiry > 0) expiry else null,
                 isActive = isActive,
-                purchaseToken = prefs.getString(PURCHASE_TOKEN_KEY),
+                purchaseToken = prefs[PURCHASE_TOKEN_KEY],
                 features = features
             )
         }
@@ -167,10 +163,10 @@ class UserPrefsImpl constructor(
 
     override val consentRecordFlow: Flow<com.resumeapp.domain.model.ConsentRecord?> = dataStore.data
         .map { prefs ->
-            val accepted = prefs.getLong(CONSENT_ACCEPTED_KEY) == 1L
+            val accepted = (prefs[CONSENT_ACCEPTED_KEY] ?: 0L) == 1L
             if (!accepted) null
             else {
-                val purposesJson = prefs.getString(CONSENT_PURPOSES_KEY) ?: "[]"
+                val purposesJson = prefs[CONSENT_PURPOSES_KEY] ?: "[]"
                 val purposes = try {
                     val type = object : TypeToken<Set<String>>() {}.type
                     Gson().fromJson(purposesJson, type)
@@ -178,9 +174,9 @@ class UserPrefsImpl constructor(
                     emptySet<String>()
                 }
                 com.resumeapp.domain.model.ConsentRecord(
-                    version = prefs.getString(CONSENT_VERSION_KEY) ?: "",
-                    timestamp = prefs.getLong(CONSENT_TIMESTAMP_KEY),
-                    policyHash = prefs.getString(CONSENT_POLICY_HASH_KEY) ?: "",
+                    version = prefs[CONSENT_VERSION_KEY] ?: "",
+                    timestamp = prefs[CONSENT_TIMESTAMP_KEY] ?: 0L,
+                    policyHash = prefs[CONSENT_POLICY_HASH_KEY] ?: "",
                     accepted = accepted,
                     purposes = purposes.map { ConsentPurpose.valueOf(it) }.toSet()
                 )
@@ -190,50 +186,50 @@ class UserPrefsImpl constructor(
         .catch { }
 
     override suspend fun setUserId(userId: String) {
-        dataStore.edit { it.putString(USER_ID_KEY, userId) }
+        dataStore.edit { it[USER_ID_KEY] = userId }
     }
 
     override suspend fun updateSubscription(tier: SubscriptionTier, expiryDate: Long?, purchaseToken: String?) {
         dataStore.edit { prefs ->
-            prefs.putString(SUBSCRIPTION_TIER_KEY, tier.name)
-            expiryDate?.let { prefs.putLong(SUBSCRIPTION_EXPIRY_KEY, it) }
-            purchaseToken?.let { prefs.putString(PURCHASE_TOKEN_KEY, it) }
+            prefs[SUBSCRIPTION_TIER_KEY] = tier.name
+            expiryDate?.let { prefs[SUBSCRIPTION_EXPIRY_KEY] = it }
+            purchaseToken?.let { prefs[PURCHASE_TOKEN_KEY] = it }
         }
     }
 
     override suspend fun setPreferredTemplateId(templateId: String?) {
         dataStore.edit { prefs ->
-            templateId?.let { prefs.putString(PREFERRED_TEMPLATE_ID_KEY, it) }
+            templateId?.let { prefs[PREFERRED_TEMPLATE_ID_KEY] = it }
                 ?: prefs.remove(PREFERRED_TEMPLATE_ID_KEY)
         }
     }
 
     override suspend fun incrementAIUsage() {
         dataStore.edit { prefs ->
-            val current = prefs.getLong(AI_USAGE_COUNT_KEY)
-            prefs.putLong(AI_USAGE_COUNT_KEY, current + 1)
+            val current = prefs[AI_USAGE_COUNT_KEY] ?: 0L
+            prefs[AI_USAGE_COUNT_KEY] = current + 1
         }
     }
 
     override suspend fun setLastSyncAt(timestamp: Long) {
         dataStore.edit { prefs ->
-            prefs.putLong(LAST_SYNC_AT_KEY, timestamp)
+            prefs[LAST_SYNC_AT_KEY] = timestamp
         }
     }
 
     override suspend fun updateConsent(record: com.resumeapp.domain.model.ConsentRecord) {
         dataStore.edit { prefs ->
-            prefs.putString(CONSENT_VERSION_KEY, record.version)
-            prefs.putLong(CONSENT_TIMESTAMP_KEY, record.timestamp)
-            prefs.putLong(CONSENT_ACCEPTED_KEY, if (record.accepted) 1L else 0L)
-            prefs.putString(CONSENT_PURPOSES_KEY, Gson().toJson(record.purposes.map { it.name }))
-            prefs.putString(CONSENT_POLICY_HASH_KEY, record.policyHash)
+            prefs[CONSENT_VERSION_KEY] = record.version
+            prefs[CONSENT_TIMESTAMP_KEY] = record.timestamp
+            prefs[CONSENT_ACCEPTED_KEY] = if (record.accepted) 1L else 0L
+            prefs[CONSENT_PURPOSES_KEY] = Gson().toJson(record.purposes.map { it.name })
+            prefs[CONSENT_POLICY_HASH_KEY] = record.policyHash
         }
     }
 
     override suspend fun clearConsent() {
         dataStore.edit { prefs ->
-            prefs.putLong(CONSENT_ACCEPTED_KEY, 0L)
+            prefs[CONSENT_ACCEPTED_KEY] = 0L
             prefs.remove(CONSENT_VERSION_KEY)
             prefs.remove(CONSENT_TIMESTAMP_KEY)
             prefs.remove(CONSENT_PURPOSES_KEY)

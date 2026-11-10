@@ -41,6 +41,9 @@ interface ResumeDao {
 
     @Query("SELECT * FROM resumes WHERE templateId = :templateId")
     suspend fun getByTemplateId(templateId: String): List<ResumeEntity>
+
+    @Query("SELECT * FROM resumes WHERE userId = :userId AND (title LIKE :query OR summary LIKE :query) ORDER BY updatedAt DESC")
+    suspend fun search(userId: String, query: String, templateId: String?): List<ResumeEntity>
 }
 
 @Dao
