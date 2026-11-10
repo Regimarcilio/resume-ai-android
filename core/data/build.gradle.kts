@@ -63,6 +63,9 @@ dependencies {
     // SQLCipher for encrypted DB
     implementation("net.zetetic:android-database-sqlcipher:4.5.3")
 
+    // PDFBox for local PDF generation
+    implementation("org.apache.pdfbox:pdfbox:3.0.2")
+
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
