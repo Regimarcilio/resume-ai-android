@@ -9,17 +9,19 @@ import com.resumeapp.domain.model.PersonalInfo
 import com.resumeapp.domain.model.SectionType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 class ResumeMapper {
 
     private val gson = Gson()
-    private val sectionItemsType = object : TypeToken<List<SectionItem>>() {}.type
-    private val stringListType = object : TypeToken<List<String>>() {}.type
+    private val sectionItemsType: Type = object : TypeToken<List<SectionItem>>() {}.type
+    private val stringListType: Type = object : TypeToken<List<String>>() {}.type
+    private val resumeSectionListType: Type = object : TypeToken<List<ResumeSection>>() {}.type
 
     fun toDomain(entity: com.resumeapp.data.db.ResumeEntity): Resume {
         val sections = gson.fromJson(
             entity.sectionsJson, 
-            TypeToken.getParameterized(List::class.java, ResumeSection::class.java).type
+            resumeSectionListType
         ) ?: emptyList()
 
         val personalInfo = gson.fromJson(
@@ -31,7 +33,13 @@ class ResumeMapper {
             id = entity.id,
             userId = entity.userId,
             templateId = entity.templateId,
-            personalInfo = personalInfo,
+            fullName = personalInfo.fullName,
+            email = personalInfo.email,
+            phone = personalInfo.phone,
+            location = personalInfo.location,
+            linkedin = personalInfo.linkedin,
+            portfolio = personalInfo.portfolio,
+            summary = personalInfo.summary,
             sections = sections,
             atsScore = null, // Loaded separately
             createdAt = entity.createdAt,
@@ -41,11 +49,27 @@ class ResumeMapper {
     }
 
     fun toEntity(resume: Resume): com.resumeapp.data.db.ResumeEntity {
+        val personalInfo = com.resumeapp.domain.model.PersonalInfo(
+            fullName = resume.fullName,
+            email = resume.email,
+            phone = resume.phone,
+            location = resume.location,
+            linkedin = resume.linkedin,
+            portfolio = resume.portfolio,
+            summary = resume.summary
+        )
         return com.resumeapp.data.db.ResumeEntity(
             id = resume.id,
             userId = resume.userId,
             templateId = resume.templateId,
-            personalInfoJson = gson.toJson(resume.personalInfo),
+            fullName = resume.fullName,
+            email = resume.email,
+            phone = resume.phone,
+            location = resume.location,
+            linkedin = resume.linkedin,
+            portfolio = resume.portfolio,
+            summary = resume.summary,
+            personalInfoJson = gson.toJson(personalInfo),
             sectionsJson = gson.toJson(resume.sections),
             createdAt = resume.createdAt,
             updatedAt = resume.updatedAt,
@@ -68,7 +92,7 @@ class ResumeMapper {
     fun toDomain(entity: com.resumeapp.data.db.ResumeSectionEntity): ResumeSection {
         val items = gson.fromJson(
             entity.itemsJson,
-            TypeToken.getParameterized(List::class.java, SectionItem::class.java).type
+            sectionItemsType
         ) ?: emptyList()
 
         return ResumeSection(

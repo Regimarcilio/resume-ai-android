@@ -3,58 +3,49 @@ package com.resumeapp.data.repository
 import com.resumeapp.data.db.TemplateDao
 import com.resumeapp.data.mapper.TemplateMapper
 import com.resumeapp.domain.model.Template
-import com.resumeapp.domain.model.Result
+import com.resumeapp.domain.model.TemplateCategory
 import com.resumeapp.domain.repository.TemplateRepository
 import kotlinx.coroutines.tasks.await
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-@Singleton
-class TemplateRepositoryImpl @Inject constructor(
+class TemplateRepositoryImpl constructor(
     private val templateDao: TemplateDao,
     private val mapper: TemplateMapper
 ) : TemplateRepository {
 
-    override suspend fun getAll(): Result<List<Template>> {
-        return try {
-            val templates = templateDao.getAllActive().await()
-            Result.Success(templates.map { mapper.toDomain(it) })
-        } catch (e: Exception) {
-            Result.Failure(e)
-        }
+    override suspend fun getAllActive(): List<Template> {
+        val templates = templateDao.getAllActive().await()
+        return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun getById(id: String): Result<Template> {
-        return try {
-            val entity = templateDao.getById(id).await()
-            entity?.let { Result.Success(mapper.toDomain(it)) }
-                ?: Result.Failure(Exception("Template not found: $id"))
-        } catch (e: Exception) {
-            Result.Failure(e)
-        }
+    override suspend fun getById(id: String): Template? {
+        val entity = templateDao.getById(id).await()
+        return entity?.let { mapper.toDomain(it) }
     }
 
-    override suspend fun save(template: Template): Result<Template> {
-        return try {
-            val entity = mapper.toEntity(template)
-            templateDao.insert(entity).await()
-            Result.Success(template)
-        } catch (e: Exception) {
-            Result.Failure(e)
-        }
+    override suspend fun getByCategory(category: TemplateCategory): List<Template> {
+        val templates = templateDao.getByCategory(category.name).await()
+        return templates.map { mapper.toDomain(it) }
     }
 
-    override suspend fun delete(id: String): Result<Unit> {
-        return try {
-            templateDao.deleteById(id).await()
-            Result.Success(Unit)
-        } catch (e: Exception) {
-            Result.Failure(e)
-        }
+    override suspend fun getPremiumTemplates(): List<Template> {
+        val templates = templateDao.getPremiumTemplates().await()
+        return templates.map { mapper.toDomain(it) }
     }
 
-    override fun observeAll(): kotlinx.coroutines.flow.Flow<List<Template>> {
-        return templateDao.observeAllActive()
-            .map { entities -> entities.map { mapper.toDomain(it) } }
+    override suspend fun getFreeTemplates(): List<Template> {
+        val templates = templateDao.getFreeTemplates().await()
+        return templates.map { mapper.toDomain(it) }
+    }
+
+    override suspend fun save(template: Template): Template {
+        val entity = mapper.toEntity(template)
+        templateDao.insert(entity).await()
+        return template
+    }
+
+    override suspend fun update(template: Template): Template {
+        val entity = mapper.toEntity(template)
+        templateDao.update(entity).await()
+        return template
     }
 }

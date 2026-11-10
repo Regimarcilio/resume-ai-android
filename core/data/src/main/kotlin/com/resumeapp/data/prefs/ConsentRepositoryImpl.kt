@@ -3,6 +3,7 @@ package com.resumeapp.data.prefs
 import com.resumeapp.domain.model.ConsentRecord
 import com.resumeapp.domain.model.ConsentPurpose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 interface ConsentRepository {
     val currentConsent: ConsentRecord?
@@ -20,7 +21,7 @@ class ConsentRepositoryImpl constructor(
 ) : ConsentRepository {
 
     override val currentConsent: ConsentRecord?
-        get() = userPrefs.consentRecordFlow.firstOrNull() ?: null
+        get() = runBlocking { userPrefs.consentRecordFlow.first() }
 
     override val consentFlow: Flow<ConsentRecord?> = userPrefs.consentRecordFlow
 
@@ -40,7 +41,7 @@ class ConsentRepositoryImpl constructor(
     }
 
     override suspend fun updatePurposes(purposes: Set<com.resumeapp.domain.model.ConsentPurpose>) {
-        val current = userPrefs.consentRecordFlow.firstOrNull()
+        val current = runBlocking { userPrefs.consentRecordFlow.first() }
             ?: com.resumeapp.domain.model.ConsentRecord(
                 version = "1.0",
                 timestamp = System.currentTimeMillis(),

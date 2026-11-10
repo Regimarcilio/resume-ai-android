@@ -2,8 +2,8 @@ package com.resumeapp.data.repository
 
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.db.PdfCacheEntity
-import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Resume
+import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.repository.PdfRepository
 import kotlinx.coroutines.tasks.await
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -13,11 +13,8 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import java.io.ByteArrayOutputStream
 import java.io.File
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 
-@Singleton
-class PdfRepositoryImpl @Inject constructor(
+class PdfRepositoryImpl constructor(
     private val context: android.content.Context,
     private val database: AppDatabase
 ) : PdfRepository {
@@ -30,36 +27,31 @@ class PdfRepositoryImpl @Inject constructor(
         resume: Resume,
         template: String,
         watermark: Boolean
-    ): Result<ByteArray> {
-        return try {
-            // Check cache first
-            val cached = database.pdfCacheDao().getCached(resume.id, template, watermark).await()
-            cached?.let {
-                return Result.Success(it.pdfData)
-            }
-
-            val pdfBytes = generatePdfDocument(resume, template, watermark)
-
-            // Cache the result
-            val cacheEntry = PdfCacheEntity(
-                id = "${resume.id}_${template}_${watermark}",
-                resumeId = resume.id,
-                template = template,
-                watermark = watermark,
-                pdfData = pdfBytes,
-                createdAt = System.currentTimeMillis()
-            )
-            database.pdfCacheDao().insert(cacheEntry).await()
-
-            Result.Success(pdfBytes)
-        } catch (e: Exception) {
-            Result.Failure(e.message ?: "PDF generation failed")
+    ): ByteArray {
+        // Check cache first
+        val cached = database.pdfCacheDao().getCached(resume.id, template, watermark).await()
+        cached?.let {
+            return it.pdfData
         }
+
+        val pdfBytes = generatePdfDocument(resume, template, watermark)
+
+        // Cache the result
+        val cacheEntry = PdfCacheEntity(
+            id = "${resume.id}_${template}_${watermark}",
+            resumeId = resume.id,
+            template = template,
+            watermark = watermark,
+            pdfData = pdfBytes,
+            createdAt = System.currentTimeMillis()
+        )
+        database.pdfCacheDao().insert(cacheEntry).await()
+
+        return pdfBytes
     }
 
-    override suspend fun clearCache(): Result<Unit> {
+    override suspend fun clearCache() {
         database.pdfCacheDao().deleteAll().await()
-        return Result.Success(Unit)
     }
 
     private fun generatePdfDocument(
@@ -108,18 +100,48 @@ class PdfRepositoryImpl @Inject constructor(
             y -= 20f
         }
 
-        // Sections
-        y = addSection(document, page, contentStream, font, y, margin, "Summary", resume.summary)
-        y = addSection(document, page, contentStream, font, y, margin, "Experience",
-            resume.experience.map { "${it.role} at ${it.company} (${it.startDate} - ${it.endDate})\n${it.description}" }.joinToString("\n\n"))
-        y = addSection(document, page, contentStream, font, y, margin, "Education",
-            resume.education.map { "${it.degree} at ${it.institution} (${it.startDate} - ${it.endDate})" }.joinToString("\n"))
-        y = addSection(document, page, contentStream, font, y, margin, "Skills", resume.skills.joinToString(", "))
-        y = addSection(document, page, contentStream, font, y, margin, "Languages",
-            resume.languages.map { "${it.language} (${it.proficiency})" }.joinToString(", "))
+        // Sections - Build content from sections
+        val summarySection = resume.sections.firstOrNull { it.type.name == "CUSTOM" && it.title == "Summary" }
+        val experienceSection = resume.sections.firstOrNull { it.type.name == "EXPERIENCE" }
+        val educationSection = resume.sections.firstOrNull { it.type.name == "EDUCATION" }
+        val skillsSection = resume.sections.firstOrNull { it.type.name == "SKILLS" }
+        val languagesSection = resume.sections.firstOrNull { it.type.name == "LANGUAGES" }
+
+        // Use personalInfo summary if no summary section
+        val summary = summarySection?.itemsJson?.let { parseItems(it).joinToString("\n") } ?: resume.personalInfo.summary
+
+        y = addSection(document, page, contentStream, font, y, margin, "Summary", summary)
+        
+        // Build experience content from SectionItems
+        val experienceContent = experienceSection?.let { parseItems(it.itemsJson)
+            .map { "${it.title} at ${it.subtitle} (${it.startDate} - ${it.endDate})\n${it.description}" }
+            .joinToString("\n\n")
+        }
+        y = addSection(document, page, contentStream, font, y, margin, "Experience", experienceContent)
+        
+        // Build education content from SectionItems
+        val educationContent = educationSection?.let { parseItems(it.itemsJson)
+            .map { "${it.title} at ${it.subtitle} (${it.startDate} - ${it.endDate})" }
+            .joinToString("\n")
+        }
+        y = addSection(document, page, contentStream, font, y, margin, "Education", educationContent)
+        
+        // Build skills content from SectionItems
+        val skillsContent = skillsSection?.let { parseItems(it.itemsJson)
+            .map { it.title }
+            .joinToString(", ")
+        }
+        y = addSection(document, page, contentStream, font, y, margin, "Skills", skillsContent)
+        
+        // Build languages content from SectionItems
+        val languagesContent = languagesSection?.let { parseItems(it.itemsJson)
+            .map { "${it.title} (${it.subtitle})" }
+            .joinToString(", ")
+        }
+        y = addSection(document, page, contentStream, font, y, margin, "Languages", languagesContent)
 
         if (watermark) {
-            addWatermark(page)
+            addWatermark(page, contentStream)
         }
 
         contentStream.close()
@@ -127,6 +149,12 @@ class PdfRepositoryImpl @Inject constructor(
         document.close()
 
         return outputStream.toByteArray()
+    }
+
+    private fun parseItems(itemsJson: String): List<SectionItem> {
+        val gson = com.google.gson.Gson()
+        val type = com.google.gson.reflect.TypeToken.getParameterized(List::class.java, SectionItem::class.java).type
+        return gson.fromJson(itemsJson, type) ?: emptyList()
     }
 
     private fun addSection(
@@ -181,16 +209,21 @@ class PdfRepositoryImpl @Inject constructor(
         return currentY
     }
 
-    private fun addWatermark(page: PDPage) {
-        val contentStream = PDPageContentStream(page, PDPageContentStream.AppendMode.APPEND, true, true)
-        contentStream.setNonStrokingColor(200f/255f, 200f/255f, 200f/255f)
-        contentStream.setFont(PDType0Font.load(contentStream.getResources(), java.lang.ClassLoader.getSystemResourceAsStream("fonts/Roboto-Regular.ttf")), 60f)
-        contentStream.beginText()
-        contentStream.setTextMatrix(java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0)))
-        contentStream.newLineAtOffset(page.mediaBox.width / 2 - 150, page.mediaBox.height / 2 - 50)
-        contentStream.showText("RESUME AI")
-        contentStream.endText()
-        contentStream.close()
+    private fun addWatermark(page: PDPage, contentStream: PDPageContentStream) {
+        val watermarkStream = PDPageContentStream(page, PDPageContentStream.AppendMode.APPEND, true, true)
+        watermarkStream.setNonStrokingColor(200f/255f, 200f/255f, 200f/255f)
+        val watermarkFont = if (fontFile.exists()) {
+            PDType0Font.load(watermarkStream.getResources(), fontFile)
+        } else {
+            PDType0Font.load(watermarkStream.getResources(), context.assets.open("fonts/Roboto-Regular.ttf"))
+        }
+        watermarkStream.setFont(watermarkFont, 60f)
+        watermarkStream.beginText()
+        watermarkStream.setTextMatrix(java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0)))
+        watermarkStream.newLineAtOffset(page.mediaBox.width / 2 - 150, page.mediaBox.height / 2 - 50)
+        watermarkStream.showText("RESUME AI")
+        watermarkStream.endText()
+        watermarkStream.close()
     }
 
     companion object {

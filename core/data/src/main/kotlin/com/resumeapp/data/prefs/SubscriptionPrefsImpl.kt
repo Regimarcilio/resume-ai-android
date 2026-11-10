@@ -4,6 +4,7 @@ import com.resumeapp.domain.model.SubscriptionStatus
 import com.resumeapp.domain.model.SubscriptionTier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 
 interface SubscriptionPrefs {
     val currentStatus: SubscriptionStatus
@@ -49,14 +50,12 @@ class SubscriptionPrefsImpl constructor(
 
     init {
         // Load from UserPrefs on init
-        val prefsStatus = userPrefs.subscriptionStatusFlow.firstOrNull()
-        if (prefsStatus != null) {
-            _status.value = SubscriptionStatus(
-                tier = prefsStatus.tier,
-                expiryDate = prefsStatus.expiryDate,
-                isActive = prefsStatus.isActive,
-                purchaseToken = prefsStatus.purchaseToken
-            )
-        }
+        val prefsStatus = runBlocking { userPrefs.subscriptionStatusFlow.first() }
+        _status.value = SubscriptionStatus(
+            tier = prefsStatus.tier,
+            expiryDate = prefsStatus.expiryDate,
+            isActive = prefsStatus.isActive,
+            purchaseToken = prefsStatus.purchaseToken
+        )
     }
 }

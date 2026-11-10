@@ -5,12 +5,13 @@ import com.resumeapp.domain.model.ATSSuggestion
 import com.resumeapp.domain.model.SuggestionType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 class ATSScoreMapper {
 
     private val gson = Gson()
-    private val suggestionListType = object : TypeToken<List<ATSSuggestion>>() {}.type
-    private val stringListType = object : TypeToken<List<String>>() {}.type
+    private val suggestionListType: Type = object : TypeToken<List<ATSSuggestion>>() {}.type
+    private val stringListType: Type = object : TypeToken<List<String>>() {}.type
 
     fun toDomain(entity: com.resumeapp.data.db.ATSScoreEntity): ATSScore {
         val missingKeywords = gson.fromJson(
@@ -20,7 +21,7 @@ class ATSScoreMapper {
 
         val suggestions = gson.fromJson(
             entity.suggestionsJson,
-            TypeToken.getParameterized(List::class.java, ATSSuggestion::class.java).type
+            suggestionListType
         ) ?: emptyList()
 
         return ATSScore(
@@ -29,8 +30,8 @@ class ATSScoreMapper {
             keywordMatch = entity.keywordMatch,
             formattingScore = entity.formattingScore,
             sectionCompleteness = entity.sectionCompleteness,
-            missingKeywords = missingKeywords,
-            suggestions = suggestions,
+            missingKeywordsJson = com.google.gson.Gson().toJson(missingKeywords),
+            suggestionsJson = com.google.gson.Gson().toJson(suggestions),
             analyzedAt = entity.analyzedAt
         )
     }
@@ -42,8 +43,8 @@ class ATSScoreMapper {
             keywordMatch = score.keywordMatch,
             formattingScore = score.formattingScore,
             sectionCompleteness = score.sectionCompleteness,
-            missingKeywordsJson = com.google.gson.Gson().toJson(score.missingKeywords),
-            suggestionsJson = com.google.gson.Gson().toJson(score.suggestions),
+            missingKeywordsJson = gson.toJson(score.missingKeywords),
+            suggestionsJson = gson.toJson(score.suggestions),
             analyzedAt = score.analyzedAt
         )
     }

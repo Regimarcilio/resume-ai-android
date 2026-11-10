@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import java.lang.reflect.Type
 
 /**
@@ -84,47 +85,47 @@ class UserPrefsImpl constructor(
     private val gson = Gson()
 
     override val userId: String
-        get() = runBlocking { dataStore.data.firstOrNull()?.getString(USER_ID_KEY) ?: "" }
+        get() = runBlocking { dataStore.data.first()?.getString(USER_ID_KEY) ?: "" }
 
     override val subscriptionTier: SubscriptionTier
         get() = runBlocking {
-            val tierStr = dataStore.data.firstOrNull()?.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name
+            val tierStr = dataStore.data.first()?.getString(SUBSCRIPTION_TIER_KEY) ?: SubscriptionTier.FREE.name
             SubscriptionTier.valueOf(tierStr)
         }
 
     override val subscriptionExpiryDate: Long?
         get() = runBlocking {
-            val expiry = dataStore.data.firstOrNull()?.getLong(SUBSCRIPTION_EXPIRY_KEY)
+            val expiry = dataStore.data.first()?.getLong(SUBSCRIPTION_EXPIRY_KEY)
             if (expiry > 0) expiry else null
         }
 
     override val purchaseToken: String?
-        get() = runBlocking { dataStore.data.firstOrNull()?.getString(PURCHASE_TOKEN_KEY) }
+        get() = runBlocking { dataStore.data.first()?.getString(PURCHASE_TOKEN_KEY) }
 
     override val preferredTemplateId: String?
-        get() = runBlocking { dataStore.data.firstOrNull()?.getString(PREFERRED_TEMPLATE_ID_KEY) }
+        get() = runBlocking { dataStore.data.first()?.getString(PREFERRED_TEMPLATE_ID_KEY) }
 
     override val aiUsageCount: Int
-        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }
+        get() = runBlocking { dataStore.data.first()?.getLong(AI_USAGE_COUNT_KEY)?.toInt() ?: 0 }
 
     override val lastSyncAt: Long
-        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(LAST_SYNC_AT_KEY) ?: 0L }
+        get() = runBlocking { dataStore.data.first()?.getLong(LAST_SYNC_AT_KEY) ?: 0L }
 
     override val consentVersion: String?
-        get() = runBlocking { dataStore.data.firstOrNull()?.getString(CONSENT_VERSION_KEY) }
+        get() = runBlocking { dataStore.data.first()?.getString(CONSENT_VERSION_KEY) }
 
     override val consentTimestamp: Long?
         get() = runBlocking {
-            val ts = dataStore.data.firstOrNull()?.getLong(CONSENT_TIMESTAMP_KEY)
+            val ts = dataStore.data.first()?.getLong(CONSENT_TIMESTAMP_KEY)
             if (ts > 0) ts else null
         }
 
     override val consentAccepted: Boolean
-        get() = runBlocking { dataStore.data.firstOrNull()?.getLong(CONSENT_ACCEPTED_KEY) == 1L }
+        get() = runBlocking { dataStore.data.first()?.getLong(CONSENT_ACCEPTED_KEY) == 1L }
 
     override val consentPurposes: Set<String>
         get() = runBlocking {
-            val json = dataStore.data.firstOrNull()?.getString(CONSENT_PURPOSES_KEY) ?: "[]"
+            val json = dataStore.data.first()?.getString(CONSENT_PURPOSES_KEY) ?: "[]"
             val type = object : TypeToken<Set<String>>() {}.type
             try {
                 Gson().fromJson(json, type)
@@ -134,7 +135,7 @@ class UserPrefsImpl constructor(
         }
 
     override val consentPolicyHash: String?
-        get() = runBlocking { dataStore.data.firstOrNull()?.getString(CONSENT_POLICY_HASH_KEY) }
+        get() = runBlocking { dataStore.data.first()?.getString(CONSENT_POLICY_HASH_KEY) }
 
     // Flows
     override val userIdFlow: Flow<String> = dataStore.data
