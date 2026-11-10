@@ -35,7 +35,7 @@ interface AICacheDao {
 
     // For semantic similarity search (requires custom function or post-processing)
     @RawQuery(observedEntities = [AICacheEntity::class])
-    fun findSimilar(query: androidx.room.RawQuery): AICacheEntity?
+    suspend fun findSimilar(query: androidx.sqlite.db.SupportSQLiteQuery): AICacheEntity?
 
     @Query("SELECT COUNT(*) FROM ai_cache")
     suspend fun count(): Int
