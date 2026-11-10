@@ -17,6 +17,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import jakarta.inject.Inject
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @HiltViewModel
 class EditorViewModel @Inject constructor(
@@ -116,7 +125,7 @@ class EditorViewModel @Inject constructor(
 
         viewModelScope.launch {
             val resume = (_uiState.value as? EditorUiState.Content)?.resume ?: return@launch
-            val result = saveResumeUseCase(SaveResumeUseCase.Params(resume = _uiState.value as? EditorUiState.Content?.resume ?: return@launch))
+            val result = saveResumeUseCase(SaveResumeUseCase.Params(resume = resume))
             _uiState.update { state ->
                 if (state is EditorUiState.Content) {
                     state.copy(
@@ -326,7 +335,6 @@ sealed interface EditorUiState {
         val isSaving: Boolean,
         val editorState: EditorState
     ) : EditorUiState
-    data class Error(val message: String) : EditorUiState
 
     sealed interface EditorState {
         data class Loading : EditorState
@@ -354,16 +362,7 @@ data class SectionEditorState(
     val items: List<SectionItemState>,
     val aiSuggestions: List<String> = emptyList(),
     val isAILoading: Boolean = false
-) {
-    copy(
-        id = id,
-        title = title,
-        type = type,
-        items = items,
-        aiSuggestions = aiSuggestions,
-        isAILoading = isAILoading
-    )
-}
+)
 
 data class SectionItemState(
     val id: String,

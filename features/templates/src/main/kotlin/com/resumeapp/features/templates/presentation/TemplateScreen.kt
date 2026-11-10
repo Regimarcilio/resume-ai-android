@@ -303,7 +303,7 @@ enum class TemplateFilter(
     CREATIVE("Criativos", Icons.Default.Palette),
     ATS("Otimizados ATS", Icons.Default.CheckCircle),
     PREMIUM("Premium", Icons.Default.Star),
-    FREE("Gratuitos", Icons.Default.FreeBreakfast)
+    FREE("Gratuitos", Icons.Default.FreeBreakfast);
 
     override fun toString(): String = displayName
 }
