@@ -3,6 +3,8 @@ package com.resumeapp.ai.cache
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /**
  * AI Cache Interface
@@ -18,6 +20,7 @@ interface AICache {
     fun stream(): Flow<CacheEntry>
 }
 
+@Serializable
 data class CacheStats(
     val hits: Long = 0,
     val misses: Long = 0,
@@ -35,4 +38,6 @@ data class CacheEntry(
     val createdAt: Long,
     val accessCount: Long,
     val lastAccessed: Long
-)
+) {
+    fun toJson(): String = Json.encodeToString(CacheEntry.serializer(), this)
+}
