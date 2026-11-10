@@ -100,11 +100,11 @@ sealed interface SyncState {
     data class Idle(val lastSyncTime: Long? = null) : SyncState
     data class Syncing(val progress: Float = 0f) : SyncState
     data class Error(val message: String) : SyncState
-}
 
-companion object {
-    val IdleInstance: SyncState = SyncState.Idle()
-    val SyncingInstance: SyncState = SyncState.Syncing()
+    companion object {
+        val IdleInstance: SyncState = SyncState.Idle()
+        val SyncingInstance: SyncState = SyncState.Syncing()
+    }
 }
 
 sealed interface SyncOperation {
