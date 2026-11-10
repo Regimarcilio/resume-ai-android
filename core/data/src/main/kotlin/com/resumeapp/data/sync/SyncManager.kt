@@ -21,7 +21,7 @@ class SyncManager @Inject constructor(
     private val ioDispatcher: CoroutineDispatcher = kotlinx.coroutines.Dispatchers.IO
 ) {
 
-    private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
+    private val _syncState = MutableStateFlow<SyncState>(SyncState.IdleInstance)
     val syncState = _syncState.asStateFlow()
 
     private val _pendingOperations = MutableStateFlow<List<SyncOperation>>(emptyList())
@@ -29,7 +29,7 @@ class SyncManager @Inject constructor(
 
     // Queue operations for offline sync
     suspend fun queueOperation(operation: SyncOperation) {
-        _pendingOperations.update { it + operation }
+        _pendingOperations.value = _pendingOperations.value + operation
         // Persist to database for durability
         // database.syncOperationDao().insert(operation.toEntity())
     }
@@ -38,7 +38,7 @@ class SyncManager @Inject constructor(
     suspend fun processQueue() {
         if (!isOnline()) return
         
-        _syncState.value = SyncState.Syncing
+        _syncState.value = SyncState.SyncingInstance
         
         val operations = _pendingOperations.value
         for (operation in operations) {
@@ -49,18 +49,18 @@ class SyncManager @Inject constructor(
                     is SyncOperation.ATSScore -> processATSScore(operation)
                     is SyncOperation.SubscriptionUpdate -> processSubscriptionUpdate(operation)
                 }
-                _pendingOperations.update { it - operation }
+                _pendingOperations.value = _pendingOperations.value - operation
             } catch (e: Exception) {
                 // Log error, keep in queue for retry
                 operation.incrementRetry()
                 if (operation.retryCount >= 3) {
-                    _pendingOperations.update { it - operation }
+_pendingOperations.value = _pendingOperations.value - operation
                     // Move to dead letter queue
                 }
             }
         }
         
-        _syncState.value = SyncState.Idle
+        _syncState.value = SyncState.IdleInstance
     }
 
     private suspend fun processPdfGeneration(op: SyncOperation.GeneratePdf) {
@@ -100,6 +100,11 @@ sealed interface SyncState {
     data class Idle(val lastSyncTime: Long? = null) : SyncState
     data class Syncing(val progress: Float = 0f) : SyncState
     data class Error(val message: String) : SyncState
+}
+
+companion object {
+    val IdleInstance: SyncState = SyncState.Idle()
+    val SyncingInstance: SyncState = SyncState.Syncing()
 }
 
 sealed interface SyncOperation {

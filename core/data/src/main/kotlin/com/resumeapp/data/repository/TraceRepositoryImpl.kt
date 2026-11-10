@@ -22,7 +22,7 @@ class TraceRepositoryImpl constructor(
     }
 
     override suspend fun save(entry: TraceEntry): TraceEntry {
-        val entity = TraceMapper.toEntity(entry)
+        val entity = mapper.toEntity(entry)
         dao.insert(entity).await()
         return entry
     }

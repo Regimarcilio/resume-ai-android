@@ -26,4 +26,12 @@ sealed interface Result<out T> {
         inline fun <T> runCatching(block: () -> T): Result<T> =
             try { Success(block()) } catch (e: Exception) { Failure(e.message ?: e.javaClass.simpleName) }
     }
+
+    /**
+     * Returns the value if Success, throws exception if Failure
+     */
+    inline fun <T> getOrThrow(): T = when (this) {
+        is Success<T> -> value
+        is Failure -> throw IllegalStateException(errorMessage)
+    }
 }

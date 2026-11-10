@@ -34,7 +34,7 @@ class OfflineFirstRepository @Inject constructor(
     suspend fun generatePdf(resume: Resume, template: String, watermark: Boolean) = pdfRepository.generatePdf(resume, template, watermark)
 
     // AI Assist - works offline with cached results, queues for server
-    suspend fun aiChatCompletion(request: AIRequest): AIResponse = aiGatewayClient.chatCompletion(request)
+    suspend fun aiChatCompletion(request: AIRequest): AIResponse = aiGatewayClient.complete(request).getOrThrow()
 
     // ATS Scoring - fully offline (on-device)
     suspend fun calculateATSScore(resumeId: String, jobDescription: String) = 
