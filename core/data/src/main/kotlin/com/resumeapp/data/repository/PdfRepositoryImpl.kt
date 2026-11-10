@@ -8,11 +8,11 @@ import com.resumeapp.domain.repository.PdfRepository
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
-import java.awt.geom.AffineTransform
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import java.io.ByteArrayOutputStream
 import java.io.File
+import android.graphics.Matrix
 
 class PdfRepositoryImpl constructor(
     private val context: android.content.Context,
@@ -218,7 +218,8 @@ class PdfRepositoryImpl constructor(
             PDType0Font.load(document, context.assets.open("fonts/Roboto-Regular.ttf"))
         }
         watermarkStream.setFont(watermarkFont, 60f)
-        val matrix = java.awt.geom.AffineTransform.getRotateInstance(Math.toRadians(45.0), page.mediaBox.width / 2.0, page.mediaBox.height / 2.0)
+        // Create rotation matrix using pdfbox's own Matrix class
+        val matrix = org.apache.pdfbox.util.Matrix.getRotateInstance(Math.toRadians(45.0), page.mediaBox.width / 2.0, page.mediaBox.height / 2.0)
         watermarkStream.setTextMatrix(matrix)
         watermarkStream.newLineAtOffset(page.mediaBox.width / 2 - 150, page.mediaBox.height / 2 - 50)
         watermarkStream.showText("RESUME AI")
