@@ -1,10 +1,7 @@
 package com.resumeapp.data.db
 
-import android.content.Context
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import net.zetetic.database.sqlcipher.SQLiteDatabase
 import net.zetetic.database.sqlcipher.SQLiteOpenHelper
 
 /**
@@ -16,14 +13,14 @@ class SQLCipherOpenHelperFactory(
 ) : RoomDatabase.OpenHelperFactory() {
 
     override fun create(configuration: RoomDatabase.Configuration): SupportSQLiteOpenHelper {
+        val builder = SQLiteOpenHelper.ConfigurationBuilder()
+            .passphrase(passphrase)
         return SQLiteOpenHelper(
             configuration.context,
             configuration.name,
             null,
             configuration.version,
-            object : SQLiteOpenHelper.ConfigurationBuilder()
-                .passphrase(passphrase)
-                .build()
+            builder.build()
         )
     }
 }
