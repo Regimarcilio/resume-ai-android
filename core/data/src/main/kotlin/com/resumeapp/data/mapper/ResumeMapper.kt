@@ -19,15 +19,17 @@ class ResumeMapper {
     private val resumeSectionListType: Type = object : TypeToken<List<ResumeSection>>() {}.type
 
     fun toDomain(entity: com.resumeapp.data.db.ResumeEntity): Resume {
-        val sections = gson.fromJson(
-            entity.sectionsJson,
-            resumeSectionListType
-        ) ?: emptyList()
+        val sections: List<ResumeSection> = if (entity.sectionsJson.isNullOrBlank()) {
+            emptyList()
+        } else {
+            gson.fromJson(entity.sectionsJson, resumeSectionListType) ?: emptyList()
+        }
 
-        val personalInfo = gson.fromJson(
-            entity.personalInfoJson,
-            PersonalInfo::class.java
-        ) ?: PersonalInfo()
+        val personalInfo: PersonalInfo = if (entity.personalInfoJson.isNullOrBlank()) {
+            PersonalInfo()
+        } else {
+            gson.fromJson(entity.personalInfoJson, PersonalInfo::class.java) ?: PersonalInfo()
+        }
 
         return Resume(
             id = entity.id,
@@ -77,10 +79,11 @@ class ResumeMapper {
     }
 
     fun toDomain(entity: com.resumeapp.data.db.ResumeSectionEntity): ResumeSection {
-        val items = gson.fromJson(
-            entity.itemsJson,
-            sectionItemsType
-        ) ?: emptyList()
+        val items: List<SectionItem> = if (entity.itemsJson.isNullOrBlank()) {
+            emptyList()
+        } else {
+            gson.fromJson(entity.itemsJson, sectionItemsType) ?: emptyList()
+        }
 
         return ResumeSection(
             id = entity.id,
