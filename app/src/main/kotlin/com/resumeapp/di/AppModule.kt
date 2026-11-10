@@ -71,8 +71,8 @@ import com.resumeapp.domain.repository.ResumeRepository
  * Main Application Module - Provides application-level dependencies
  * All singletons that live for the entire app lifecycle
  */
-@Module(includes = [SyncModule::class])
 @InstallIn(SingletonComponent::class)
+@Module(includes = [SyncModule::class])
 object AppModule {
 
     @Provides
