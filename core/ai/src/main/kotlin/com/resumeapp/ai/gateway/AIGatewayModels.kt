@@ -75,17 +75,6 @@ data class StreamDelta(
 )
 
 /**
- * Result wrapper for AI operations
- */
-sealed interface Result<out T> {
-    data class Success<out T>(val value: T) : Result<T>
-    data class Failure(val exception: Throwable) : Result<Nothing>
-}
-
-fun <T> Result<T>.isSuccess(): Boolean = this is Result.Success<T>
-fun <T> Result<T>.isFailure(): Boolean = this is Result.Failure
-
-/**
  * Extension to convert GatewayResponse to AIResponse
  * (Internal to AIGatewayClientImpl, kept here for type sharing)
  */
