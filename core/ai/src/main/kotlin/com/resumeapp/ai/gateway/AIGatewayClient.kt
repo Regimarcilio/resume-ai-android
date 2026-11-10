@@ -3,6 +3,7 @@ package com.resumeapp.ai.gateway
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.ai.gateway.AIResponseChunk
+import com.resumeapp.domain.model.Result
 import kotlinx.coroutines.flow.Flow
 
 /**

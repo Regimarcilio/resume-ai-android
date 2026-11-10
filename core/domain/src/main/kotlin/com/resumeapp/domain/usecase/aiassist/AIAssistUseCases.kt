@@ -63,11 +63,13 @@ class ImproveBulletsUseCase constructor(
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Success -> {
-                    val bullets = parseBullets(result.value.content, params.maxBullets)
-                    Success(bullets)
+                is Result.Success -> {
+                    val aiResponse = result.value
+                    val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
+                    val bullets = parseBullets(content, params.maxBullets)
+                    Result.Success(bullets)
                 }
-                is Failure -> Failure(result.errorMessage)
+                is Result.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -169,11 +171,13 @@ class ExtractKeywordsUseCase constructor(
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Success -> {
-                    val keywords = parseKeywords(result.value.content)
-                    Success(keywords)
+                is Result.Success -> {
+                    val aiResponse = result.value
+                    val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
+                    val keywords = parseKeywords(content)
+                    Result.Success(keywords)
                 }
-                is Failure -> Failure(result.errorMessage)
+                is Result.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)
@@ -287,8 +291,12 @@ class RephraseSectionUseCase constructor(
             val result = aiGatewayClient.complete(request)
 
             when (result) {
-                is Success -> Success(result.value.content.trim())
-                is Failure -> Failure(result.errorMessage)
+                is Result.Success -> {
+                    val aiResponse = result.value
+                    val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
+                    Result.Success(content.trim())
+                }
+                is Result.Failure -> Result.Failure(result.errorMessage)
             }
         } catch (e: Exception) {
             Failure(e.message ?: e.javaClass.simpleName)

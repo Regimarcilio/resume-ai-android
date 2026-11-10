@@ -175,8 +175,12 @@ class AnalyzeATSUseCase constructor(
         val result = aiGatewayClient.complete(request)
 
         return when (result) {
-            is Success -> parseAIResponse(result.value.content)
-            is Failure -> {
+            is Result.Success -> {
+                val aiResponse = result.value
+                val content = aiResponse.choices.firstOrNull()?.message?.content ?: ""
+                parseAIResponse(content)
+            }
+            is Result.Failure -> {
                 // Fallback: basic keyword extraction
                 extractKeywordsFallback(resume)
             }
