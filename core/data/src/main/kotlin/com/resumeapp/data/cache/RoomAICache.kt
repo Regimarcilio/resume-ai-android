@@ -9,6 +9,8 @@ import com.resumeapp.data.db.AICacheDao
 import com.resumeapp.data.db.AICacheEntity
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.mapper.AICacheMapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Room-backed AI Cache implementation - Semantic and exact caching
@@ -39,7 +41,7 @@ class RoomAICache constructor(
         }
 
         // Check Room cache (persisted)
-        val entry = database.runInTransaction { dao.getByPromptHash(key, "") }
+        val entry = withContext(Dispatchers.IO) { dao.getByPromptHash(key, "") }
         entry?.let { roomEntry ->
             val response = mapper.toDomain(roomEntry, cacheHit = true)
             val cached = CachedResponse(key, response)
@@ -57,21 +59,21 @@ class RoomAICache constructor(
 
         // Persist to Room
         val entry = mapper.toEntity(key, response)
-        database.runInTransaction { dao.insert(entry) }
+        withContext(Dispatchers.IO) { dao.insert(entry) }
     }
 
     override suspend fun invalidate(key: String) {
         exactCache.remove(key)
-        database.runInTransaction { dao.deleteById(key) }
+        withContext(Dispatchers.IO) { dao.deleteById(key) }
     }
 
     override suspend fun clear() {
         exactCache.clear()
-        database.runInTransaction { dao.deleteAll() }
+        withContext(Dispatchers.IO) { dao.deleteAll() }
     }
 
     override suspend fun getStats(): CacheStats {
-        val size = exactCache.size + database.runInTransaction { dao.count() }
+        val size = exactCache.size + withContext(Dispatchers.IO) { dao.count() }
         val hitRate = if (totalRequests > 0) cacheHits.toDouble() / totalRequests else 0.0
         return CacheStats(size, hitRate, totalRequests, cacheHits)
     }
