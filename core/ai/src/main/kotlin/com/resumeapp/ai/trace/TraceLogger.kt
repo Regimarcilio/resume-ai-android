@@ -1,5 +1,8 @@
 package com.resumeapp.ai.trace
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
 /**
  * Trace Logger Interface
  * Defines the contract for logging AI traces
@@ -19,7 +22,7 @@ data class TraceEntry(
     val response: TraceResponse?,
     val metadata: Map<String, String> = emptyMap()
 ) {
-    fun toJson(): String = kotlinx.serialization.json.Json.encodeToString(TraceEntry.serializer(), this)
+    fun toJson(): String = Json.encodeToString(TraceEntry.serializer(), this)
 }
 
 @Serializable
