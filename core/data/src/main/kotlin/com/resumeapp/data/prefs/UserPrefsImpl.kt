@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.getString
 import androidx.datastore.preferences.core.getLong
+import androidx.datastore.preferences.core.putString
+import androidx.datastore.preferences.core.putLong
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.core.DataStore
 import androidx.security.crypto.EncryptedSharedPreferences
