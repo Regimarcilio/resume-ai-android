@@ -274,3 +274,81 @@ class UpdateSectionUseCase constructor(
         }
     }
 }
+
+/**
+ * Add Section UseCase
+ * Adds a new section to a resume
+ */
+class AddSectionUseCase constructor(
+    private val resumeRepository: ResumeRepository
+) : AsyncUseCase<AddSectionUseCase.Params, Resume> {
+
+    @Serializable
+    data class Params(
+        val resumeId: String,
+        val section: com.resumeapp.domain.model.ResumeSection
+    )
+
+    override suspend operator fun invoke(params: Params): Result<Resume> {
+        return try {
+            val resume = resumeRepository.getById(params.resumeId)
+                ?: return Failure("Resume not found: ${params.resumeId}")
+
+            val newOrder = resume.sections.maxByOrNull { it.order }?.order ?: -1
+            val newSection = params.section.copy(
+                resumeId = params.resumeId,
+                order = newOrder + 1
+            )
+
+            val updatedSections = resume.sections + newSection
+            val updated = resume.copy(
+                sections = updatedSections,
+                updatedAt = System.currentTimeMillis(),
+                version = resume.version + 1
+            )
+
+            resumeRepository.update(updated)
+            Success(updated)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+}
+
+/**
+ * Delete Section UseCase
+ * Removes a section from a resume
+ */
+class DeleteSectionUseCase constructor(
+    private val resumeRepository: ResumeRepository
+) : AsyncUseCase<DeleteSectionUseCase.Params, Resume> {
+
+    @Serializable
+    data class Params(
+        val resumeId: String,
+        val sectionId: String
+    )
+
+    override suspend operator fun invoke(params: Params): Result<Resume> {
+        return try {
+            val resume = resumeRepository.getById(params.resumeId)
+                ?: return Failure("Resume not found: ${params.resumeId}")
+
+            val updatedSections = resume.sections.filter { it.id != params.sectionId }
+                .mapIndexed { index, section ->
+                    section.copy(order = index)
+                }
+
+            val updated = resume.copy(
+                sections = updatedSections,
+                updatedAt = System.currentTimeMillis(),
+                version = resume.version + 1
+            )
+
+            resumeRepository.update(updated)
+            Success(updated)
+        } catch (e: Exception) {
+            Failure(e.message ?: e.javaClass.simpleName)
+        }
+    }
+}

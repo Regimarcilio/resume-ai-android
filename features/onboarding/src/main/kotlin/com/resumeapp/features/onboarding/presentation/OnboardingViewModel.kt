@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.SavedStateHandle
 import com.resumeapp.domain.model.ConsentPurpose
 import com.resumeapp.domain.model.ConsentRecord
-import com.resumeapp.features.onboarding.domain.RecordConsentUseCase
-import com.resumeapp.features.onboarding.domain.CompleteOnboardingUseCase
+import com.resumeapp.domain.usecase.onboarding.RecordConsentUseCase
+import com.resumeapp.domain.usecase.onboarding.CompleteOnboardingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
