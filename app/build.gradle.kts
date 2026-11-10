@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
     id("com.google.dagger.hilt.android")
 }
 
