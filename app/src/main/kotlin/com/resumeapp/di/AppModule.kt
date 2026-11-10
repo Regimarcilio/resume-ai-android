@@ -32,6 +32,14 @@ import com.resumeapp.domain.repository.ATSScoreRepository
 import com.resumeapp.domain.repository.AICacheRepository
 import com.resumeapp.domain.repository.TraceRepository
 import com.resumeapp.domain.repository.PdfRepository
+import com.resumeapp.domain.usecase.ats.AnalyzeATSUseCase
+import com.resumeapp.domain.usecase.ats.ApplyATSSuggestionUseCase
+import com.resumeapp.domain.usecase.ats.GetATSScoreUseCase
+import com.resumeapp.domain.usecase.ats.RefreshATSUseCase
+import com.resumeapp.domain.usecase.aiassist.ExtractKeywordsUseCase
+import com.resumeapp.domain.usecase.aiassist.ImproveBulletsUseCase
+import com.resumeapp.domain.usecase.aiassist.RephraseSectionUseCase
+import com.resumeapp.domain.usecase.aiassist.SuggestTemplatesUseCase
 import dagger.hilt.android.EntryPoint
 import dagger.hilt.android.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
@@ -44,7 +52,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
-import com.resumeapp.domain.ai.cache.AICache
+import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.guardrail.GuardrailPipeline
 import com.resumeapp.ai.guardrail.InputSanitizer
 import com.resumeapp.ai.guardrail.OutputValidator
@@ -326,6 +334,38 @@ object UseCaseModule {
     @Singleton
     fun provideSaveResumeUseCase(resumeRepository: ResumeRepository): SaveResumeUseCase = SaveResumeUseCase(resumeRepository)
 
+    // AI Assist UseCases
+    @Provides
+    @Singleton
+    fun provideImproveBulletsUseCase(
+        aiGatewayClient: AIGatewayClient,
+        aiCache: AICache,
+        guardrailPipeline: GuardrailPipeline,
+        traceLogger: TraceLogger
+    ): ImproveBulletsUseCase = ImproveBulletsUseCase(aiGatewayClient, aiCache, guardrailPipeline, traceLogger)
+
+    @Provides
+    @Singleton
+    fun provideExtractKeywordsUseCase(
+        aiGatewayClient: AIGatewayClient,
+        aiCache: AICache,
+        traceLogger: TraceLogger
+    ): ExtractKeywordsUseCase = ExtractKeywordsUseCase(aiGatewayClient, aiCache, traceLogger)
+
+    @Provides
+    @Singleton
+    fun provideRephraseSectionUseCase(
+        aiGatewayClient: AIGatewayClient,
+        traceLogger: TraceLogger
+    ): RephraseSectionUseCase = RephraseSectionUseCase(aiGatewayClient, traceLogger)
+
+    @Provides
+    @Singleton
+    fun provideSuggestTemplatesUseCase(
+        aiGatewayClient: AIGatewayClient,
+        templateRepository: TemplateRepository
+    ): SuggestTemplatesUseCase = SuggestTemplatesUseCase(aiGatewayClient, templateRepository)
+
     // Onboarding UseCases
     @Provides
     @Singleton
@@ -334,4 +374,26 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideCompleteOnboardingUseCase(resumeRepository: ResumeRepository): CompleteOnboardingUseCase = CompleteOnboardingUseCase(resumeRepository)
+
+    // ATS UseCases
+    @Provides
+    @Singleton
+    fun provideAnalyzeATSUseCase(
+        atsScoreRepository: ATSScoreRepository,
+        resumeRepository: ResumeRepository,
+        aiGatewayClient: AIGatewayClient,
+        aiCache: AICache
+    ): AnalyzeATSUseCase = AnalyzeATSUseCase(atsScoreRepository, resumeRepository, aiGatewayClient, aiCache)
+
+    @Provides
+    @Singleton
+    fun provideGetATSScoreUseCase(atsScoreRepository: ATSScoreRepository): GetATSScoreUseCase = GetATSScoreUseCase(atsScoreRepository)
+
+    @Provides
+    @Singleton
+    fun provideApplyATSSuggestionUseCase(resumeRepository: ResumeRepository): ApplyATSSuggestionUseCase = ApplyATSSuggestionUseCase(resumeRepository)
+
+    @Provides
+    @Singleton
+    fun provideRefreshATSUseCase(analyzeATSUseCase: AnalyzeATSUseCase): RefreshATSUseCase = RefreshATSUseCase(analyzeATSUseCase)
 }
