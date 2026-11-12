@@ -6,6 +6,12 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+// Hilt cross-module aggregation: required so the :app module's Dagger graph
+// sees @HiltViewModel classes declared in the :features:* library modules.
+hilt {
+    enableAggregatingTask = true
+}
+
 android {
     namespace = "com.resumeapp"
     compileSdk = 34

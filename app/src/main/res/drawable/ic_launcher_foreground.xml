@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Launcher icon - foreground layer.
+    108x108dp canvas; the central 72x72dp is the guaranteed-visible safe zone.
+    Design: a resume document sheet + an "AI" sparkle accent.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Document sheet (white) with folded top-right corner -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,25 H57 L68,36 V78 A5,5 0 0 1 63,83 H38 A5,5 0 0 1 33,78 V30 A5,5 0 0 1 38,25 Z" />
+
+    <!-- Folded corner (light indigo) -->
+    <path
+        android:fillColor="#C7D2FE"
+        android:pathData="M57,25 V36 H68 Z" />
+
+    <!-- Resume content lines -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M40,43 H60 A1.8,1.8 0 0 1 60,46.6 H40 A1.8,1.8 0 0 1 40,43 Z" />
+    <path
+        android:fillColor="#818CF8"
+        android:pathData="M40,52 H60 A1.8,1.8 0 0 1 60,55.6 H40 A1.8,1.8 0 0 1 40,52 Z" />
+    <path
+        android:fillColor="#818CF8"
+        android:pathData="M40,61 H52 A1.8,1.8 0 0 1 52,64.6 H40 A1.8,1.8 0 0 1 40,61 Z" />
+
+    <!-- "AI" sparkle accent, bottom-right -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M74,62 L77.2,71.8 L87,75 L77.2,78.2 L74,88 L70.8,78.2 L61,75 L70.8,71.8 Z" />
+</vector>

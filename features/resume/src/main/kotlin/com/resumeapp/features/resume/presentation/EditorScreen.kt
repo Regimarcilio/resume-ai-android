@@ -68,16 +68,21 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 
+/**
+ * Resume flow (list -> editor).
+ *
+ * Uses its own NavController: a nested NavHost must not reuse the parent
+ * controller, otherwise the ViewModelStore is set twice and navigation throws
+ * "ViewModelStore should be set before setGraph call".
+ */
 @Composable
-fun ResumeNavHost(
-    navController: NavHostController,
-    startDestination: String = "list"
-) {
+fun ResumeNavHost() {
+    val navController = rememberNavController()
     val viewModel = hiltViewModel<ResumeListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = uiState as? ResumeListUiState.Content
 
-    NavHost(navController, startDestination) {
+    NavHost(navController, "list") {
         composable("list") {
             ResumeListScreen(
                 resumes = listState?.resumes.orEmpty(),

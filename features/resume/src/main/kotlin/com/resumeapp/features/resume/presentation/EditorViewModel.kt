@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+@HiltViewModel
 class EditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getResumeUseCase: GetResumeUseCase,

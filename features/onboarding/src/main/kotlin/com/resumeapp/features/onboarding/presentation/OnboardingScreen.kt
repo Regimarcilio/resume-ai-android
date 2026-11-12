@@ -25,12 +25,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -70,37 +72,41 @@ import androidx.compose.material.icons.filled.SmartToy
 import com.resumeapp.domain.model.ConsentPurpose
 import androidx.hilt.navigation.compose.hiltViewModel
 
+/**
+ * Onboarding flow.
+ *
+ * The flow is driven by [OnboardingViewModel]'s state machine rather than by a
+ * nested NavHost: a NavHost inside another NavHost's destination cannot reuse
+ * the parent controller (the ViewModelStore is already set), which crashed
+ * with "ViewModelStore should be set before setGraph call".
+ */
 @Composable
 fun OnboardingNavHost(
-    navController: NavHostController,
-    startDestination: String = "welcome"
+    onFinished: () -> Unit
 ) {
     val viewModel = hiltViewModel<OnboardingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    NavHost(navController, startDestination) {
-        composable("welcome") {
-            WelcomeScreen(onNext = { viewModel.onWelcomeNext() })
-        }
-        composable("policy") {
-            PolicyScreen(onAccept = { viewModel.onPolicyAccepted() })
-        }
-        composable("consent") {
-            ConsentScreen(
-                onPurposeToggled = { purpose, checked -> viewModel.onConsentPurposeToggled(purpose, checked) },
-                onAccept = { viewModel.onConsentAccepted() }
-            )
-        }
-        composable("template-picker") {
-            TemplatePickerScreen(
-                onTemplateSelected = { id -> viewModel.onTemplateSelected(id) },
-                onComplete = { viewModel.onCompleteOnboarding() },
-                onSkip = { viewModel.onSkipTemplatePicker() }
-            )
-        }
-        composable("complete") {
+    when (val state = uiState) {
+        is OnboardingUiState.Welcome -> WelcomeScreen(onNext = { viewModel.onWelcomeNext() })
+        is OnboardingUiState.Policy -> PolicyScreen(onAccept = { viewModel.onPolicyAccepted() })
+        is OnboardingUiState.Consent -> ConsentScreen(
+            onPurposeToggled = { purpose, checked -> viewModel.onConsentPurposeToggled(purpose, checked) },
+            onAccept = { viewModel.onConsentAccepted() }
+        )
+        is OnboardingUiState.TemplatePicker -> TemplatePickerScreen(
+            onTemplateSelected = { id -> viewModel.onTemplateSelected(id) },
+            onComplete = { viewModel.onCompleteOnboarding() },
+            onSkip = { viewModel.onSkipTemplatePicker() }
+        )
+        is OnboardingUiState.Complete -> {
             CompletionScreen()
+            LaunchedEffect(Unit) { onFinished() }
         }
+        is OnboardingUiState.Error -> ErrorScreen(
+            message = state.message,
+            onRetry = { viewModel.onWelcomeNext() }
+        )
     }
 }
 
@@ -525,6 +531,34 @@ fun CompletionScreen() {
             ) {
                 Text("Ir para o Editor", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
+        }
+    }
+}
+@Composable
+private fun ErrorScreen(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Box(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                Icons.Default.Error,
+                contentDescription = "Erro",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(48.dp)
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(onClick = onRetry) { Text("Tentar novamente") }
         }
     }
 }

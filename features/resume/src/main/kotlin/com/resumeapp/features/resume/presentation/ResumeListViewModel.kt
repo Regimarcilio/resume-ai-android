@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+@HiltViewModel
 class ResumeListViewModel @Inject constructor(
     private val getAllResumesUseCase: GetAllResumesUseCase,
     private val createResumeUseCase: CreateResumeUseCase,

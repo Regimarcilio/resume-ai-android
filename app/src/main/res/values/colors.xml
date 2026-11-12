@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand palette (mirrors ui/theme/Theme.kt) -->
+    <color name="brand_primary">#4F46E5</color>
+    <color name="brand_primary_dark">#6366F1</color>
+    <color name="brand_secondary">#7C3AED</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_dark">#1E1E1E</color>
+</resources>

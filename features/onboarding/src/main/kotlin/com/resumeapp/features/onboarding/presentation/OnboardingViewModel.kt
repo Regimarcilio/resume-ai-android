@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+@HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val recordConsentUseCase: RecordConsentUseCase,

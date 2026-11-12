@@ -20,6 +20,7 @@ import javax.inject.Inject
  * ATS Analysis ViewModel
  * Runs the ATS scoring pipeline and exposes the result to [ATSScreen].
  */
+@HiltViewModel
 class ATSViewModel @Inject constructor(
     savedStateHandle: androidx.lifecycle.SavedStateHandle,
     private val analyzeATSUseCase: AnalyzeATSUseCase,

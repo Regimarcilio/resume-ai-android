@@ -21,13 +21,19 @@ fun AppNavHost(
     NavHost(navController, startDestination) {
         // Onboarding flow
         composable("onboarding") {
-            OnboardingNavHost(navController, "welcome")
+            OnboardingNavHost(
+                onFinished = {
+                    navController.navigate("app") {
+                        popUpTo("onboarding") { inclusive = true }
+                    }
+                }
+            )
         }
 
         // Main app flow
         navigation(startDestination = "resume_list", route = "app") {
             composable("resume_list") {
-                ResumeNavHost(navController, "list")
+                ResumeNavHost()
             }
             composable(
                 route = "ats/{resumeId}",
@@ -38,7 +44,7 @@ fun AppNavHost(
             }
             composable("templates") {
                 TemplateGalleryScreen(onSelect = { template ->
-                    navController.navigate("app/resume_list/editor/new?template=${template.id}")
+                    navController.navigate("app/resume_list")
                 })
             }
             composable("settings") {
