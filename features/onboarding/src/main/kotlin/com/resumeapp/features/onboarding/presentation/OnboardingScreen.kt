@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -113,7 +115,10 @@ fun OnboardingNavHost(
 @Composable
 fun WelcomeScreen(onNext: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -191,11 +196,20 @@ fun FeatureRow(icon: ImageVector, title: String, description: String) {
 
 @Composable
 fun PolicyScreen(onAccept: () -> Unit) {
-    var scrollPosition by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0f) }
-    val context = LocalContext.current
+    val scrollState = androidx.compose.foundation.rememberScrollState()
+
+    // O botão só habilita depois que o usuário percorreu a política.
+    // `scrollState.value` é a posição atual e `maxValue` o limite total;
+    // quando o texto cabe inteiro na tela (maxValue == 0) já pode aceitar.
+    val hasScrolledToEnd = scrollState.maxValue <= 0 ||
+        scrollState.value >= scrollState.maxValue - 24f
+    val canAccept = hasScrolledToEnd
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Header
@@ -203,20 +217,20 @@ fun PolicyScreen(onAccept: () -> Unit) {
             text = "Política de Privacidade",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp)
         )
 
         // Scrollable policy text
         androidx.compose.foundation.layout.Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
+                .fillMaxWidth()
                 .weight(1f)
+                .padding(horizontal = 24.dp)
         ) {
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                    .verticalScroll(scrollState)
             ) {
                 // Policy content - in real app, load from assets/privacy-policy.html
                 PolicySection("1. Quem Somos", "Este aplicativo é desenvolvido por [Empresa]. Somos o Controlador dos seus dados (LGPD Art. 5º).")
@@ -231,17 +245,29 @@ fun PolicyScreen(onAccept: () -> Unit) {
             }
         }
 
-        // Accept button - only enabled after scroll
+        // Botão de aceite - habilitado após percorrer a política.
         Button(
             onClick = onAccept,
-            modifier = Modifier.padding(24.dp).fillMaxWidth(),
-            enabled = scrollPosition > 0.8f, // Enable after 80% scroll
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .fillMaxWidth(),
+            enabled = canAccept,
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = if (scrollPosition > 0.8f) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            Text("Li e aceito a Política de Privacidade", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = if (canAccept) {
+                    "Li e aceito a Política de Privacidade"
+                } else {
+                    "Role até o final para aceitar"
+                },
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
@@ -261,7 +287,10 @@ fun ConsentScreen(
     onAccept: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
@@ -376,7 +405,10 @@ fun TemplatePickerScreen(
     onSkip: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
@@ -492,7 +524,10 @@ fun TemplateCard(
 @Composable
 fun CompletionScreen() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
