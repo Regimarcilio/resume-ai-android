@@ -42,7 +42,9 @@ There is no Play Store dependency, no billing, and no server-side account.
 
 ## Screens
 
-`Onboarding (consent)` → `Resume list` → `Editor` → `ATS` / `Templates` / `Settings` → `My Data (Art. 18)`
+`Onboarding` (Welcome → Privacy policy → Consent → Template) → `Resume list` → `Editor` (Personal info → Sections) → `ATS`
+
+A bottom bar do app principal leva a `Currículos`, `Templates` e `Configurações` (→ `Meus Dados`, Art. 18 LGPD).
 
 ## Requirements
 
@@ -169,12 +171,12 @@ Releases are published as GitHub Releases with the APK attached.
 ## Known limitations
 
 1. **The AI features require the mock gateway** (Docker + Redis). Without it, `AIGatewayClient` returns a failure.
-2. **The ATS screen is not yet reachable** from the navigation graph.
-3. **AI traces are not persisted** — `TraceLogger` is injected into the use cases but never called (wiring pending).
-4. **Unit tests do not run in CI** — `core:ai` has a test referencing a class that moved to the `app` module.
-5. **SQLCipher was removed** — Room currently uses the default (unencrypted) factory, while the privacy policy states AES-256. This must be reconciled before any wide distribution.
-6. **The release build with R8/minify is not validated** — published artifacts are debug builds.
-7. The privacy policy still contains placeholders (`[Empresa]`, `dpo@empresa.com`).
+2. **AI traces are not persisted** — `TraceLogger` is injected into the use cases but never called (wiring pending).
+3. **Unit tests do not run in CI** — `core:ai` has a test referencing a class that moved to the `app` module.
+4. **SQLCipher was removed** — Room currently uses the default (unencrypted) factory, while the privacy policy states AES-256. This must be reconciled before any wide distribution.
+5. **The release build with R8/minify is not validated** — published artifacts are debug builds.
+6. The privacy policy still contains placeholders (`[Empresa]`, `dpo@empresa.com`).
+7. **Some actions are still placeholders**: duplicating a resume, editing a section item, the AI-assist button in the editor, and PDF export.
 
 ## Roadmap
 
@@ -217,7 +219,9 @@ Sem dependência da Play Store, sem cobrança e sem conta no servidor.
 
 ## Telas
 
-`Onboarding (consentimento)` → `Lista de currículos` → `Editor` → `ATS` / `Templates` / `Configurações` → `Meus Dados (Art. 18)`
+`Onboarding` (Welcome → Política → Consentimento → Template) → `Lista de currículos` → `Editor` (Dados pessoais → Seções) → `ATS`
+
+A bottom bar do app principal leva a `Currículos`, `Templates` e `Configurações` (→ `Meus Dados`, Art. 18 LGPD).
 
 ## Requisitos
 
@@ -345,12 +349,12 @@ Os releases são publicados como GitHub Releases com o APK anexado.
 ## Limitações conhecidas
 
 1. **As features de IA exigem o mock gateway** (Docker + Redis). Sem ele, o `AIGatewayClient` retorna falha.
-2. **A tela de ATS ainda não é alcançável** pelo grafo de navegação.
-3. **Traces de IA não são persistidos** — o `TraceLogger` é injetado nos use cases mas nunca é chamado (falta o wiring).
-4. **Os testes unitários não rodam no CI** — o `core:ai` tem um teste referenciando uma classe que foi movida para o módulo `app`.
-5. **O SQLCipher foi removido** — o Room usa o factory padrão (sem criptografia), mas a política de privacidade declara AES-256. Precisa ser reconciliado antes de qualquer distribuição ampla.
-6. **O build release com R8/minify não foi validado** — os artefatos publicados são debug.
-7. A política de privacidade ainda contém placeholders (`[Empresa]`, `dpo@empresa.com`).
+2. **Traces de IA não são persistidos** — o `TraceLogger` é injetado nos use cases mas nunca é chamado (falta o wiring).
+3. **Os testes unitários não rodam no CI** — o `core:ai` tem um teste referenciando uma classe que foi movida para o módulo `app`.
+4. **O SQLCipher foi removido** — o Room usa o factory padrão (sem criptografia), mas a política de privacidade declara AES-256. Precisa ser reconciliado antes de qualquer distribuição ampla.
+5. **O build release com R8/minify não foi validado** — os artefatos publicados são debug.
+6. A política de privacidade ainda contém placeholders (`[Empresa]`, `dpo@empresa.com`).
+7. **Algumas ações ainda são placeholders**: duplicar currículo, editar item de seção, o botão de IA Assist no editor e a exportação de PDF.
 
 ## Roadmap
 
