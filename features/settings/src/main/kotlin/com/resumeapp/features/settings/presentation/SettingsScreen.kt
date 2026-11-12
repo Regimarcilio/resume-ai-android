@@ -345,7 +345,11 @@ fun MyDataScreen(onBack: () -> Unit = {}) {
                         }
 
                         val errorColor = MaterialTheme.colorScheme.error
-                        LazyColumn(
+                        // Column (nao LazyColumn): um LazyColumn dentro de
+                        // outro LazyColumn recebe altura infinita e estoura em
+                        // runtime com "Vertically scrollable component was
+                        // measured with an infinity maximum height constraints".
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -358,7 +362,7 @@ fun MyDataScreen(onBack: () -> Unit = {}) {
                                 RightAction("Portabilidade", "Exporte todos os seus dados em JSON", Icons.Default.Download, { viewModel.exportData { } }),
                                 RightAction("Excluir Tudo", "Apague TODOS os dados irreversivelmente", Icons.Default.DeleteForever, { viewModel.deleteAllData() }, errorColor)
                             )
-                            items(rightActions) { action ->
+                            rightActions.forEach { action ->
                                 ActionCard(
                                     title = action.title,
                                     description = action.description,

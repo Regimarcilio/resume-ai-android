@@ -443,12 +443,13 @@ fun SectionEditor(
                         Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                         Text("Sugestões da IA", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
-                    LazyColumn(
+                    // Column (nao LazyColumn): evitar container lazy dentro de
+                    // outro container lazy (altura infinita -> crash).
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(0.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        items(aiSuggestions) { suggestion ->
+                        aiSuggestions.forEach { suggestion ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
