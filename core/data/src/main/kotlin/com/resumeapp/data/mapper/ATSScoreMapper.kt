@@ -1,5 +1,6 @@
 package com.resumeapp.data.mapper
 
+import javax.inject.Inject
 import com.resumeapp.domain.model.ATSScore
 import com.resumeapp.domain.model.ATSSuggestion
 import com.resumeapp.domain.model.SuggestionType
@@ -7,7 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
-class ATSScoreMapper {
+class ATSScoreMapper @Inject constructor() {
 
     private val gson = Gson()
     private val suggestionListType: Type = object : TypeToken<List<ATSSuggestion>>() {}.type

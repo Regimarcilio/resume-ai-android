@@ -11,8 +11,8 @@ import com.resumeapp.ai.gateway.Result as GatewayResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class OfflineFirstRepository @Inject constructor(

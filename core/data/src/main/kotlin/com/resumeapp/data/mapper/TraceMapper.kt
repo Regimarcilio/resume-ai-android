@@ -1,9 +1,10 @@
 package com.resumeapp.data.mapper
 
+import javax.inject.Inject
 import com.resumeapp.data.db.TraceEntity
 import com.resumeapp.domain.model.TraceEntry
 
-class TraceMapper {
+class TraceMapper @Inject constructor() {
 
     fun toDomain(entity: TraceEntity): TraceEntry {
         return TraceEntry(

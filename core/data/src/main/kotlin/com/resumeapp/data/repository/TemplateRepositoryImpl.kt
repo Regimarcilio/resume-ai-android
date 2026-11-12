@@ -1,12 +1,13 @@
 package com.resumeapp.data.repository
 
+import javax.inject.Inject
 import com.resumeapp.data.db.TemplateDao
 import com.resumeapp.data.mapper.TemplateMapper
 import com.resumeapp.domain.model.Template
 import com.resumeapp.domain.model.TemplateCategory
 import com.resumeapp.domain.repository.TemplateRepository
 
-class TemplateRepositoryImpl constructor(
+class TemplateRepositoryImpl @Inject constructor(
     private val templateDao: TemplateDao,
     private val mapper: TemplateMapper
 ) : TemplateRepository {

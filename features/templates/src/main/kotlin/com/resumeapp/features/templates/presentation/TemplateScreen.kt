@@ -1,5 +1,17 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.resumeapp.features.templates.presentation
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.FreeBreakfast
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.gridItems
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -20,11 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.resumeapp.domain.model.Template
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,28 +44,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Spacer
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.CheckCircle
 
 @Composable
 fun TemplateGalleryScreen(
     onSelect: (Template) -> Unit
 ) {
-    val viewModel = viewModel<TemplateGalleryViewModel>()
+    val viewModel = hiltViewModel<TemplateGalleryViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -103,23 +122,22 @@ fun TemplateFilterTabs(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .horizontalScroll(androidx.compose.foundation.gestures.rememberScrollState())
+            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
     ) {
         TemplateFilter.values().forEach { filter ->
             androidx.compose.material3.FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterChange(filter) },
                 label = { Text(filter.displayName) },
-                leadingIcon = { if (filter.icon != null) Icon(filter.icon!!, contentDescription = null) },
-                selectedIcon = { if (filter.icon != null) Icon(filter.icon!!, contentDescription = null) },
+                leadingIcon = { filter.icon?.let { Icon(it, contentDescription = null) } },
                 colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    unselectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.padding(end = 8.dp))
+            Spacer(modifier = Modifier.padding(end = 8.dp))
         }
     }
 }
@@ -188,7 +206,7 @@ fun TemplateCard(
                 Row {
                     Text(text = template.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     if (template.isPremium) {
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.padding(start = 8.dp))
+                        Spacer(modifier = Modifier.padding(start = 8.dp))
                         Text(
                             text = "PRO",
                             fontSize = 10.sp,
@@ -200,7 +218,7 @@ fun TemplateCard(
                         )
                     }
                 }
-                Text(text = template.description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = androidx.compose.ui.text.overflow.Ellipsis)
+                Text(text = template.description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     }
@@ -308,16 +326,26 @@ enum class TemplateFilter(
     override fun toString(): String = displayName
 }
 
-data class Template(
-    val id: String,
-    val name: String,
-    val description: String,
-    val category: TemplateCategory,
-    val previewImageUrl: String,
-    val isPremium: Boolean,
-    val isActive: Boolean
-)
-
-enum class TemplateCategory {
-    MODERN, CLASSIC, CREATIVE, ATS_OPTIMIZED
+@Composable
+private fun EmptyState(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    message: String,
+    actionText: String,
+    onAction: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(40.dp))
+        Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(
+            message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Button(onClick = onAction) { Text(actionText) }
+    }
 }

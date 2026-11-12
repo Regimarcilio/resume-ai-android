@@ -1,11 +1,12 @@
 package com.resumeapp.data.repository
 
+import javax.inject.Inject
 import com.resumeapp.data.db.ATSScoreDao
 import com.resumeapp.data.mapper.ATSScoreMapper
 import com.resumeapp.domain.model.ATSScore
 import com.resumeapp.domain.repository.ATSScoreRepository
 
-class ATSScoreRepositoryImpl constructor(
+class ATSScoreRepositoryImpl @Inject constructor(
     private val atsScoreDao: ATSScoreDao,
     private val mapper: ATSScoreMapper
 ) : ATSScoreRepository {

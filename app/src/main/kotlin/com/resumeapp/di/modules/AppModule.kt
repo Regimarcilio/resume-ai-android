@@ -1,14 +1,14 @@
 package com.resumeapp.di.modules
 
 import android.content.Context
-import androidx.datastore.preferences.DataStore
+import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.hilt.work.HiltWorkerFactory
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import androidx.work.Configuration
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.gateway.AIGatewayClient
 import com.resumeapp.ai.gateway.AIGatewayClientImpl
@@ -19,9 +19,12 @@ import com.resumeapp.ai.guardrail.GuardrailPipelineImpl
 import com.resumeapp.ai.trace.TraceLogger
 import com.resumeapp.ai.trace.TraceLoggerImpl
 import com.resumeapp.ai.trace.TraceUploader
+import com.resumeapp.ai.trace.TraceUploaderImpl
 import com.resumeapp.data.cache.RoomAICache
+import com.resumeapp.BuildConfig
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.db.ResumeDao
+import com.resumeapp.data.db.ResumeSectionDao
 import com.resumeapp.data.db.TemplateDao
 import com.resumeapp.data.db.ATSScoreDao
 import com.resumeapp.data.db.AICacheDao
@@ -70,14 +73,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.KotlinJsonAdapterFactory
-import dagger.hilt.android.InstallIn
-import dagger.hilt.android.components.SingletonComponent
-import dagger.hilt.android.scopes.ApplicationContext
-import dagger.hilt.android.scopes.Singleton
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Singleton
 import dagger.Module
 import dagger.Provides
-import jakarta.inject.Inject
+import javax.inject.Inject
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 
@@ -112,17 +115,20 @@ object AppModule {
     fun provideEncryptedSharedPreferences(
         @ApplicationContext context: Context,
         masterKey: MasterKey
-    ) = EncryptedSharedPreferences.create(
+    ): SharedPreferences = EncryptedSharedPreferences.create(
+        context,
         "secure_prefs",
         masterKey,
-        context,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext context: Context) = context.preferencesDataStore("user_prefs")
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("user_prefs") }
+        )
 
     // ============================================================
     // Room Database
@@ -131,8 +137,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideRoomDatabase(
-        @ApplicationContext context: Context,
-        masterKey: MasterKey
+        @ApplicationContext context: Context
     ): AppDatabase = Room.databaseBuilder(
         context,
         AppDatabase::class.java,
@@ -148,6 +153,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideResumeDao(database: AppDatabase): ResumeDao = database.resumeDao()
+
+    @Provides
+    @Singleton
+    fun provideResumeSectionDao(database: AppDatabase): ResumeSectionDao = database.resumeSectionDao()
 
     @Provides
     @Singleton
@@ -173,9 +182,8 @@ object AppModule {
     @Singleton
     fun provideUserPrefs(
         @ApplicationContext context: Context,
-        dataStore: DataStore<Preferences>,
-        masterKey: MasterKey
-    ): UserPrefs = UserPrefsImpl(context, dataStore, masterKey)
+        dataStore: DataStore<Preferences>
+    ): UserPrefs = UserPrefsImpl(context, dataStore)
 
     @Provides
     @Singleton
@@ -207,7 +215,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePdfRepository(impl: PdfRepositoryImpl): PdfRepository = impl
+    fun providePdfRepository(
+        @ApplicationContext context: Context,
+        database: AppDatabase
+    ): PdfRepository = PdfRepositoryImpl(context, database)
 
     @Provides
     @Singleton
@@ -282,7 +293,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideTraceUploader(@ApplicationContext context: Context, traceLogger: TraceLogger): TraceUploader = TraceUploader(traceLogger, context)
+    fun provideTraceUploader(traceLogger: TraceLogger): TraceUploader = TraceUploaderImpl(traceLogger)
 
     // ============================================================
     // Sync / Offline-First
@@ -313,20 +324,6 @@ object AppModule {
     ): OfflineFirstRepository {
         return OfflineFirstRepository(syncManager, resumeRepository, pdfRepository, aiCache, aiGatewayClient, ioDispatcher)
     }
-
-    // ============================================================
-    // WorkManager
-    // ============================================================
-
-    @Provides
-    @Singleton
-    fun provideHiltWorkerFactory(): HiltWorkerFactory = HiltWorkerFactory()
-
-    @Provides
-    @Singleton
-    fun provideWorkManagerConfiguration(): Configuration = Configuration.Builder()
-        .setWorkerFactory(HiltWorkerFactory())
-        .build()
 
     // ============================================================
     // UseCases - Resume

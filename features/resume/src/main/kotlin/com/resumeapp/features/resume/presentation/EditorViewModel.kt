@@ -1,32 +1,40 @@
 package com.resumeapp.features.resume.presentation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Work
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.SavedStateHandle
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Resume
+import com.resumeapp.domain.model.ResumeSection
+import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.model.SectionType
-import com.resumeapp.domain.usecase.resume.*
 import com.resumeapp.domain.usecase.aiassist.ImproveBulletsUseCase
 import com.resumeapp.domain.usecase.ats.AnalyzeATSUseCase
-import com.resumeapp.domain.model.SectionItem
-import com.resumeapp.domain.usecase.Result.Success
-import com.resumeapp.domain.usecase.Result.Failure
+import com.resumeapp.domain.usecase.resume.AddSectionUseCase
+import com.resumeapp.domain.usecase.resume.DeleteSectionUseCase
+import com.resumeapp.domain.usecase.resume.GetResumeUseCase
+import com.resumeapp.domain.usecase.resume.ReorderSectionsUseCase
+import com.resumeapp.domain.usecase.resume.SaveResumeUseCase
+import com.resumeapp.domain.usecase.resume.UpdateSectionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.ui.graphics.vector.ImageVector
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class EditorViewModel(
+class EditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getResumeUseCase: GetResumeUseCase,
     private val saveResumeUseCase: SaveResumeUseCase,
@@ -38,21 +46,23 @@ class EditorViewModel(
     private val analyzeATSUseCase: AnalyzeATSUseCase
 ) : ViewModel() {
 
-    private val resumeId: String = savedStateHandle.get("resumeId") ?: ""
+    private val gson = Gson()
+    private val resumeId: String = savedStateHandle.get<String>("resumeId") ?: ""
 
-    private val _uiState = MutableStateFlow(EditorUiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<EditorUiState>(EditorUiState.Loading())
+    val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
 
     init {
         loadResume()
     }
 
-    private fun loadResume() {
+    // ==================== Loading ====================
+
+    fun loadResume() {
         viewModelScope.launch {
-            _uiState.value = EditorUiState.Loading
-            val result = getResumeUseCase(com.resumeapp.domain.usecase.IdParams(resumeId))
-            _uiState.value = when (result) {
-                is Result.Success -> EditorUiState.Content(
+            _uiState.value = EditorUiState.Loading()
+            when (val result = getResumeUseCase(com.resumeapp.domain.usecase.IdParams(resumeId))) {
+                is Result.Success -> _uiState.value = EditorUiState.Content(
                     resume = result.value,
                     sections = buildSectionTabs(result.value),
                     selectedSectionId = result.value.sections.firstOrNull()?.id,
@@ -66,239 +76,238 @@ class EditorViewModel(
                         isAILoading = false
                     )
                 )
-                is Result.Failure -> EditorUiState.Error(result.error.message ?: "Erro ao carregar currículo")
+                is Result.Failure -> _uiState.value = EditorUiState.Error(result.errorMessage)
             }
         }
     }
+
+    // ==================== Section selection ====================
 
     fun selectSection(sectionId: String) {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                val section = state.resume.sections.find { it.id == it }
-                state.copy(
-                    selectedSectionId = section?.id,
-                    currentSection = section?.let { buildSectionEditorState(state.resume, it.id) } ?: state.currentSection,
-                    editorState = state.editorState.copy(
-                        currentSection = state.currentSection.copy(
-                            id = section?.id ?: "",
-                            title = section?.title ?: "",
-                            type = section?.type ?: SectionType.CUSTOM
-                        )
-                    )
-                )
-            } else this
-        }
-    }
-
-    fun addSection(sectionType: SectionType) {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                val newSection = com.resumeapp.domain.model.ResumeSection(
-                    type = sectionType,
-                    title = sectionType.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                    itemsJson = "[]",
-                    order = state.resume.sections.size
-                )
-                val updatedResume = state.resume.copy(
-                    sections = state.resume.sections + newSection,
-                    version = state.resume.version + 1
-                )
-                state.copy(
-                    resume = updatedResume,
-                    sections = buildSectionTabs(updatedResume),
-                    selectedSectionId = newSection.id,
-                    currentSection = buildSectionEditorState(updatedResume, newSection.id),
-                    editorState = state.editorState.copy(
-                        currentSection = buildSectionEditorState(state.resume, newSection.id)
-                    )
-                )
-            } else this
-        }
-    }
-
-    fun save() {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                state.copy(isSaving = true, editorState = state.editorState.copy(isSaving = true))
-            } else this
-        }
-
-        viewModelScope.launch {
-            val resume = (_uiState.value as? EditorUiState.Content)?.resume ?: return@launch
-            val result = saveResumeUseCase(SaveResumeUseCase.Params(resume = resume))
-            _uiState.update { state ->
-                if (state is EditorUiState.Content) {
-                    state.copy(
-                        isSaving = false,
-                        editorState = state.editorState.copy(isSaving = false)
-                    )
-                } else this
-            }
-        }
-    }
-
-    fun updateSectionContent(sectionId: String, itemsJson: String) {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                val updatedSections = state.resume.sections.map { section ->
-                    if (section.id == sectionId) {
-                        section.copy(itemsJson = itemsJson)
-                    } else section
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        val section = current.resume.sections.find { it.id == sectionId } ?: return
+        val editor = buildSectionEditorState(current.resume, sectionId)
+        _uiState.value = current.copy(
+            selectedSectionId = sectionId,
+            currentSection = editor,
+            editorState = current.editorState.let {
+                if (it is EditorUiState.EditorState.Content) {
+                    it.copy(currentSection = editor, selectedSectionId = sectionId)
+                } else {
+                    it
                 }
-                val updatedResume = state.resume.copy(
-                    sections = updatedSections,
-                    updatedAt = System.currentTimeMillis(),
-                    version = state.resume.version + 1
-                )
-                val updatedSection = updatedResume.sections.find { it.id == sectionId }
-                state.copy(
-                    resume = updatedResume,
-                    currentSection = updatedSection?.let { buildSectionEditorState(updatedResume, it.id) } ?: state.currentSection,
-                    editorState = state.editorState.copy(
-                        currentSection = state.currentSection.copy(
-                            items = buildSectionItems(updatedSection)
-                        )
-                    )
-                )
-            } else this
-        }
-    }
-
-    fun addSectionItem(sectionId: String) {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                val updatedSections = state.resume.sections.map { section ->
-                    if (section.id == sectionId) {
-                        val newItem = com.resumeapp.domain.model.SectionItem(
-                            title = "Novo item",
-                            subtitle = "",
-                            startDate = "",
-                            endDate = "",
-                            highlights = emptyList()
-                        )
-                        val items = com.google.gson.Gson().fromJson(
-                            section.itemsJson,
-                            com.google.gson.reflect.TypeToken.getParameterized(List::class.java, com.resumeapp.domain.model.SectionItem::class.java).type
-                        ) ?: emptyList()
-                        section.copy(itemsJson = com.google.gson.Gson().toJson(items + com.resumeapp.domain.model.SectionItem(
-                            title = "Novo item",
-                            subtitle = "",
-                            startDate = "",
-                            endDate = "",
-                            highlights = emptyList()
-                        )))
-                    } else section
-                }
-                val updatedResume = state.resume.copy(
-                    sections = updatedSections,
-                    version = state.resume.version + 1
-                )
-                state.copy(
-                    resume = updatedResume,
-                    currentSection = state.currentSection.copy(
-                        items = buildSectionItems(updatedResume.sections.find { it.id == sectionId })
-                    ),
-                    editorState = state.editorState.copy(
-                        currentSection = state.currentSection.copy(
-                            items = buildSectionItems(updatedResume.sections.find { it.id == sectionId })
-                        )
-                    )
-                )
-            } else this
-        }
-    }
-
-    fun deleteSectionItem(sectionId: String, itemId: String) {
-        // Similar to addSectionItem but removing item
-    }
-
-    fun reorderSectionItems(sectionId: String, itemIds: List<String>) {
-        // Reorder items in section
-    }
-
-    fun requestAIImprovement(sectionId: String) {
-        _uiState.update { state ->
-            if (state is EditorUiState.Content) {
-                state.copy(
-                    editorState = state.editorState.copy(isAILoading = true)
-                )
-            } else this
-        }
-
-        viewModelScope.launch {
-            val section = (_uiState.value as? EditorUiState.Content)?.resume?.sections
-                .find { it.id == sectionId } ?: return@launch
-
-            val items = com.google.gson.Gson().fromJson(
-                section.itemsJson,
-                com.google.gson.reflect.TypeToken.getParameterized(List::class.java, com.resumeapp.domain.model.SectionItem::class.java).type
-            ) ?: emptyList()
-
-            val result = improveBulletsUseCase(ImproveBulletsUseCase.Params(
-                sectionType = section.type,
-                currentItems = items,
-                context = ImproveBulletsUseCase.ResumeContext(),
-                maxBullets = 5
-            ))
-
-            _uiState.update { state ->
-                if (state is EditorUiState.Content) {
-                    state.copy(
-                        editorState = state.editorState.copy(
-                            isAILoading = false,
-                            aiSuggestions = when (result) {
-                                is Result.Success -> result.value
-                                is Result.Failure -> emptyList()
-                            }
-                        )
-                    )
-                } else this
-            }
-        }
-    }
-
-    private fun buildSectionTabs(resume: Resume): List<SectionTab> {
-        return resume.sections.map { section ->
-            SectionTab(
-                id = section.id,
-                title = section.title,
-                icon = sectionTypeToIcon(section.type)
-            )
-        }
-    }
-
-    private fun buildSectionEditorState(resume: Resume, sectionId: String?): SectionEditorState {
-        val section = sectionId?.let { id -> resume.sections.find { it.id == id } } ?: resume.sections.firstOrNull()
-        val items = section?.let { section ->
-            com.google.gson.Gson().fromJson(
-                section.itemsJson,
-                com.google.gson.reflect.TypeToken.getParameterized(List::class.java, com.resumeapp.domain.model.SectionItem::class.java).type
-            ) ?: emptyList()
-        } ?: emptyList()
-
-        return SectionEditorState(
-            id = section?.id ?: "",
-            title = section?.title ?: "",
-            type = section?.type ?: SectionType.CUSTOM,
-            items = items.map { item ->
-                SectionItemState(
-                    id = item.id,
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    dateRange = "${item.startDate} - ${item.endDate}",
-                    highlights = item.highlights
-                )
             }
         )
     }
 
-    private fun buildSectionItems(section: com.resumeapp.domain.model.ResumeSection?): List<SectionItemState> {
-        return section?.let { section ->
-            val items = com.google.gson.Gson().fromJson(
-                section.itemsJson,
-                com.google.gson.reflect.TypeToken.getParameterized(List::class.java, com.resumeapp.domain.model.SectionItem::class.java).type
-            ) ?: emptyList()
-            items.map { item ->
+    // ==================== Section mutation ====================
+
+    fun addSection(sectionType: SectionType) {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        viewModelScope.launch {
+            val newSection = ResumeSection(
+                resumeId = resumeId,
+                type = sectionType,
+                title = sectionType.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
+                itemsJson = "[]",
+                order = current.resume.sections.size
+            )
+            when (val result = addSectionUseCase(AddSectionUseCase.Params(resumeId, newSection))) {
+                is Result.Success -> applyResume(result.value)
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    fun deleteSection(sectionId: String) {
+        viewModelScope.launch {
+            when (val result = deleteSectionUseCase(DeleteSectionUseCase.Params(resumeId, sectionId))) {
+                is Result.Success -> applyResume(result.value)
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    fun reorderSections(sectionIds: List<String>) {
+        viewModelScope.launch {
+            val orders = sectionIds.withIndex().associate { (index, id) -> id to index }
+            when (val result = reorderSectionsUseCase(ReorderSectionsUseCase.Params(resumeId, orders))) {
+                is Result.Success -> applyResume(result.value)
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    /** Atualiza o conteudo JSON da secao atualmente selecionada. */
+    fun updateSectionContent(itemsJson: String) {
+        val sectionId = (_uiState.value as? EditorUiState.Content)?.selectedSectionId ?: return
+        updateSectionContent(sectionId, itemsJson)
+    }
+
+    private fun updateSectionContent(sectionId: String, itemsJson: String) {
+        viewModelScope.launch {
+            when (
+                val result = updateSectionUseCase(
+                    UpdateSectionUseCase.Params(resumeId = resumeId, sectionId = sectionId, itemsJson = itemsJson)
+                )
+            ) {
+                is Result.Success -> applyResume(result.value)
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    fun save() {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        _uiState.value = current.copy(isSaving = true)
+        viewModelScope.launch {
+            when (val result = saveResumeUseCase(SaveResumeUseCase.Params(resume = current.resume))) {
+                is Result.Success -> {
+                    val updated = _uiState.value as? EditorUiState.Content ?: return@launch
+                    _uiState.value = updated.copy(isSaving = false)
+                }
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    // ==================== Section items ====================
+
+    fun addSectionItem() {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        val sectionId = current.selectedSectionId ?: return
+        val section = current.resume.sections.find { it.id == sectionId } ?: return
+        val items = parseItems(section.itemsJson).toMutableList()
+        items.add(
+            SectionItem(
+                title = "Novo item",
+                subtitle = "",
+                startDate = "",
+                endDate = "",
+                highlights = emptyList()
+            )
+        )
+        updateSectionContent(sectionId, gson.toJson(items))
+    }
+
+    fun deleteSectionItem(itemId: String) {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        val sectionId = current.selectedSectionId ?: return
+        val section = current.resume.sections.find { it.id == sectionId } ?: return
+        val items = parseItems(section.itemsJson).filterNot { it.id == itemId }
+        updateSectionContent(sectionId, gson.toJson(items))
+    }
+
+    fun reorderSectionItems(itemIds: List<String>) {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        val sectionId = current.selectedSectionId ?: return
+        val section = current.resume.sections.find { it.id == sectionId } ?: return
+        val items = parseItems(section.itemsJson)
+        val reordered = itemIds.mapNotNull { id -> items.find { it.id == id } } +
+            items.filter { it.id !in itemIds }
+        updateSectionContent(sectionId, gson.toJson(reordered))
+    }
+
+    // ==================== AI assist ====================
+
+    fun requestAIImprovement() {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        val sectionId = current.selectedSectionId ?: return
+        val section = current.resume.sections.find { it.id == sectionId } ?: return
+
+        setEditorLoading(true)
+        viewModelScope.launch {
+            val result = improveBulletsUseCase(
+                ImproveBulletsUseCase.Params(
+                    sectionType = section.type,
+                    currentItems = parseItems(section.itemsJson),
+                    context = ImproveBulletsUseCase.ResumeContext(),
+                    maxBullets = 5
+                )
+            )
+            val state = _uiState.value as? EditorUiState.Content ?: return@launch
+            val editor = state.editorState
+            _uiState.value = state.copy(
+                editorState = if (editor is EditorUiState.EditorState.Content) {
+                    editor.copy(
+                        isAILoading = false,
+                        aiSuggestions = when (result) {
+                            is Result.Success -> result.value
+                            is Result.Failure -> emptyList()
+                        }
+                    )
+                } else {
+                    editor
+                }
+            )
+        }
+    }
+
+    fun runATSAnalysis(jobDescription: String? = null) {
+        viewModelScope.launch {
+            when (val result = analyzeATSUseCase(AnalyzeATSUseCase.Params(resumeId, jobDescription))) {
+                is Result.Success -> Unit
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    // ==================== Helpers ====================
+
+    private fun applyResume(resume: Resume) {
+        val selectedId = (_uiState.value as? EditorUiState.Content)?.selectedSectionId
+            ?: resume.sections.firstOrNull()?.id
+        val editor = buildSectionEditorState(resume, selectedId)
+        _uiState.value = EditorUiState.Content(
+            resume = resume,
+            sections = buildSectionTabs(resume),
+            selectedSectionId = selectedId,
+            currentSection = editor,
+            isSaving = false,
+            editorState = EditorUiState.EditorState.Content(
+                currentSection = editor,
+                selectedSectionId = selectedId,
+                isSaving = false,
+                aiSuggestions = emptyList(),
+                isAILoading = false
+            )
+        )
+    }
+
+    private fun setEditorLoading(loading: Boolean) {
+        val state = _uiState.value as? EditorUiState.Content ?: return
+        val editor = state.editorState
+        _uiState.value = state.copy(
+            editorState = if (editor is EditorUiState.EditorState.Content) {
+                editor.copy(isAILoading = loading)
+            } else {
+                editor
+            }
+        )
+    }
+
+    private fun setEditorError(message: String) {
+        _uiState.value = EditorUiState.Error(message)
+    }
+
+    private fun parseItems(json: String): List<SectionItem> {
+        val type = object : TypeToken<List<SectionItem>>() {}.type
+        return runCatching { gson.fromJson<List<SectionItem>>(json, type) }.getOrNull().orEmpty()
+    }
+
+    private fun buildSectionTabs(resume: Resume): List<SectionTab> =
+        resume.sections.map { section ->
+            SectionTab(id = section.id, title = section.title, icon = sectionTypeToIcon(section.type))
+        }
+
+    private fun buildSectionEditorState(resume: Resume, sectionId: String?): SectionEditorState {
+        val section = sectionId?.let { id -> resume.sections.find { it.id == id } }
+            ?: resume.sections.firstOrNull()
+        return SectionEditorState(
+            id = section?.id ?: "",
+            title = section?.title ?: "",
+            type = section?.type ?: SectionType.CUSTOM,
+            items = section?.let { parseItems(it.itemsJson) }?.map { item ->
                 SectionItemState(
                     id = item.id,
                     title = item.title,
@@ -306,26 +315,25 @@ class EditorViewModel(
                     dateRange = "${item.startDate} - ${item.endDate}",
                     highlights = item.highlights
                 )
-            }
-        } ?: emptyList()
+            }.orEmpty()
+        )
     }
 
-    private fun sectionTypeToIcon(type: SectionType): ImageVector {
-        return when (type) {
-            SectionType.EXPERIENCE -> Icons.Default.Work
-            SectionType.EDUCATION -> Icons.Default.School
-            SectionType.SKILLS -> Icons.Default.Build
-            SectionType.PROJECTS -> Icons.Default.Folder
-            SectionType.CERTIFICATIONS -> Icons.Default.Verified
-            SectionType.LANGUAGES -> Icons.Default.Language
-            else -> Icons.Default.Description
-        }
+    private fun sectionTypeToIcon(type: SectionType): ImageVector = when (type) {
+        SectionType.EXPERIENCE -> Icons.Default.Work
+        SectionType.EDUCATION -> Icons.Default.School
+        SectionType.SKILLS -> Icons.Default.Build
+        SectionType.PROJECTS -> Icons.Default.Folder
+        SectionType.CERTIFICATIONS -> Icons.Default.Verified
+        SectionType.LANGUAGES -> Icons.Default.Language
+        else -> Icons.Default.Description
     }
 }
 
-// UI State Classes
+// ==================== UI State ====================
+
 sealed interface EditorUiState {
-    data class Loading : EditorUiState
+    data class Loading(val placeholder: Unit = Unit) : EditorUiState
     data class Error(val message: String) : EditorUiState
     data class Content(
         val resume: Resume,
@@ -337,7 +345,7 @@ sealed interface EditorUiState {
     ) : EditorUiState
 
     sealed interface EditorState {
-        data class Loading : EditorState
+        data class Loading(val placeholder: Unit = Unit) : EditorState
         data class Error(val message: String) : EditorState
         data class Content(
             val currentSection: SectionEditorState,

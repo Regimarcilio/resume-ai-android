@@ -1,5 +1,6 @@
 package com.resumeapp.data.mapper
 
+import javax.inject.Inject
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.db.ResumeSectionDao
 import com.resumeapp.domain.model.Resume
@@ -11,7 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
-class ResumeMapper {
+class ResumeMapper @Inject constructor() {
 
     private val gson = Gson()
     private val sectionItemsType: Type = object : TypeToken<List<SectionItem>>() {}.type

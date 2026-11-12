@@ -84,8 +84,8 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    // Jakarta inject for @Singleton annotation
-    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+    // javax.inject for @Singleton annotation
+    implementation("javax.inject:javax.inject:1")
 
     // Gson for mappers
     implementation("com.google.code.gson:gson:2.10.1")

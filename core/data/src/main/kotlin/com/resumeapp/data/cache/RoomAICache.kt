@@ -1,5 +1,6 @@
 package com.resumeapp.data.cache
 
+import javax.inject.Inject
 import com.resumeapp.ai.cache.AICache
 import com.resumeapp.ai.cache.CacheStats
 import com.resumeapp.ai.cache.CacheEntry
@@ -18,7 +19,7 @@ import kotlinx.coroutines.withContext
  * Room-backed AI Cache implementation - Semantic and exact caching
  * Moved to core:data to avoid circular dependency with core:ai
  */
-class RoomAICache constructor(
+class RoomAICache @Inject constructor(
     private val dao: AICacheDao,
     private val database: AppDatabase,
     private val mapper: AICacheMapper

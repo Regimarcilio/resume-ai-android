@@ -1,5 +1,6 @@
 package com.resumeapp.data.repository
 
+import javax.inject.Inject
 import com.resumeapp.data.db.AppDatabase
 import com.resumeapp.data.db.ResumeDao
 import com.resumeapp.data.db.ResumeSectionDao
@@ -7,7 +8,7 @@ import com.resumeapp.data.mapper.ResumeMapper
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.repository.ResumeRepository
 
-class ResumeRepositoryImpl constructor(
+class ResumeRepositoryImpl @Inject constructor(
     private val database: AppDatabase,
     private val resumeDao: ResumeDao,
     private val sectionDao: ResumeSectionDao,

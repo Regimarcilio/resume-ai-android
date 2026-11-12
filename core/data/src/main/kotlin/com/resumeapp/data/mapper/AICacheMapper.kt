@@ -1,5 +1,6 @@
 package com.resumeapp.data.mapper
 
+import javax.inject.Inject
 import com.resumeapp.ai.gateway.AIResponse
 import com.resumeapp.ai.gateway.AIRequest
 import com.resumeapp.ai.gateway.Usage
@@ -9,7 +10,7 @@ import com.resumeapp.ai.cache.CacheEntry
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class AICacheMapper {
+class AICacheMapper @Inject constructor() {
 
     private val gson = Gson()
 

@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.resumeapp.features.onboarding.presentation
 
 import android.content.Context
@@ -20,7 +22,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material.icons.Icons
@@ -29,7 +31,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,37 +39,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.overflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.px
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavController
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Consent
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.TemplatePicker
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Complete
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Error
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Policy
-import com.resumeapp.features.onboarding.presentation.OnboardingUiState.TemplatePicker
 import com.resumeapp.features.onboarding.presentation.OnboardingUiState.Welcome
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.navArgument
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Score
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.SmartToy
+import com.resumeapp.domain.model.ConsentPurpose
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun OnboardingNavHost(
-    navController: NavController,
+    navController: NavHostController,
     startDestination: String = "welcome"
 ) {
-    val viewModel = viewModel<OnboardingViewModel>()
+    val viewModel = hiltViewModel<OnboardingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NavHost(navController, startDestination) {
@@ -202,7 +210,7 @@ fun PolicyScreen(onAccept: () -> Unit) {
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(androidx.compose.foundation.gestures.rememberScrollState())
+                    .verticalScroll(androidx.compose.foundation.rememberScrollState())
             ) {
                 // Policy content - in real app, load from assets/privacy-policy.html
                 PolicySection("1. Quem Somos", "Este aplicativo é desenvolvido por [Empresa]. Somos o Controlador dos seus dados (LGPD Art. 5º).")
@@ -236,7 +244,7 @@ fun PolicyScreen(onAccept: () -> Unit) {
 fun PolicySection(title: String, content: String) {
     Column(modifier = Modifier.padding(bottom = 16.dp).fillMaxWidth()) {
         Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.padding(top = 4.dp))
+        Spacer(modifier = Modifier.padding(top = 4.dp))
         Text(text = content, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
@@ -340,7 +348,7 @@ fun ConsentRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.padding(top = 2.dp))
+            Spacer(modifier = Modifier.padding(top = 2.dp))
             Text(text = description, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Checkbox(
@@ -457,7 +465,7 @@ fun TemplateCard(
                 Row {
                     Text(text = template.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     if (template.isPremium) {
-                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.foundation.layout.padding(start = 8.dp))
+                        Spacer(modifier = Modifier.padding(start = 8.dp))
                         Text(
                             text = "PRO",
                             fontSize = 10.sp,
@@ -469,7 +477,7 @@ fun TemplateCard(
                         )
                     }
                 }
-                Text(text = template.description, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = androidx.compose.ui.text.overflow.Ellipsis)
+                Text(text = template.description, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     }

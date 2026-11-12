@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import android.app.Activity
 
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF6366F1),
@@ -24,9 +26,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = Color(0xFFC4C4C4),
     outline = Color(0xFF5A5A5A),
     error = Color(0xFFFCA5A5),
-    errorContainer = Color(0xFF7F1D1D),
-    warning = Color(0xFFFBBF24),
-    warningContainer = Color(0xFF713F12)
+    errorContainer = Color(0xFF7F1D1D)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -43,9 +43,7 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF64748B),
     outline = Color(0xFFCBD5E1),
     error = Color(0xFFDC2626),
-    errorContainer = Color(0xFFFEF2F2),
-    warning = Color(0xFFD97706),
-    warningContainer = Color(0xFFFFFBE6)
+    errorContainer = Color(0xFFFEF2F2)
 )
 
 @Composable
@@ -55,6 +53,7 @@ fun ResumeTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     val view = LocalView.current
+    val window = (view.context as Activity).window
     if (!darkTheme) {
         SideEffect {
             val windowInsetsController = WindowInsetsControllerCompat(window, view)

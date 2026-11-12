@@ -1,24 +1,21 @@
 package com.resumeapp.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
-import com.resumeapp.features.onboarding.presentation.OnboardingNavHost
-import com.resumeapp.features.resume.presentation.ResumeNavHost
 import com.resumeapp.features.ats.presentation.ATSScreen
-import com.resumeapp.features.templates.presentation.TemplateGalleryScreen
-import com.resumeapp.features.settings.presentation.SettingsScreen
 import com.resumeapp.features.onboarding.presentation.OnboardingNavHost
 import com.resumeapp.features.resume.presentation.ResumeNavHost
+import com.resumeapp.features.settings.presentation.SettingsScreen
+import com.resumeapp.features.templates.presentation.TemplateGalleryScreen
 
 @Composable
 fun AppNavHost(
-    navController: NavController,
+    navController: NavHostController,
     startDestination: String = "onboarding"
 ) {
     NavHost(navController, startDestination) {
@@ -36,7 +33,7 @@ fun AppNavHost(
                 route = "ats/{resumeId}",
                 arguments = listOf(navArgument("resumeId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val resumeId = backStackEntry.getString()!!
+                val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
                 ATSScreen(resumeId = resumeId, onBack = { navController.popBackStack() })
             }
             composable("templates") {

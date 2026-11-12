@@ -3,7 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
     id("com.google.devtools.ksp") version "1.9.20-1.0.14"
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
 }
 
@@ -65,6 +64,14 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:ai"))
 
+    // Feature modules
+    implementation(project(":features:resume"))
+    implementation(project(":features:ats"))
+    implementation(project(":features:ai-assist"))
+    implementation(project(":features:templates"))
+    implementation(project(":features:settings"))
+    implementation(project(":features:onboarding"))
+
     // Compose (using BOM)
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
     implementation("androidx.compose.ui:ui")
@@ -76,13 +83,26 @@ dependencies {
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    // Hilt - using KAPT for annotation processing
+    // Hilt - KSP annotation processing
     implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    ksp("com.google.dagger:hilt-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-    // Jakarta inject for @Singleton annotation
-    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+    // javax.inject for @Singleton / @Inject annotations
+    implementation("javax.inject:javax.inject:1")
+
+    // AndroidX libs used directly by the app module DI layer
+    // (core:data exposes them as `implementation`, so they are NOT transitive)
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-core:1.0.0")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Kotlin Coroutines & Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

@@ -10,15 +10,17 @@ import com.resumeapp.domain.usecase.onboarding.CompleteOnboardingUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class OnboardingViewModel(
+class OnboardingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val recordConsentUseCase: RecordConsentUseCase,
     private val completeOnboardingUseCase: CompleteOnboardingUseCase
 ) : ViewModel() {
 
     // UI State
-    private val _uiState = MutableStateFlow(OnboardingUiState.Welcome)
+    private val _uiState = MutableStateFlow<OnboardingUiState>(OnboardingUiState.Welcome())
     val uiState: kotlinx.coroutines.flow.StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     // Current step tracking
@@ -53,8 +55,8 @@ class OnboardingViewModel(
         )
         
         viewModelScope.launch {
-            recordConsentUseCase(record)
-            _uiState.value = OnboardingUiState.TemplatePicker
+            recordConsentUseCase(RecordConsentUseCase.Params(record))
+            _uiState.value = OnboardingUiState.TemplatePicker()
         }
     }
 
@@ -65,7 +67,7 @@ class OnboardingViewModel(
     fun onCompleteOnboarding() {
         val templateId = selectedTemplateId.value ?: return
         viewModelScope.launch {
-            completeOnboardingUseCase(templateId)
+            completeOnboardingUseCase(CompleteOnboardingUseCase.Params(templateId))
             _uiState.value = OnboardingUiState.Complete
         }
     }
@@ -83,14 +85,6 @@ sealed interface OnboardingUiState {
     data class TemplatePicker(val templates: List<TemplateOption> = emptyList()) : OnboardingUiState
     object Complete : OnboardingUiState
     data class Error(val message: String) : OnboardingUiState
-
-    // Companion factories
-    companion object {
-        val Welcome = Welcome()
-        val Policy = Policy()
-        val Consent = Consent()
-        val Complete = Complete()
-    }
 }
 
 data class TemplateOption(
@@ -99,4 +93,31 @@ data class TemplateOption(
     val description: String,
     val previewImageUrl: String,
     val isPremium: Boolean
-)
+) {
+    companion object {
+        /** Offline-first defaults; the catalogue can be replaced by the remote sync later. */
+        val defaultTemplates: List<TemplateOption> = listOf(
+            TemplateOption(
+                id = "modern_professional",
+                name = "Moderno Profissional",
+                description = "Layout limpo, otimizado para ATS, ideal para áreas de tecnologia.",
+                previewImageUrl = "",
+                isPremium = false
+            ),
+            TemplateOption(
+                id = "classic",
+                name = "Clássico",
+                description = "Formatação tradicional, adequada para áreas conservadoras.",
+                previewImageUrl = "",
+                isPremium = false
+            ),
+            TemplateOption(
+                id = "creative",
+                name = "Criativo",
+                description = "Destaques visuais para áreas de design e marketing.",
+                previewImageUrl = "",
+                isPremium = true
+            )
+        )
+    }
+}

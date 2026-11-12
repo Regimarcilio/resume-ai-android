@@ -1,9 +1,12 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.resumeapp.features.resume.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.ContentCopy
+import com.resumeapp.domain.model.SectionType
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -38,30 +44,45 @@ import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Score
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ResumeNavHost(
-    navController: NavController,
+    navController: NavHostController,
     startDestination: String = "list"
 ) {
-    val viewModel = viewModel<ResumeListViewModel>()
+    val viewModel = hiltViewModel<ResumeListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listState = uiState as? ResumeListUiState.Content
 
     NavHost(navController, startDestination) {
         composable("list") {
             ResumeListScreen(
-                resumes = uiState.resumes,
+                resumes = listState?.resumes.orEmpty(),
                 onNewResume = { viewModel.onNewResume() },
-                onEditResume = { id -> navController.navigate("editor/$it") },
+                onEditResume = { id -> navController.navigate("editor/$id") },
                 onDeleteResume = { viewModel.onDeleteResume(it) }
             )
         }
@@ -69,7 +90,7 @@ fun ResumeNavHost(
             route = "editor/{resumeId}",
             arguments = listOf(navArgument("resumeId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val resumeId = backStackEntry.getString()!!
+            val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
             EditorScreen(resumeId = resumeId, onBack = { navController.popBackStack() })
         }
     }
@@ -117,15 +138,16 @@ fun ResumeListScreen(
                 }
             }
 
-            // FAB
-            androidx.compose.material3.FloatingActionButton(
-                onClick = onNewResume,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Novo currículo")
-            }
+        }
+
+        // FAB
+        androidx.compose.material3.FloatingActionButton(
+            onClick = onNewResume,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Novo currículo")
         }
     }
 }
@@ -189,14 +211,15 @@ fun EditorScreen(
     resumeId: String,
     onBack: () -> Unit
 ) {
-    val viewModel = viewModel<EditorViewModel>(resumeId = resumeId)
+    val viewModel = hiltViewModel<EditorViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = uiState as? EditorUiState.Content
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Top App Bar
             androidx.compose.material3.TopAppBar(
-                title = { Text(uiState.resume?.personalInfo?.fullName?.ifEmpty { "Editor" } ?: "Editor", fontSize = 18.sp) },
+                title = { Text(content?.resume?.personalInfo?.fullName?.ifEmpty { "Editor" } ?: "Editor", fontSize = 18.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
@@ -204,8 +227,8 @@ fun EditorScreen(
                 },
                 actions = {
                     // Save indicator
-                    if (uiState.isSaving) {
-                        androidx.compose.material3.ProgressIndicator(
+                    if ((content?.isSaving == true)) {
+                        androidx.compose.material3.CircularProgressIndicator(
                             modifier = Modifier.padding(end = 16.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -213,7 +236,7 @@ fun EditorScreen(
                     // Save button
                     IconButton(
                         onClick = { viewModel.save() },
-                        enabled = !uiState.isSaving
+                        enabled = !(content?.isSaving == true)
                     ) {
                         Icon(Icons.Default.Save, contentDescription = "Salvar")
                     }
@@ -237,8 +260,8 @@ fun EditorScreen(
 
             // Section tabs
             SectionTabs(
-                sections = uiState.sections,
-                selectedSection = uiState.selectedSectionId,
+                sections = content?.sections.orEmpty(),
+                selectedSection = content?.selectedSectionId,
                 onTabClick = { viewModel.selectSection(it) },
                 onAddSection = { viewModel.addSection(it) }
             )
@@ -247,23 +270,23 @@ fun EditorScreen(
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier.fillMaxSize().weight(1f)
             ) {
-                when (uiState.editorState) {
+                when (val editorState = content?.editorState ?: EditorUiState.EditorState.Loading()) {
                     is EditorUiState.EditorState.Loading -> {
                         LoadingScreen(message = "Carregando currículo...")
                     }
                     is EditorUiState.EditorState.Error -> {
-                        ErrorScreen(message = it.message, onRetry = { viewModel.loadResume() })
+                        ErrorScreen(message = editorState.message, onRetry = { viewModel.loadResume() })
                     }
                     is EditorUiState.EditorState.Content -> {
                         SectionEditor(
-                            section = it.currentSection,
-                            onContentChange = { viewModel.updateSectionContent(it) },
-                            onAddItem = { viewModel.addSectionItem(it) },
-                            onDeleteItem = { viewModel.deleteSectionItem(it) },
-                            onReorderItems = { viewModel.reorderSectionItems(it) },
-                            onAIImprove = { viewModel.requestAIImprovement(it) },
-                            aiSuggestions = it.aiSuggestions,
-                            isAILoading = it.isAILoading
+                            section = editorState.currentSection,
+                            onContentChange = { itemsJson -> viewModel.updateSectionContent(itemsJson) },
+                            onAddItem = { viewModel.addSectionItem() },
+                            onDeleteItem = { itemId -> viewModel.deleteSectionItem(itemId) },
+                            onReorderItems = { itemIds -> viewModel.reorderSectionItems(itemIds) },
+                            onAIImprove = { viewModel.requestAIImprovement() },
+                            aiSuggestions = editorState.aiSuggestions,
+                            isAILoading = editorState.isAILoading
                         )
                     }
                 }
@@ -283,7 +306,7 @@ fun SectionTabs(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .horizontalScroll(androidx.compose.foundation.gestures.rememberScrollState())
+            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
     ) {
         sections.forEach { section ->
             androidx.compose.material3.Tab(
@@ -334,7 +357,7 @@ fun SectionEditor(
                         Icon(Icons.Default.SmartToy, contentDescription = "Melhorar com IA", tint = MaterialTheme.colorScheme.primary)
                     }
                 } else {
-                    androidx.compose.material3.ProgressIndicator(
+                    androidx.compose.material3.CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -531,92 +554,3 @@ fun ErrorScreen(message: String, onRetry: () -> Unit) {
     }
 }
 
-// Data classes for UI State
-data class ResumeListItem(
-    val id: String,
-    val name: String,
-    val templateName: String,
-    val updatedAt: String,
-    val sectionsCount: Int
-)
-
-data class SectionTab(
-    val id: String,
-    val title: String,
-    val icon: ImageVector
-)
-
-data class SectionTabItem(
-    val id: String,
-    val title: String,
-    val icon: ImageVector
-)
-
-sealed interface SectionType {
-    data class EXPERIENCE : SectionType
-    data class EDUCATION : SectionType
-    data class SKILLS : SectionType
-    data class PROJECTS : SectionType
-    data class CERTIFICATIONS : SectionType
-    data class LANGUAGES : SectionType
-    data class CUSTOM(val name: String) : SectionType
-}
-
-data class SectionItemState(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val dateRange: String,
-    val highlights: List<String>
-)
-
-sealed interface EditorUiState {
-    data class Loading : EditorUiState
-    data class Error(val message: String) : EditorUiState
-    data class Content(
-        val resume: Resume?,
-        val sections: List<SectionTab>,
-        val selectedSectionId: String?,
-        val currentSection: SectionEditorState,
-        val selectedSectionId: String?,
-        val isSaving: Boolean,
-        val editorState: EditorState
-    ) : EditorUiState
-
-    sealed interface EditorState {
-        data class Loading : EditorState
-        data class Error(val message: String) : EditorState
-        data class Content(
-            val currentSection: SectionEditorState,
-            val selectedSectionId: String?,
-            val isSaving: Boolean,
-            val aiSuggestions: List<String>,
-            val isAILoading: Boolean
-        ) : EditorState
-    }
-}
-
-data class SectionEditorState(
-    val id: String,
-    val title: String,
-    val type: SectionType,
-    val items: List<SectionItemState>,
-    val aiSuggestions: List<String> = emptyList(),
-    val isAILoading: Boolean = false
-)
-
-data class SectionItemState(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val dateRange: String,
-    val highlights: List<String>
-)
-
-data class ResumeListItem(
-    val id: String,
-    val name: String,
-    val templateName: String,
-    val updatedAt: String,
-    val sectionsCount: Int
-)

@@ -1,11 +1,12 @@
 package com.resumeapp.data.repository
 
+import javax.inject.Inject
 import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.mapper.TraceMapper
 import com.resumeapp.domain.model.TraceEntry
 import com.resumeapp.domain.repository.TraceRepository
 
-class TraceRepositoryImpl constructor(
+class TraceRepositoryImpl @Inject constructor(
     private val dao: TraceDao,
     private val mapper: TraceMapper
 ) : TraceRepository {

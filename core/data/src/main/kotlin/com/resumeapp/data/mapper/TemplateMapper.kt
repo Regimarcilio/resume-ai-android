@@ -1,9 +1,10 @@
 package com.resumeapp.data.mapper
 
+import javax.inject.Inject
 import com.resumeapp.domain.model.Template
 import com.resumeapp.domain.model.TemplateCategory
 
-class TemplateMapper {
+class TemplateMapper @Inject constructor() {
 
     fun toDomain(entity: com.resumeapp.data.db.TemplateEntity): Template {
         return Template(
