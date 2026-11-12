@@ -64,6 +64,35 @@ android {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Distribution: every generated APK is copied to <project-root>/dist/
+// so it is always easy to find next to the sources.
+//
+//   ./gradlew :app:assembleDebug   ->  dist/resume-ai-<version>-debug.apk
+//   ./gradlew apk                   ->  alias for the task above (from root)
+// ---------------------------------------------------------------------------
+val distDir = rootProject.layout.projectDirectory.dir("dist")
+
+val copyDebugApkToDist by tasks.registering(Copy::class) {
+    group = "distribution"
+    description = "Copies the debug APK to <project-root>/dist/"
+    dependsOn("assembleDebug")
+    from(layout.buildDirectory.dir("outputs/apk/debug")) {
+        include("*.apk")
+    }
+    into(distDir)
+    rename { "resume-ai-${android.defaultConfig.versionName}-debug.apk" }
+    doLast {
+        logger.lifecycle("APK copied to ${distDir.asFile.path}")
+    }
+}
+
+// AGP registers the variant tasks lazily, so the wiring must be lazy too
+// (tasks.named(...) at configuration time fails with "task not found").
+tasks.matching { it.name == "assembleDebug" }.configureEach {
+    finalizedBy(copyDebugApkToDist)
+}
+
 dependencies {
     // Core modules
     implementation(project(":core:domain"))

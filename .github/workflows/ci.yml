@@ -10,6 +10,7 @@ on:
 env:
   JAVA_VERSION: '21'
   GRADLE_VERSION: '8.7'
+  VERSION_NAME: '1.0.0-debug'
 
 jobs:
   build:
@@ -35,11 +36,22 @@ jobs:
       - name: Build app with all modules
         run: ./gradlew :app:assembleDebug --no-daemon --no-configuration-cache --continue
 
+      # The assembleDebug task already copies the APK to <root>/dist/.
+      # Normalising the name here keeps the artifact identical to what a
+      # local `./gradlew apk` produces.
+      - name: Normalise APK in dist/
+        run: |
+          mkdir -p dist
+          cp -f app/build/outputs/apk/debug/app-debug.apk "dist/resume-ai-${VERSION_NAME}-debug.apk"
+          ls -lh dist/
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            dist/*.apk
 
       - name: Upload test results
         if: always()

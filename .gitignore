@@ -4,6 +4,9 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 captures/
 
+# Distribution output (generated APKs land here on every build)
+dist/
+
 # Android
 *.apk
 *.aab

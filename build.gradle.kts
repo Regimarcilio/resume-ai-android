@@ -18,6 +18,13 @@ tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
 
+// Convenience alias: builds the debug APK and copies it to <root>/dist/
+tasks.register("apk") {
+    group = "distribution"
+    description = "Builds the debug APK and copies it to <project-root>/dist/"
+    dependsOn(":app:assembleDebug")
+}
+
 // Version bump task for release
 tasks.register("bumpVersion") {
     group = "release"
