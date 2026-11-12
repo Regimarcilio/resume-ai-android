@@ -19,6 +19,7 @@ import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.ResumeSection
 import com.resumeapp.domain.model.SectionItem
 import com.resumeapp.domain.model.SectionType
+import com.resumeapp.domain.model.displayTitle
 import com.resumeapp.domain.usecase.aiassist.ImproveBulletsUseCase
 import com.resumeapp.domain.usecase.ats.AnalyzeATSUseCase
 import com.resumeapp.domain.usecase.resume.AddSectionUseCase
@@ -26,6 +27,7 @@ import com.resumeapp.domain.usecase.resume.DeleteSectionUseCase
 import com.resumeapp.domain.usecase.resume.GetResumeUseCase
 import com.resumeapp.domain.usecase.resume.ReorderSectionsUseCase
 import com.resumeapp.domain.usecase.resume.SaveResumeUseCase
+import com.resumeapp.domain.usecase.resume.UpdateResumeUseCase
 import com.resumeapp.domain.usecase.resume.UpdateSectionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +46,8 @@ class EditorViewModel @Inject constructor(
     private val deleteSectionUseCase: DeleteSectionUseCase,
     private val reorderSectionsUseCase: ReorderSectionsUseCase,
     private val improveBulletsUseCase: ImproveBulletsUseCase,
-    private val analyzeATSUseCase: AnalyzeATSUseCase
+    private val analyzeATSUseCase: AnalyzeATSUseCase,
+    private val updateResumeUseCase: UpdateResumeUseCase
 ) : ViewModel() {
 
     private val gson = Gson()
@@ -66,7 +69,8 @@ class EditorViewModel @Inject constructor(
                 is Result.Success -> _uiState.value = EditorUiState.Content(
                     resume = result.value,
                     sections = buildSectionTabs(result.value),
-                    selectedSectionId = result.value.sections.firstOrNull()?.id,
+                    // Abre nos dados pessoais: e o primeiro passo obrigatorio.
+                    selectedSectionId = PERSONAL_INFO_SECTION_ID,
                     currentSection = buildSectionEditorState(result.value, result.value.sections.firstOrNull()?.id),
                     isSaving = false,
                     editorState = EditorUiState.EditorState.Content(
@@ -86,6 +90,13 @@ class EditorViewModel @Inject constructor(
 
     fun selectSection(sectionId: String) {
         val current = _uiState.value as? EditorUiState.Content ?: return
+
+        // Aba virtual de dados pessoais: nao ha secao correspondente.
+        if (sectionId == PERSONAL_INFO_SECTION_ID) {
+            _uiState.value = current.copy(selectedSectionId = sectionId)
+            return
+        }
+
         val section = current.resume.sections.find { it.id == sectionId } ?: return
         val editor = buildSectionEditorState(current.resume, sectionId)
         _uiState.value = current.copy(
@@ -109,7 +120,7 @@ class EditorViewModel @Inject constructor(
             val newSection = ResumeSection(
                 resumeId = resumeId,
                 type = sectionType,
-                title = sectionType.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
+                title = sectionType.displayTitle,
                 itemsJson = "[]",
                 order = current.resume.sections.size
             )
@@ -209,6 +220,44 @@ class EditorViewModel @Inject constructor(
         updateSectionContent(sectionId, gson.toJson(reordered))
     }
 
+    // ==================== Dados pessoais ====================
+
+    /**
+     * Atualiza os dados de contato do curriculo.
+     * Sem isso o usuario nao conseguia preencher nome/email/telefone.
+     */
+    fun updatePersonalInfo(
+        fullName: String,
+        email: String,
+        phone: String,
+        location: String,
+        linkedin: String,
+        summary: String
+    ) {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        viewModelScope.launch {
+            val updatedInfo = current.resume.personalInfo.copy(
+                fullName = fullName,
+                email = email,
+                phone = phone,
+                location = location,
+                linkedin = linkedin,
+                summary = summary
+            )
+            when (
+                val result = updateResumeUseCase(
+                    UpdateResumeUseCase.Params(
+                        resumeId = resumeId,
+                        personalInfo = updatedInfo
+                    )
+                )
+            ) {
+                is Result.Success -> applyResume(result.value)
+                is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
     // ==================== AI assist ====================
 
     fun requestAIImprovement() {
@@ -256,7 +305,9 @@ class EditorViewModel @Inject constructor(
     // ==================== Helpers ====================
 
     private fun applyResume(resume: Resume) {
-        val selectedId = (_uiState.value as? EditorUiState.Content)?.selectedSectionId
+        val current = _uiState.value as? EditorUiState.Content
+        val selectedId = current?.selectedSectionId
+            ?.takeIf { it == PERSONAL_INFO_SECTION_ID || resume.sections.any { s -> s.id == it } }
             ?: resume.sections.firstOrNull()?.id
         val editor = buildSectionEditorState(resume, selectedId)
         _uiState.value = EditorUiState.Content(

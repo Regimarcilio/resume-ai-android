@@ -52,6 +52,22 @@ enum class SectionType {
     EXPERIENCE, EDUCATION, SKILLS, PROJECTS, CERTIFICATIONS, LANGUAGES, CUSTOM
 }
 
+/**
+ * Rotulo exibido ao usuario para cada tipo de secao.
+ * Centralizado aqui para que um curriculo criado por qualquer caminho
+ * (novo curriculo, secao adicionada, importacao) use o mesmo texto.
+ */
+val SectionType.displayTitle: String
+    get() = when (this) {
+        SectionType.EXPERIENCE -> "Experiência"
+        SectionType.EDUCATION -> "Formação Acadêmica"
+        SectionType.SKILLS -> "Habilidades"
+        SectionType.PROJECTS -> "Projetos"
+        SectionType.CERTIFICATIONS -> "Certificações"
+        SectionType.LANGUAGES -> "Idiomas"
+        SectionType.CUSTOM -> "Personalizada"
+    }
+
 @Serializable
 data class SectionItem(
     val id: String = UUID.randomUUID().toString(),

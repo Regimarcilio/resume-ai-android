@@ -138,13 +138,20 @@ object AppModule {
     @Singleton
     fun provideRoomDatabase(
         @ApplicationContext context: Context
-    ): AppDatabase = Room.databaseBuilder(
-        context,
-        AppDatabase::class.java,
-        "resume_db"
-    )
-        .fallbackToDestructiveMigration()
-        .build()
+    ): AppDatabase {
+        // O callback de seeding roda na primeira abertura do banco, quando a
+        // instancia ja esta atribuida.
+        lateinit var database: AppDatabase
+        database = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "resume_db"
+        )
+            .addCallback(AppDatabase.seedCallback { database })
+            .fallbackToDestructiveMigration()
+            .build()
+        return database
+    }
 
     // ============================================================
     // Room DAOs

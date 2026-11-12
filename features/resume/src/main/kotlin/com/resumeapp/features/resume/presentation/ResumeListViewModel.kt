@@ -53,8 +53,27 @@ class ResumeListViewModel @Inject constructor(
         }
     }
 
-    fun onNewResume() {
-        // Navigation handled by screen
+    /**
+     * Cria um currículo novo e devolve o id para a tela navegar ate o editor.
+     * Sem isso o botão "Criar Currículo" não fazia nada.
+     */
+    fun onNewResume(onCreated: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            when (
+                val result = createResumeUseCase(
+                    com.resumeapp.domain.usecase.resume.CreateResumeUseCase.Params(
+                        templateId = DEFAULT_TEMPLATE_ID,
+                        userId = DEFAULT_USER_ID
+                    )
+                )
+            ) {
+                is Result.Success -> {
+                    loadResumes()
+                    onCreated(result.value.id)
+                }
+                is Result.Failure -> _uiState.value = ResumeListUiState.Error(result.errorMessage)
+            }
+        }
     }
 
     fun onDeleteResume(resumeId: String) {
@@ -73,6 +92,9 @@ class ResumeListViewModel @Inject constructor(
     companion object {
         /** Single-user build: LGPD consent is per-device, not per-account. */
         const val DEFAULT_USER_ID = "local_user"
+
+        /** Template semeado no banco e usado como padrao para novos currículos. */
+        const val DEFAULT_TEMPLATE_ID = "modern_professional"
     }
 }
 

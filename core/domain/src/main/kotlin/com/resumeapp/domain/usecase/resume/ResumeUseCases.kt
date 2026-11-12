@@ -7,6 +7,7 @@ import com.resumeapp.domain.model.Result
 import com.resumeapp.domain.model.Result.Success
 import com.resumeapp.domain.model.Result.Failure
 import com.resumeapp.domain.model.SectionType
+import com.resumeapp.domain.model.displayTitle
 import com.resumeapp.domain.repository.ResumeRepository
 import com.resumeapp.domain.usecase.AsyncUseCase
 import com.resumeapp.domain.usecase.IdParams
@@ -55,7 +56,7 @@ class CreateResumeUseCase constructor(
             ResumeSection(
                 resumeId = "", // Will be set after resume creation
                 type = type,
-                title = type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
+                title = type.displayTitle,
                 itemsJson = "[]",
                 order = index,
                 isVisible = true

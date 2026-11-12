@@ -2,11 +2,15 @@
 
 package com.resumeapp.features.resume.presentation
 
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,7 +80,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
  * "ViewModelStore should be set before setGraph call".
  */
 @Composable
-fun ResumeNavHost() {
+fun ResumeNavHost(
+    onOpenAts: (String) -> Unit = {}
+) {
     val navController = rememberNavController()
     val viewModel = hiltViewModel<ResumeListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -86,7 +92,7 @@ fun ResumeNavHost() {
         composable("list") {
             ResumeListScreen(
                 resumes = listState?.resumes.orEmpty(),
-                onNewResume = { viewModel.onNewResume() },
+                onNewResume = { viewModel.onNewResume { id -> navController.navigate("editor/$id") } },
                 onEditResume = { id -> navController.navigate("editor/$id") },
                 onDeleteResume = { viewModel.onDeleteResume(it) }
             )
@@ -96,7 +102,11 @@ fun ResumeNavHost() {
             arguments = listOf(navArgument("resumeId") { type = NavType.StringType })
         ) { backStackEntry ->
             val resumeId = backStackEntry.arguments?.getString("resumeId") ?: ""
-            EditorScreen(resumeId = resumeId, onBack = { navController.popBackStack() })
+            EditorScreen(
+                resumeId = resumeId,
+                onBack = { navController.popBackStack() },
+                onOpenAts = onOpenAts
+            )
         }
     }
 }
@@ -108,7 +118,11 @@ fun ResumeListScreen(
     onEditResume: (String) -> Unit,
     onDeleteResume: (String) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
             androidx.compose.material3.TopAppBar(
@@ -214,7 +228,8 @@ fun ResumeCard(
 @Composable
 fun EditorScreen(
     resumeId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenAts: (String) -> Unit = {}
 ) {
     val viewModel = hiltViewModel<EditorViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -246,7 +261,7 @@ fun EditorScreen(
                         Icon(Icons.Default.Save, contentDescription = "Salvar")
                     }
                     // ATS Button
-                    IconButton(onClick = { /* TODO: Navigate to ATS */ }) {
+                    IconButton(onClick = { onOpenAts(content?.resume?.id.orEmpty()) }) {
                         Icon(Icons.Default.Score, contentDescription = "ATS Score")
                     }
                     // AI Assist Button
@@ -263,7 +278,7 @@ fun EditorScreen(
                 )
             )
 
-            // Section tabs
+            // Aba de dados pessoais + abas de secoes
             SectionTabs(
                 sections = content?.sections.orEmpty(),
                 selectedSection = content?.selectedSectionId,
@@ -275,24 +290,36 @@ fun EditorScreen(
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier.fillMaxSize().weight(1f)
             ) {
-                when (val editorState = content?.editorState ?: EditorUiState.EditorState.Loading()) {
-                    is EditorUiState.EditorState.Loading -> {
-                        LoadingScreen(message = "Carregando currículo...")
-                    }
-                    is EditorUiState.EditorState.Error -> {
-                        ErrorScreen(message = editorState.message, onRetry = { viewModel.loadResume() })
-                    }
-                    is EditorUiState.EditorState.Content -> {
-                        SectionEditor(
-                            section = editorState.currentSection,
-                            onContentChange = { itemsJson -> viewModel.updateSectionContent(itemsJson) },
-                            onAddItem = { viewModel.addSectionItem() },
-                            onDeleteItem = { itemId -> viewModel.deleteSectionItem(itemId) },
-                            onReorderItems = { itemIds -> viewModel.reorderSectionItems(itemIds) },
-                            onAIImprove = { viewModel.requestAIImprovement() },
-                            aiSuggestions = editorState.aiSuggestions,
-                            isAILoading = editorState.isAILoading
-                        )
+                // if/else (nunca `return` dentro de um lambda @Composable):
+                // um return antecipado desalinha os grupos do Compose e causa
+                // IndexOutOfBoundsException em ComposerImpl.exitGroup.
+                if (content?.selectedSectionId == PERSONAL_INFO_SECTION_ID) {
+                    PersonalInfoEditor(
+                        personalInfo = content.resume.personalInfo,
+                        onSave = { fullName, email, phone, location, linkedin, summary ->
+                            viewModel.updatePersonalInfo(fullName, email, phone, location, linkedin, summary)
+                        }
+                    )
+                } else {
+                    when (val editorState = content?.editorState ?: EditorUiState.EditorState.Loading()) {
+                        is EditorUiState.EditorState.Loading -> {
+                            LoadingScreen(message = "Carregando currículo...")
+                        }
+                        is EditorUiState.EditorState.Error -> {
+                            ErrorScreen(message = editorState.message, onRetry = { viewModel.loadResume() })
+                        }
+                        is EditorUiState.EditorState.Content -> {
+                            SectionEditor(
+                                section = editorState.currentSection,
+                                onContentChange = { itemsJson -> viewModel.updateSectionContent(itemsJson) },
+                                onAddItem = { viewModel.addSectionItem() },
+                                onDeleteItem = { itemId -> viewModel.deleteSectionItem(itemId) },
+                                onReorderItems = { itemIds -> viewModel.reorderSectionItems(itemIds) },
+                                onAIImprove = { viewModel.requestAIImprovement() },
+                                aiSuggestions = editorState.aiSuggestions,
+                                isAILoading = editorState.isAILoading
+                            )
+                        }
                     }
                 }
             }
@@ -313,6 +340,14 @@ fun SectionTabs(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .horizontalScroll(androidx.compose.foundation.rememberScrollState())
     ) {
+        // Aba fixa de dados pessoais (primeira, sempre presente).
+        androidx.compose.material3.Tab(
+            selected = selectedSection == PERSONAL_INFO_SECTION_ID,
+            onClick = { onTabClick(PERSONAL_INFO_SECTION_ID) },
+            text = { Text("Dados Pessoais") },
+            icon = { Icon(Icons.Default.Person, contentDescription = null) }
+        )
+
         sections.forEach { section ->
             androidx.compose.material3.Tab(
                 selected = section.id == selectedSection,
@@ -559,3 +594,94 @@ fun ErrorScreen(message: String, onRetry: () -> Unit) {
     }
 }
 
+
+
+/** Id da aba virtual de dados pessoais (nao e uma secao persistida). */
+const val PERSONAL_INFO_SECTION_ID = "__personal_info__"
+
+/**
+ * Formulario dos dados de contato do curriculo.
+ * Sem esta tela o usuario criava um curriculo sem consegue preencher
+ * nome, email ou telefone.
+ */
+@Composable
+fun PersonalInfoEditor(
+    personalInfo: com.resumeapp.domain.model.PersonalInfo,
+    onSave: (String, String, String, String, String, String) -> Unit
+) {
+    var fullName by remember { mutableStateOf(personalInfo.fullName) }
+    var email by remember { mutableStateOf(personalInfo.email) }
+    var phone by remember { mutableStateOf(personalInfo.phone) }
+    var location by remember { mutableStateOf(personalInfo.location) }
+    var linkedin by remember { mutableStateOf(personalInfo.linkedin) }
+    var summary by remember { mutableStateOf(personalInfo.summary) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(androidx.compose.foundation.rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        androidx.compose.material3.Text(
+            text = "Seus dados",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+        androidx.compose.material3.Text(
+            text = "Estas informações aparecem no topo do currículo exportado.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        androidx.compose.material3.OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Nome completo") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        androidx.compose.material3.OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("E-mail") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        androidx.compose.material3.OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Telefone") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        androidx.compose.material3.OutlinedTextField(
+            value = location,
+            onValueChange = { location = it },
+            label = { Text("Localização") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        androidx.compose.material3.OutlinedTextField(
+            value = linkedin,
+            onValueChange = { linkedin = it },
+            label = { Text("LinkedIn") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        androidx.compose.material3.OutlinedTextField(
+            value = summary,
+            onValueChange = { summary = it },
+            label = { Text("Resumo profissional") },
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        androidx.compose.material3.Button(
+            onClick = { onSave(fullName, email, phone, location, linkedin, summary) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Salvar dados")
+        }
+    }
+}
