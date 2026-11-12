@@ -33,15 +33,26 @@ import com.resumeapp.features.templates.presentation.TemplateGalleryScreen
 
 private data class MainDestination(
     val route: String,
+    val shortRoute: String,
     val label: String,
     val icon: ImageVector
 )
 
 private val MAIN_DESTINATIONS = listOf(
-    MainDestination("app/resume_list", "Currículos", Icons.Default.Description),
-    MainDestination("app/templates", "Templates", Icons.Default.Style),
-    MainDestination("app/settings", "Configurações", Icons.Default.Settings)
+    MainDestination("resume_list", "resume_list", "Currículos", Icons.Default.Description),
+    MainDestination("templates", "templates", "Templates", Icons.Default.Style),
+    MainDestination("settings", "settings", "Configurações", Icons.Default.Settings)
 )
+
+/**
+ * `destination.route` pode devolver a rota declarada ("templates") ou a rota
+ * completa ("app/templates"), dependendo de como o grafo aninhado foi montado.
+ * Comparamos as duas formas para nao depender do detalhe.
+ */
+private fun isRoute(current: String?, destination: MainDestination): Boolean =
+    current == destination.route ||
+        current == destination.shortRoute ||
+        current?.endsWith("/${destination.shortRoute}") == true
 
 @Composable
 fun AppNavHost(
@@ -50,8 +61,8 @@ fun AppNavHost(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    // A bottom bar aparece apenas no app principal (rotas "app/...").
-    val showBottomBar = currentRoute?.startsWith("app") == true
+    // A bottom bar aparece no app principal e some no onboarding.
+    val showBottomBar = currentRoute != null && currentRoute != "onboarding"
 
     Scaffold(
         // Os insets sao tratados por cada tela; o Scaffold nao deve duplicar.
@@ -60,13 +71,13 @@ fun AppNavHost(
             if (showBottomBar) {
                 NavigationBar {
                     MAIN_DESTINATIONS.forEach { destination ->
-                        val selected = currentRoute == destination.route
+                        val selected = isRoute(currentRoute, destination)
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
                                 if (!selected) {
                                     navController.navigate(destination.route) {
-                                        popUpTo("app/resume_list") { inclusive = false }
+                                        popUpTo("resume_list") { inclusive = false }
                                         launchSingleTop = true
                                     }
                                 }
@@ -108,7 +119,7 @@ fun AppNavHost(
                 composable("resume_list") {
                     ResumeNavHost(
                         onOpenAts = { resumeId ->
-                            navController.navigate("app/ats/$resumeId")
+                            navController.navigate("ats/$resumeId")
                         }
                     )
                 }
@@ -121,7 +132,7 @@ fun AppNavHost(
                 }
                 composable("templates") {
                     TemplateGalleryScreen(onSelect = { template ->
-                        navController.navigate("app/resume_list")
+                        navController.navigate("resume_list")
                     })
                 }
                 composable("settings") {

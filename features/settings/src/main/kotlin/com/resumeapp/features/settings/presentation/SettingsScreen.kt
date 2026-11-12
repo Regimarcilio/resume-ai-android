@@ -88,6 +88,13 @@ import androidx.compose.material3.TopAppBarDefaults
 fun SettingsScreen() {
     val viewModel = hiltViewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // "Meus Dados" e uma tela interna do modulo (nao uma rota do NavHost).
+    var showMyData by remember { mutableStateOf(false) }
+
+    if (showMyData) {
+        MyDataScreen(onBack = { showMyData = false })
+        return
+    }
 
     Box(
         modifier = Modifier
@@ -133,7 +140,7 @@ fun SettingsScreen() {
                             title = "Meus Dados (Art. 18 LGPD)",
                             subtitle = "Visualizar, exportar, anonimizar ou excluir seus dados",
                             icon = Icons.Default.Info,
-                            onClick = { /* Navigate to My Data screen */ }
+                            onClick = { showMyData = true }
                         )
                         SettingRow(
                             title = "Política de Privacidade",
@@ -296,7 +303,7 @@ fun SettingRow(
 
 // My Data Screen (LGPD Art. 18)
 @Composable
-fun MyDataScreen() {
+fun MyDataScreen(onBack: () -> Unit = {}) {
     val viewModel = hiltViewModel<MyDataViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -305,7 +312,7 @@ fun MyDataScreen() {
             androidx.compose.material3.TopAppBar(
                 title = { Text("Meus Dados (Art. 18 LGPD)", fontSize = 18.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { /* navController.popBackStack() */ }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
                     }
                 },

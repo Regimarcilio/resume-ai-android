@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -187,37 +188,59 @@ fun ResumeCard(
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
         ) {
             // Template preview thumbnail
             Box(
                 modifier = Modifier
-                    .size(60.dp, 80.dp)
+                    .size(48.dp, 64.dp)
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest, androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
             ) {
                 Text(
                     text = resume.templateName.substring(0, 1).uppercase(),
-                    fontSize = 24.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = resume.name, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = "Atualizado: ${resume.updatedAt}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = "${resume.sectionsCount} seções", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // weight(1f) com espaco minimo: sem isso os botoes de acao
+            // espremem a coluna e o titulo quebra uma letra por linha.
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .widthIn(min = 96.dp)
+            ) {
+                Text(
+                    text = resume.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Atualizado: ${resume.updatedAt}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${resume.sectionsCount} seções",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
 
-            Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = { /* TODO: Duplicate */ }) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Duplicar")
-                }
-                IconButton(onClick = { /* TODO: Edit */ }) {
+            // Acoes empilhadas verticalmente (48dp de largura em vez de 144dp).
+            Column {
+                IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Editar")
                 }
-                IconButton(onClick = { /* TODO: Delete */ }) {
+                IconButton(onClick = onDelete) {
                     Icon(Icons.Default.Delete, contentDescription = "Excluir")
                 }
             }
