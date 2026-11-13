@@ -72,6 +72,29 @@ ls -lh dist/
 adb install -r dist/resume-ai-1.0.0-debug.apk
 ```
 
+### Production build (signed)
+
+```bash
+# Configure the release keystore once (never versioned)
+cp keystore.properties.template keystore.properties   # fill in the values
+
+./gradlew apkRelease
+ls -lh release/
+#  -> release/resume-ai-1.0.0-release.apk   (signed, R8 enabled)
+
+adb install -r release/resume-ai-1.0.0-release.apk
+```
+
+| Build | Command | Output | Directory |
+|---|---|---|---|
+| Debug | `./gradlew apk` | `resume-ai-<version>-debug.apk` | `dist/` |
+| Production | `./gradlew apkRelease` | `resume-ai-<version>-release.apk` | `release/` |
+
+Without `keystore.properties` the release build still succeeds but produces an
+**unsigned** APK (the task prints an `[UNSIGNED]` warning).
+
+See [`AGENTS.md`](AGENTS.md) for the full working contract of this repository.
+
 > Every `assembleDebug` (local **or** CI) automatically drops a copy of the APK in
 > `<project-root>/dist/`. The directory is git-ignored — it is a build output.
 
@@ -248,6 +271,29 @@ ls -lh dist/
 # 4. Instalar
 adb install -r dist/resume-ai-1.0.0-debug.apk
 ```
+
+### Build de produção (assinado)
+
+```bash
+# Configure o keystore de release uma vez (nunca versionado)
+cp keystore.properties.template keystore.properties   # preencha os valores
+
+./gradlew apkRelease
+ls -lh release/
+#  -> release/resume-ai-1.0.0-release.apk   (assinado, R8 ativo)
+
+adb install -r release/resume-ai-1.0.0-release.apk
+```
+
+| Build | Comando | Saída | Diretório |
+|---|---|---|---|
+| Debug | `./gradlew apk` | `resume-ai-<version>-debug.apk` | `dist/` |
+| Produção | `./gradlew apkRelease` | `resume-ai-<version>-release.apk` | `release/` |
+
+Sem o `keystore.properties` o build de release funciona, mas sai **unsigned**
+(a task avisa com `[UNSIGNED]`).
+
+Veja o [`AGENTS.md`](AGENTS.md) para o contrato completo de trabalho neste repositório.
 
 > Todo `assembleDebug` — **local ou no CI** — deixa automaticamente uma cópia do APK em
 > `<project-root>/dist/`. O diretório está no `.gitignore`, pois é artefato de build.
