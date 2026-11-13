@@ -250,7 +250,32 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 11. Definition of Done
+## 11. Releases — only after validation in usage tests
+
+**A release is published only after the build has been validated in real usage
+tests.** "It compiles" and "it does not crash" are not validation.
+
+Before cutting a release:
+
+1. The candidate APK (the **production** build, `release/`, signed) is installed
+   on a device and the **whole flow is exercised by hand**, not by a script that
+   only checks the process is alive.
+2. Every screen listed in the flow is **opened and looked at** — including the
+   ones behind the freemium gate and the ones that only appear after an action
+   (export, share, ATS, My Data).
+3. Artifacts that the flow produces are **opened and inspected**: the exported
+   PDF is rendered and read (not just "the file exists"), the screenshot of each
+   screen is actually looked at.
+4. `adb logcat` shows **zero** `FATAL EXCEPTION` for the whole session.
+5. The release notes list every known limitation, honestly.
+
+If any of these fail, the release is **not** cut — the defect is fixed and the
+validation is redone. Publishing a release to work around a failing validation
+is never acceptable.
+
+---
+
+## 12. Definition of Done
 
 A change is done when:
 
