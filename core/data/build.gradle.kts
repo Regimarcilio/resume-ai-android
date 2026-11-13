@@ -62,7 +62,6 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences-rxjava3:1.0.0")
 
     // PDFBox for local PDF generation
-    implementation("org.apache.pdfbox:pdfbox:3.0.2")
 
     // Core Android & Kotlin
     implementation("androidx.core:core-ktx:1.12.0")

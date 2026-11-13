@@ -29,6 +29,7 @@ import com.resumeapp.features.ats.presentation.ATSScreen
 import com.resumeapp.features.onboarding.presentation.OnboardingNavHost
 import com.resumeapp.features.resume.presentation.ResumeNavHost
 import com.resumeapp.features.settings.presentation.SettingsScreen
+import com.resumeapp.features.subscription.presentation.UpgradeScreen
 import com.resumeapp.features.templates.presentation.TemplateGalleryScreen
 
 private data class MainDestination(
@@ -61,8 +62,11 @@ fun AppNavHost(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    // A bottom bar aparece no app principal e some no onboarding.
-    val showBottomBar = currentRoute != null && currentRoute != "onboarding"
+    // A bottom bar aparece no app principal e some no onboarding e no
+    // checkout (onde o usuario esta pagando).
+    val showBottomBar = currentRoute != null &&
+        currentRoute != "onboarding" &&
+        currentRoute != "upgrade"
 
     Scaffold(
         // Os insets sao tratados por cada tela; o Scaffold nao deve duplicar.
@@ -114,13 +118,25 @@ fun AppNavHost(
                 )
             }
 
+            // Upgrade (checkout PayMaster) - fora do grafo "app" para que a
+            // bottom bar nao apareca durante o pagamento.
+            composable("upgrade") {
+                UpgradeScreen(
+                    onBack = { navController.popBackStack() },
+                    onUnlocked = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             // Main app flow
             navigation(startDestination = "resume_list", route = "app") {
                 composable("resume_list") {
                     ResumeNavHost(
                         onOpenAts = { resumeId ->
                             navController.navigate("ats/$resumeId")
-                        }
+                        },
+                        onOpenUpgrade = { navController.navigate("upgrade") }
                     )
                 }
                 composable(
@@ -136,7 +152,9 @@ fun AppNavHost(
                     })
                 }
                 composable("settings") {
-                    SettingsScreen()
+                    SettingsScreen(
+                        onOpenUpgrade = { navController.navigate("upgrade") }
+                    )
                 }
             }
         }

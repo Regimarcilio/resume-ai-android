@@ -1,5 +1,6 @@
 package com.resumeapp.di.modules
 
+import com.google.gson.Gson
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.datastore.core.DataStore
@@ -32,6 +33,10 @@ import com.resumeapp.data.db.TraceDao
 import com.resumeapp.data.prefs.ConsentRepositoryImpl
 import com.resumeapp.data.prefs.SubscriptionPrefs
 import com.resumeapp.data.prefs.SubscriptionPrefsImpl
+import com.resumeapp.domain.usecase.resume.ExportPdfUseCase
+import com.resumeapp.domain.repository.PaymentGateway
+import com.resumeapp.domain.usecase.subscription.StartCheckoutUseCase
+import com.resumeapp.domain.usecase.subscription.AwaitPaymentUseCase
 import com.resumeapp.data.prefs.UserPrefs
 import com.resumeapp.data.prefs.UserPrefsImpl
 import com.resumeapp.data.repository.ATSScoreRepositoryImpl
@@ -248,6 +253,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGson(): Gson = Gson()
+
+    @Provides
+    @Singleton
     fun provideMoshi(): Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
@@ -338,7 +347,44 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCreateResumeUseCase(resumeRepository: ResumeRepository): CreateResumeUseCase = CreateResumeUseCase(resumeRepository)
+    fun provideCreateResumeUseCase(
+        resumeRepository: ResumeRepository,
+        subscriptionPrefs: SubscriptionPrefs
+    ): CreateResumeUseCase = CreateResumeUseCase(resumeRepository) { subscriptionPrefs.currentStatus }
+
+    @Provides
+    @Singleton
+    fun providePaymentGateway(gateway: com.resumeapp.ai.billing.PayMasterBackendGateway): PaymentGateway = gateway
+
+    @Provides
+    @Singleton
+    fun provideStartCheckoutUseCase(
+        paymentGateway: PaymentGateway,
+        subscriptionPrefs: SubscriptionPrefs
+    ): StartCheckoutUseCase = StartCheckoutUseCase(paymentGateway) { purchaseToken ->
+        subscriptionPrefs.saveSubscriptionStatus(
+            com.resumeapp.domain.model.SubscriptionStatus(
+                tier = com.resumeapp.domain.model.SubscriptionTier.PRO,
+                isActive = true,
+                purchaseToken = purchaseToken
+            )
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAwaitPaymentUseCase(paymentGateway: PaymentGateway): AwaitPaymentUseCase =
+        AwaitPaymentUseCase(paymentGateway)
+
+    @Provides
+    @Singleton
+    fun provideExportPdfUseCase(
+        pdfRepository: PdfRepository,
+        templateRepository: TemplateRepository,
+        subscriptionPrefs: SubscriptionPrefs
+    ): ExportPdfUseCase = ExportPdfUseCase(pdfRepository, templateRepository) {
+        subscriptionPrefs.currentStatus
+    }
 
     @Provides
     @Singleton

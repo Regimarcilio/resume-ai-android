@@ -1,6 +1,9 @@
 package com.resumeapp.domain.usecase.resume
 
 import com.resumeapp.domain.model.PersonalInfo
+import com.resumeapp.domain.model.FreemiumLimits
+import com.resumeapp.domain.model.SubscriptionStatus
+import com.resumeapp.domain.model.SubscriptionTier
 import com.resumeapp.domain.model.Resume
 import com.resumeapp.domain.model.ResumeSection
 import com.resumeapp.domain.model.Result
@@ -19,7 +22,8 @@ import kotlinx.serialization.Serializable
  * Creates a new resume from a template
  */
 class CreateResumeUseCase constructor(
-    private val resumeRepository: ResumeRepository
+    private val resumeRepository: ResumeRepository,
+    private val subscriptionStatusProvider: suspend () -> SubscriptionStatus = { SubscriptionStatus() }
 ) : AsyncUseCase<CreateResumeUseCase.Params, Resume> {
 
     @Serializable
@@ -28,8 +32,28 @@ class CreateResumeUseCase constructor(
         val userId: String
     )
 
+    /** Result of the freemium gate, exposed so the UI can offer the upgrade. */
+    sealed interface Limit {
+        data object Allowed : Limit
+        data class Blocked(val current: Int, val max: Int) : Limit
+    }
+
     override suspend operator fun invoke(params: Params): Result<Resume> {
         return try {
+            // Evaluation mode: 1 resume free. The rule lives in the domain so
+            // it cannot be bypassed by the UI.
+            val existing = resumeRepository.getAllByUserId(params.userId)
+            val status = subscriptionStatusProvider()
+            val isUnlocked = status.isActive && status.tier != SubscriptionTier.FREE
+
+            if (!isUnlocked && existing.size >= FreemiumLimits.FREE_RESUME_LIMIT) {
+                return Failure(
+                    "LIMITE_FREE: você pode criar " +
+                        "${FreemiumLimits.FREE_RESUME_LIMIT} currículo no modo de avaliação. " +
+                        "Desbloqueie por ${FreemiumLimits.formatPrice()}."
+                )
+            }
+
             val resume = Resume(
                 userId = params.userId,
                 templateId = params.templateId,

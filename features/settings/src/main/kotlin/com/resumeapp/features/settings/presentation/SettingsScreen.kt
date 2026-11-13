@@ -85,7 +85,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onOpenUpgrade: () -> Unit = {}
+) {
     val viewModel = hiltViewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     // "Meus Dados" e uma tela interna do modulo (nao uma rota do NavHost).
@@ -128,7 +130,7 @@ fun SettingsScreen() {
                             title = "Assinatura",
                             subtitle = "${uiState.subscriptionTier.displayName} - ${uiState.subscriptionStatus}",
                             icon = Icons.Default.Subscriptions,
-                            onClick = { /* Navigate to subscription */ }
+                            onClick = onOpenUpgrade
                         )
                     }
                 }
@@ -190,6 +192,40 @@ fun SettingsScreen() {
                 // About Section
                 item {
                     SettingsSection(title = "Sobre", icon = Icons.Default.Info) {
+                        // Logo e responsavel legal: EX Technologies (padrao de todos
+                        // os projetos). Ver AGENTS.md secao 1.
+                        androidx.compose.foundation.layout.Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Image (nao Icon): Icon aplica tint e sobrescreve
+                            // as cores do vetor, deixando a marca toda escura.
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(
+                                    id = com.resumeapp.features.settings.R.drawable.ic_ex_technologies
+                                ),
+                                contentDescription = "EX Technologies",
+                                modifier = Modifier.size(44.dp)
+                            )
+                            androidx.compose.foundation.layout.Spacer(
+                                modifier = Modifier.width(12.dp)
+                            )
+                            androidx.compose.foundation.layout.Column {
+                                Text(
+                                    text = "EX Technologies",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Desenvolvedora e responsavel legal",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                         SettingRow(
                             title = "Versão do App",
                             subtitle = "1.0.0 (build 1)",

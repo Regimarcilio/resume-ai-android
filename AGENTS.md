@@ -6,7 +6,37 @@
 
 ---
 
-## 1. Non-negotiable: verify what you changed, visually
+## 1. Responsible party — EX Technologies
+
+**EX Technologies is, by default, the sole responsible party for every project
+in this repository.** This is the default assumption unless the user states
+otherwise for a specific project.
+
+Concretely, that means:
+
+- **Attribution is mandatory.** The EX Technologies name and logo appear in the
+  shipped product.
+- **Where the logo goes** (per the project type):
+  | Project type | Where the logo appears |
+  |---|---|
+  | Android / mobile | the app's **about / info screen** ("Sobre"), and the launcher icon when there is no brand of its own |
+  | Web | the **footer** of every page |
+  | Desktop / CLI | the about screen and the `--version` output |
+  | Library | the README header and the package description |
+- **Do not invent a different responsible party.** If a project needs another
+  entity credited, ask first.
+- The privacy policy / terms of the project must name **EX Technologies** as
+  the controller (LGPD Art. 5º) unless told otherwise — placeholder names
+  such as `[Empresa]` are **not** acceptable in a shipped build.
+
+### Logo asset
+
+The canonical mark lives in `app/src/main/res/drawable/ic_ex_technologies.xml`
+(vector, theme-independent). Reuse it rather than redrawing it.
+
+---
+
+## 2. Non-negotiable: verify what you changed, visually
 
 **A change is not done when it compiles.** It is done when the screen has been
 **rendered and looked at** on an emulator.
@@ -49,7 +79,7 @@ Rules:
 
 ---
 
-## 2. APK delivery (default)
+## 3. APK delivery (default)
 
 Every APK produced by this project is copied **inside the repository**, so it
 is always findable next to the sources.
@@ -71,7 +101,7 @@ Both directories are git-ignored (build artifacts).
 
 ---
 
-## 3. Local environment
+## 4. Local environment
 
 The Android SDK is at `~/Android/Sdk`. A JDK is **not** on the `PATH` by
 default; a portable Temurin 21 is used from `/tmp/opencode`:
@@ -103,7 +133,7 @@ Emulator (used for the visual verification of §1):
 
 ---
 
-## 4. Build & CI
+## 5. Build & CI
 
 | Command | Effect |
 |---|---|
@@ -118,7 +148,7 @@ artifact. Releases are published as GitHub Releases with the APK attached.
 
 ---
 
-## 5. Architecture rules
+## 6. Architecture rules
 
 ```
 app  ──►  features/*  ──►  core:domain  ──►  core:ai
@@ -147,7 +177,7 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 6. Hilt / KSP rules (every one of these caused a real crash)
+## 7. Hilt / KSP rules (every one of these caused a real crash)
 
 1. **`@HiltViewModel` must be *applied*, not just imported.**
    A ViewModel with the import but without the annotation compiles, is not
@@ -174,7 +204,7 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 7. Compose rules that caused crashes
+## 8. Compose rules that caused crashes
 
 1. **Never `return` from a `@Composable` lambda.** An early `return@Box`
    unbalances the composition groups →
@@ -201,7 +231,7 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 8. Language & naming
+## 9. Language & naming
 
 - The UI is **pt-BR**. Section titles come from
   `SectionType.displayTitle` (in `core:domain`) — never from
@@ -211,7 +241,7 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 9. Git
+## 10. Git
 
 - Branch: `develop` (develop-first). Never commit straight to `main`.
 - Conventional Commits: `fix(scope): ...`, `feat(scope): ...`,
@@ -220,7 +250,7 @@ app  ──►  features/*  ──►  core:domain  ──►  core:ai
 
 ---
 
-## 10. Definition of Done
+## 11. Definition of Done
 
 A change is done when:
 

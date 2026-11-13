@@ -38,6 +38,7 @@ There is no Play Store dependency, no billing, and no server-side account.
 | 🎨 **Templates** | Modern, Classic, Creative and ATS-optimized layouts |
 | 🔒 **LGPD by design** | Granular per-purpose consent + full Art. 18 rights (export, anonymize, delete, revoke) |
 | ✈️ **Offline-first** | Room + DataStore locally; the sync queue retries and dead-letters |
+| 💳 **Evaluation mode** | 1 free resume; unlock unlimited for **R$ 4,99** (one-off, PIX or card) via PayMaster |
 | 🔌 **Self-hosted AI** | OpenAI-compatible mock gateway with semantic cache, guardrail and sanitized traces |
 
 ## Screens
@@ -182,6 +183,39 @@ Without the gateway running, AI features return a failure result — the rest of
 
 Releases are published as GitHub Releases with the APK attached.
 
+## Freemium model
+
+| Tier | What you get |
+|---|---|
+| **Evaluation (free)** | 1 resume, ATS score, PDF export **with watermark**, AI Assist with the free quota |
+| **Unlocked — R$ 4,99** (one-off) | Unlimited resumes, PDF export **without watermark**, premium templates, full ATS, unlimited AI |
+
+The limit is enforced in the **domain** (`CreateResumeUseCase`), not in the UI, so it
+cannot be bypassed. The paid plan is delivered by **PayMaster** (API v2).
+
+### Payment architecture
+
+PayMaster authenticates with a merchant token (`Authorization: Bearer …`). That token
+**must never ship inside the APK** — anyone can unzip it. The production setup is:
+
+```
+app ──POST /checkout──► backend (holds the PayMaster token)
+│                           │  creates the invoice at PayMaster (POST /api/v2/invoices)
+│◄── checkout (paymentUrl) ─┘
+│                           │  PayMaster notifies the backend (webhook)
+└──GET /checkout/{id}──────►┘  backend verifies the status (GET /api/v2/payments/{id})
+```
+
+The app talks only to the backend. Configure it in `gradle.properties`:
+
+```properties
+paymasterBackendUrl=https://api.extechnologies.com.br/pay
+paymasterMerchantId=<merchantId>
+```
+
+Without `paymasterBackendUrl` the checkout reports a clear error instead of
+pretending the payment succeeded. The PayMaster **token** is only ever on the backend.
+
 ## Security & privacy (LGPD)
 
 - **Consent** — per-purpose, revocable, recorded with version + timestamp + policy hash
@@ -198,8 +232,9 @@ Releases are published as GitHub Releases with the APK attached.
 3. **Unit tests do not run in CI** — `core:ai` has a test referencing a class that moved to the `app` module.
 4. **SQLCipher was removed** — Room currently uses the default (unencrypted) factory, while the privacy policy states AES-256. This must be reconciled before any wide distribution.
 5. **The release build with R8/minify is not validated** — published artifacts are debug builds.
-6. The privacy policy still contains placeholders (`[Empresa]`, `dpo@empresa.com`).
-7. **Some actions are still placeholders**: duplicating a resume, editing a section item, the AI-assist button in the editor, and PDF export.
+6. The privacy policy still contains placeholders (`[Empresa]`, `dpo@empresa.com`) — they must name **EX Technologies**.
+7. **The PayMaster backend does not exist yet.** The app side is complete (checkout, PIX payload, status polling, unlocking), but it needs a small backend holding the merchant token before real payments can be taken.
+8. **Some actions are still placeholders**: duplicating a resume and editing a section item.
 
 ## Roadmap
 
@@ -238,6 +273,7 @@ Sem dependência da Play Store, sem cobrança e sem conta no servidor.
 | 🎨 **Templates** | Layouts Moderno, Clássico, Criativo e otimizado para ATS |
 | 🔒 **LGPD por design** | Consentimento granular por finalidade + todos os direitos do Art. 18 (exportar, anonimizar, excluir, revogar) |
 | ✈️ **Offline-first** | Room + DataStore localmente; fila de sincronização com retry e dead-letter |
+| 💳 **Modo avaliação** | 1 currículo grátis; desbloqueio ilimitado por **R$ 4,99** (pagamento único, PIX ou cartão) via PayMaster |
 | 🔌 **IA auto-hospedada** | Gateway mock compatível com OpenAI, com cache semântico, guardrail e traces sanitizados |
 
 ## Telas
@@ -383,6 +419,40 @@ Sem o gateway no ar, as features de IA retornam falha — o resto do app continu
 
 Os releases são publicados como GitHub Releases com o APK anexado.
 
+## Modelo freemium
+
+| Plano | O que você recebe |
+|---|---|
+| **Avaliação (grátis)** | 1 currículo, score ATS, export PDF **com marca d'água**, IA Assist na cota gratuita |
+| **Desbloqueado — R$ 4,99** (pagamento único) | Currículos ilimitados, PDF **sem marca d'água**, templates premium, ATS completo, IA sem limite |
+
+O limite é aplicado no **domínio** (`CreateResumeUseCase`), não na UI, então não
+pode ser contornado. O plano pago é entregue pelo **PayMaster** (API v2).
+
+### Arquitetura de pagamento
+
+O PayMaster autentica com um token de lojista (`Authorization: Bearer …`). Esse token
+**nunca pode ir dentro do APK** — qualquer pessoa descompacta o app e o encontra. A
+configuração de produção é:
+
+```
+app ──POST /checkout──► backend (guarda o token do PayMaster)
+│                           │  cria a fatura no PayMaster (POST /api/v2/invoices)
+│◄── checkout (paymentUrl) ─┘
+│                           │  PayMaster notifica o backend (webhook)
+└──GET /checkout/{id}──────►┘  backend confere o status (GET /api/v2/payments/{id})
+```
+
+O app conversa apenas com o backend. Configure em `gradle.properties`:
+
+```properties
+paymasterBackendUrl=https://api.extechnologies.com.br/pay
+paymasterMerchantId=<merchantId>
+```
+
+Sem `paymasterBackendUrl` o checkout reporta um erro claro em vez de fingir que o
+pagamento deu certo. O **token** do PayMaster fica somente no backend.
+
 ## Segurança e privacidade (LGPD)
 
 - **Consentimento** — por finalidade, revogável, gravado com versão + timestamp + hash da política
@@ -399,8 +469,9 @@ Os releases são publicados como GitHub Releases com o APK anexado.
 3. **Os testes unitários não rodam no CI** — o `core:ai` tem um teste referenciando uma classe que foi movida para o módulo `app`.
 4. **O SQLCipher foi removido** — o Room usa o factory padrão (sem criptografia), mas a política de privacidade declara AES-256. Precisa ser reconciliado antes de qualquer distribuição ampla.
 5. **O build release com R8/minify não foi validado** — os artefatos publicados são debug.
-6. A política de privacidade ainda contém placeholders (`[Empresa]`, `dpo@empresa.com`).
-7. **Algumas ações ainda são placeholders**: duplicar currículo, editar item de seção, o botão de IA Assist no editor e a exportação de PDF.
+6. A política de privacidade ainda contém placeholders (`[Empresa]`, `dpo@empresa.com`) — devem citar **EX Technologies**.
+7. **O backend do PayMaster ainda não existe.** O lado do app está pronto (checkout, payload PIX, consulta de status, desbloqueio), mas falta o backend que guarda o token do lojista para aceitar pagamentos reais.
+8. **Algumas ações ainda são placeholders**: duplicar currículo e editar item de seção.
 
 ## Roadmap
 

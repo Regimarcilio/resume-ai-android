@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    EX Technologies - logo vector (marca padrao de todos os projetos).
+    CANONICO: app/src/main/res/drawable/ic_ex_technologies.xml
+    Copia feita porque recursos Android nao sao compartilhados entre modulos.
+    Mantenha em sincronia com o canonico.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#4F46E5"
+        android:pathData="M26,10 L94,10 A16,16 0 0 1 110,26 L110,94 A16,16 0 0 1 94,110 L26,110 A16,16 0 0 1 10,94 L10,26 A16,16 0 0 1 26,10 Z" />
+    <path
+        android:fillColor="#7C3AED"
+        android:pathData="M10,10 L46,10 L110,74 L110,110 L74,110 L10,46 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,38 L38,38 L50,54 L62,38 L72,38 L55,60 L73,82 L62,82 L50,66 L37,82 L27,82 L44,60 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M76,38 L86,38 L86,58 L100,58 L100,68 L86,68 L86,82 L76,82 Z" />
+</vector>

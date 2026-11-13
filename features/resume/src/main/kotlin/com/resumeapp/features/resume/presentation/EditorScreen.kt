@@ -4,6 +4,10 @@ package com.resumeapp.features.resume.presentation
 
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.foundation.verticalScroll
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,7 +87,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
  */
 @Composable
 fun ResumeNavHost(
-    onOpenAts: (String) -> Unit = {}
+    onOpenAts: (String) -> Unit = {},
+    onOpenUpgrade: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     val viewModel = hiltViewModel<ResumeListViewModel>()
@@ -93,7 +99,12 @@ fun ResumeNavHost(
         composable("list") {
             ResumeListScreen(
                 resumes = listState?.resumes.orEmpty(),
-                onNewResume = { viewModel.onNewResume { id -> navController.navigate("editor/$id") } },
+                onNewResume = {
+                    viewModel.onNewResume(
+                        onCreated = { id -> navController.navigate("editor/$id") },
+                        onLimitReached = onOpenUpgrade
+                    )
+                },
                 onEditResume = { id -> navController.navigate("editor/$id") },
                 onDeleteResume = { viewModel.onDeleteResume(it) }
             )
@@ -257,6 +268,15 @@ fun EditorScreen(
     val viewModel = hiltViewModel<EditorViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val content = uiState as? EditorUiState.Content
+    var exportState by remember { mutableStateOf<ExportState>(ExportState.Idle) }
+    val context = LocalContext.current
+
+    // Quando o PDF fica pronto, abre a folha de compartilhamento.
+    LaunchedEffect(exportState) {
+        val ready = exportState as? ExportState.Ready ?: return@LaunchedEffect
+        sharePdf(context, ready.bytes)
+        exportState = ExportState.Idle
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -292,7 +312,15 @@ fun EditorScreen(
                         Icon(Icons.Default.SmartToy, contentDescription = "IA Assist")
                     }
                     // Export Button
-                    IconButton(onClick = { /* TODO: Export */ }) {
+                    IconButton(
+                        onClick = {
+                            viewModel.exportPdf(
+                                onPdf = { bytes -> exportState = ExportState.Ready(bytes) },
+                                onError = { message -> exportState = ExportState.Error(message) }
+                            )
+                        },
+                        enabled = exportState !is ExportState.Exporting
+                    ) {
                         Icon(Icons.Default.PictureAsPdf, contentDescription = "Exportar PDF")
                     }
                 },
@@ -348,6 +376,33 @@ fun EditorScreen(
             }
         }
     }
+}
+
+/**
+ * Estado da exportacao de PDF.
+ */
+sealed interface ExportState {
+    data object Idle : ExportState
+    data object Exporting : ExportState
+    data class Ready(val bytes: ByteArray) : ExportState
+    data class Error(val message: String) : ExportState
+}
+
+/**
+ * Grava o PDF em cacheDir/exports e abre a folha de compartilhamento.
+ */
+fun sharePdf(context: Context, bytes: ByteArray, fileName: String = "curriculo.pdf") {
+    val dir = File(context.cacheDir, "exports").apply { mkdirs() }
+    val file = File(dir, fileName)
+    file.writeBytes(bytes)
+
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Compartilhar currículo"))
 }
 
 @Composable

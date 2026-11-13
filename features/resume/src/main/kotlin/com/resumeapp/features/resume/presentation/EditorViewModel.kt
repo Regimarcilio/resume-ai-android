@@ -27,6 +27,7 @@ import com.resumeapp.domain.usecase.resume.DeleteSectionUseCase
 import com.resumeapp.domain.usecase.resume.GetResumeUseCase
 import com.resumeapp.domain.usecase.resume.ReorderSectionsUseCase
 import com.resumeapp.domain.usecase.resume.SaveResumeUseCase
+import com.resumeapp.domain.usecase.resume.ExportPdfUseCase
 import com.resumeapp.domain.usecase.resume.UpdateResumeUseCase
 import com.resumeapp.domain.usecase.resume.UpdateSectionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,8 @@ class EditorViewModel @Inject constructor(
     private val reorderSectionsUseCase: ReorderSectionsUseCase,
     private val improveBulletsUseCase: ImproveBulletsUseCase,
     private val analyzeATSUseCase: AnalyzeATSUseCase,
-    private val updateResumeUseCase: UpdateResumeUseCase
+    private val updateResumeUseCase: UpdateResumeUseCase,
+    private val exportPdfUseCase: ExportPdfUseCase
 ) : ViewModel() {
 
     private val gson = Gson()
@@ -254,6 +256,22 @@ class EditorViewModel @Inject constructor(
             ) {
                 is Result.Success -> applyResume(result.value)
                 is Result.Failure -> setEditorError(result.errorMessage)
+            }
+        }
+    }
+
+    // ==================== Exportacao PDF ====================
+
+    /**
+     * Gera o PDF do curriculo atual.
+     * O callback recebe os bytes para a UI gravar e compartilhar.
+     */
+    fun exportPdf(onPdf: (ByteArray) -> Unit, onError: (String) -> Unit = {}) {
+        val current = _uiState.value as? EditorUiState.Content ?: return
+        viewModelScope.launch {
+            when (val result = exportPdfUseCase(ExportPdfUseCase.Params(current.resume))) {
+                is Result.Success -> onPdf(result.value)
+                is Result.Failure -> onError(result.errorMessage)
             }
         }
     }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Caminhos compartilhados via FileProvider (exportacao de PDF).
+    O PDF e gravado em cacheDir/exports e exposto por content://.
+-->
+<paths>
+    <cache-path
+        name="exports"
+        path="exports/" />
+    <cache-path
+        name="shared"
+        path="shared/" />
+    <external-cache-path
+        name="external_exports"
+        path="exports/" />
+    <files-path
+        name="files"
+        path="." />
+</paths>

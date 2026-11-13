@@ -30,6 +30,7 @@ include("features:ai-assist")
 include("features:templates")
 include("features:settings")
 include("features:onboarding")
+include("features:subscription")
 
 // App module
 include("app")

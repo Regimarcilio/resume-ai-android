@@ -45,6 +45,19 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Payment configuration (PayMaster). Injected from gradle.properties or
+        // -P flags; never hardcoded. The merchant TOKEN stays on the backend.
+        buildConfigField(
+            "String",
+            "PAYMASTER_BACKEND_URL",
+            "\"" + (project.findProperty("paymasterBackendUrl") as String? ?: "") + "\""
+        )
+        buildConfigField(
+            "String",
+            "PAYMASTER_MERCHANT_ID",
+            "\"" + (project.findProperty("paymasterMerchantId") as String? ?: "") + "\""
+        )
     }
 
     signingConfigs {
@@ -165,6 +178,7 @@ dependencies {
     implementation(project(":features:templates"))
     implementation(project(":features:settings"))
     implementation(project(":features:onboarding"))
+    implementation(project(":features:subscription"))
 
     // Compose (using BOM)
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
@@ -215,8 +229,7 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // PDF (local generation with pdfbox for offline)
-    implementation("org.apache.pdfbox:pdfbox:3.0.2")
+    // PDF: gerado localmente com android.graphics.pdf.PdfDocument (nativo)
 
     // Testing
     testImplementation("junit:junit:4.13.2")

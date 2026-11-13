@@ -57,7 +57,7 @@ class ResumeListViewModel @Inject constructor(
      * Cria um currículo novo e devolve o id para a tela navegar ate o editor.
      * Sem isso o botão "Criar Currículo" não fazia nada.
      */
-    fun onNewResume(onCreated: (String) -> Unit = {}) {
+    fun onNewResume(onCreated: (String) -> Unit = {}, onLimitReached: () -> Unit = {}) {
         viewModelScope.launch {
             when (
                 val result = createResumeUseCase(
@@ -71,7 +71,14 @@ class ResumeListViewModel @Inject constructor(
                     loadResumes()
                     onCreated(result.value.id)
                 }
-                is Result.Failure -> _uiState.value = ResumeListUiState.Error(result.errorMessage)
+                is Result.Failure -> {
+                    // Limite do modo de avaliacao (1 curriculo gratis).
+                    if (result.errorMessage.startsWith(LIMIT_PREFIX)) {
+                        onLimitReached()
+                    } else {
+                        _uiState.value = ResumeListUiState.Error(result.errorMessage)
+                    }
+                }
             }
         }
     }
@@ -95,6 +102,9 @@ class ResumeListViewModel @Inject constructor(
 
         /** Template semeado no banco e usado como padrao para novos currículos. */
         const val DEFAULT_TEMPLATE_ID = "modern_professional"
+
+        /** Prefixo das mensagens de limite do modo de avaliacao. */
+        const val LIMIT_PREFIX = "LIMITE_FREE"
     }
 }
 
