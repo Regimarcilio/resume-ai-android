@@ -25,6 +25,14 @@ tasks.register("apk") {
     dependsOn(":app:assembleDebug")
 }
 
+// Convenience alias: builds the production (release) APK and copies it to
+// <root>/release/. Signed when keystore.properties is configured.
+tasks.register("apkRelease") {
+    group = "distribution"
+    description = "Builds the release APK and copies it to <project-root>/release/"
+    dependsOn(":app:assembleRelease")
+}
+
 // Version bump task for release
 tasks.register("bumpVersion") {
     group = "release"

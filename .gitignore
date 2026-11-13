@@ -6,6 +6,12 @@ captures/
 
 # Distribution output (generated APKs land here on every build)
 dist/
+release/
+
+# Release signing secrets (never versioned)
+keystore.properties
+*.jks
+*.keystore
 
 # Android
 *.apk

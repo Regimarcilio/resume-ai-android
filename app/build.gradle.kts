@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -11,6 +13,23 @@ plugins {
 hilt {
     enableAggregatingTask = true
 }
+
+// ---------------------------------------------------------------------------
+// Release signing.
+//
+// The keystore lives outside version control: "keystore.properties" points to
+// it and is git-ignored. When the file is absent (CI, fresh clone) the release
+// build still works, it just produces an unsigned APK.
+// Copy "keystore.properties.template" and fill it in to sign locally.
+// ---------------------------------------------------------------------------
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+val hasReleaseKeystore = keystoreProperties.getProperty("storeFile") != null &&
+    rootProject.file(keystoreProperties.getProperty("storeFile")).exists()
 
 android {
     namespace = "com.resumeapp"
@@ -28,6 +47,17 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -36,6 +66,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false
@@ -65,13 +98,14 @@ android {
 }
 
 // ---------------------------------------------------------------------------
-// Distribution: every generated APK is copied to <project-root>/dist/
-// so it is always easy to find next to the sources.
+// Distribution: every generated APK is copied inside the project so it is
+// always easy to find next to the sources.
 //
-//   ./gradlew :app:assembleDebug   ->  dist/resume-ai-<version>-debug.apk
-//   ./gradlew apk                   ->  alias for the task above (from root)
+//   ./gradlew apk         ->  dist/resume-ai-<version>-debug.apk     (debug)
+//   ./gradlew apkRelease  ->  release/resume-ai-<version>-release.apk (producao)
 // ---------------------------------------------------------------------------
 val distDir = rootProject.layout.projectDirectory.dir("dist")
+val releaseDir = rootProject.layout.projectDirectory.dir("release")
 
 val copyDebugApkToDist by tasks.registering(Copy::class) {
     group = "distribution"
@@ -83,7 +117,28 @@ val copyDebugApkToDist by tasks.registering(Copy::class) {
     into(distDir)
     rename { "resume-ai-${android.defaultConfig.versionName}-debug.apk" }
     doLast {
-        logger.lifecycle("APK copied to ${distDir.asFile.path}")
+        logger.lifecycle("APK (debug) copied to ${distDir.asFile.path}")
+    }
+}
+
+val copyReleaseApkToReleaseDir by tasks.registering(Copy::class) {
+    group = "distribution"
+    description = "Copies the release (production) APK to <project-root>/release/"
+    dependsOn("assembleRelease")
+    from(layout.buildDirectory.dir("outputs/apk/release")) {
+        include("*.apk")
+        exclude("**/baselineProfiles/**")
+    }
+    into(releaseDir)
+    rename { "resume-ai-${android.defaultConfig.versionName}-release.apk" }
+    doLast {
+        val unsigned = releaseDir.asFile
+            .listFiles { f -> f.name.endsWith(".apk") }
+            ?.all { f -> f.name.contains("unsigned") } ?: true
+        logger.lifecycle(
+            "APK (release) copied to ${releaseDir.asFile.path}" +
+                if (unsigned) "  [UNSIGNED: configure keystore.properties to sign]" else ""
+        )
     }
 }
 
@@ -91,6 +146,10 @@ val copyDebugApkToDist by tasks.registering(Copy::class) {
 // (tasks.named(...) at configuration time fails with "task not found").
 tasks.matching { it.name == "assembleDebug" }.configureEach {
     finalizedBy(copyDebugApkToDist)
+}
+
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    finalizedBy(copyReleaseApkToReleaseDir)
 }
 
 dependencies {
